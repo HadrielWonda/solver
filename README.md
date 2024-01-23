@@ -34,3 +34,20 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+
+##Ideas
+Implementing Full Text Explanation
+Dynamic equation typer
+Notes
+Dynamic playground with preset functions (design my own language)
+Ability to view, pseudocode and actual codes on methods (in different languages if possible).
+
+=> Graph Plot
+Different function type (parametric, e.t.c)
+Multiple functions and intersection and color coding
+
+Detail information with MDX
+Editable code for optimazation and customization and savable and sharable.
+
+Expression evaluator
+https://github.com/silentmatt/expr-eval

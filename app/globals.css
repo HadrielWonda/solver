@@ -30,9 +30,13 @@ body {
   overflow-x: hidden;
 }
 
-a {
+/* a {
   color: inherit;
   text-decoration: none;
+} */
+
+.block {
+  margin-top: 1rem;
 }
 
 @media (prefers-color-scheme: dark) {
