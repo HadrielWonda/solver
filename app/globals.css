@@ -38,6 +38,12 @@ body {
 .block {
   margin-top: 1rem;
 }
+.bold {
+  font-weight: 700;
+}
+.indent {
+  padding-left: 1rem;
+}
 
 @media (prefers-color-scheme: dark) {
   html {

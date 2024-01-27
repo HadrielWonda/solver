@@ -5,3 +5,9 @@ export type result = {
   xr: number;
   ea?: number;
 };
+
+export type fixedPointResult = {
+  itr: number;
+  xi: number;
+  ea?: number;
+};

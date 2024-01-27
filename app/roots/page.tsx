@@ -7,6 +7,9 @@ export default function page() {
       <li>
         <Link href="roots/bracketing-methods">Bracketing Methods</Link>
       </li>
+      <li>
+        <Link href="roots/open-methods">Open Methods</Link>
+      </li>
     </ul>
   );
 }

@@ -5,7 +5,9 @@ export default function page() {
   return (
     <ul>
       <li>
-        <Link href="/roots/open-methods/2d-graph">2D Graph</Link>
+        <Link href="/roots/open-methods/simple-fixed-point">
+          Simple Fixed-Point Iteration
+        </Link>
       </li>
       <li>
         <Link href="/roots/open-methods/bisection">
