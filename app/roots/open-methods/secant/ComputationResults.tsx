@@ -1,6 +1,6 @@
 "use client";
 
-import { fixedPointResult } from "@/types";
+import { fixedPointResult, result } from "@/types";
 import { useEffect, useMemo, useState } from "react";
 
 export default function ComputationResults({
@@ -8,7 +8,8 @@ export default function ComputationResults({
 }: {
   initialValues: {
     equation: string;
-    start: string;
+    x0: string;
+    x1: string;
     stoppingCriteria?: string;
     maxIterations: string;
     maxError: string;
@@ -16,16 +17,20 @@ export default function ComputationResults({
 }) {
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState<
-    { results: fixedPointResult[]; diverge: boolean } | undefined
+    | {
+        results: result[];
+        diverge: boolean;
+      }
+    | undefined
   >();
   const [errorMessage, setErrorMessage] = useState("");
-  console.log("maxError: ", initialValues.maxError);
+  // console.log("maxError: ", initialValues.maxError);
 
   const compute = useMemo(
     () => async () => {
       try {
         let response: Response;
-        response = await fetch("/roots/open-methods/simple-fixed-point/api", {
+        response = await fetch("/roots/open-methods/secant/api", {
           method: "post",
           body: JSON.stringify(initialValues),
         });
@@ -88,14 +93,16 @@ export default function ComputationResults({
               width: 800,
             }}
           >
-            <h3>Fixed-Point Iteration Results</h3>
+            <h3>Secant Iteration Results</h3>
             <button onClick={() => reCompute()}>Re-run</button>
           </div>
           <table border={1} cellPadding={17} width={800}>
             <thead>
               <tr>
                 <th>Iteration</th>
-                <th>xi</th>
+                <th>xl</th>
+                <th>xu</th>
+                <th>xr</th>
                 <th>ea(%)</th>
               </tr>
             </thead>
@@ -103,7 +110,9 @@ export default function ComputationResults({
               {results?.results?.map((result, index) => (
                 <tr key={index}>
                   <td>{result.itr}</td>
-                  <td>{result.xi}</td>
+                  <td>{result.xl}</td>
+                  <td>{result.xu}</td>
+                  <td>{result.xr}</td>
                   <td>{result.ea}</td>
                 </tr>
               ))}
@@ -112,8 +121,8 @@ export default function ComputationResults({
           {results?.diverge && (
             <div className="block">
               <p>
-                Iteration was terminated because results were not converging!
-                Consider restructuring your governing equation.
+                Iteration was terminated because results were diverging or
+                converging slow!
               </p>
             </div>
           )}

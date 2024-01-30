@@ -10,19 +10,12 @@ export default function page() {
         </Link>
       </li>
       <li>
-        <Link href="/roots/open-methods/bisection">
-          Bisection / Bolzano’s method
+        <Link href="/roots/open-methods/newton-raphson">
+          Newton-Raphson method
         </Link>
       </li>
       <li>
-        <Link href="/roots/open-methods/false-position">
-          False Postion method
-        </Link>
-      </li>
-      <li>
-        <Link href="/roots/open-methods/modified-false-position">
-          Modified False Postion method
-        </Link>
+        <Link href="/roots/open-methods/secant">Secant method</Link>
       </li>
     </ul>
   );

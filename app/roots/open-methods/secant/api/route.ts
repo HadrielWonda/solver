@@ -1,7 +1,7 @@
 "use server";
 import { NextRequest } from "next/server";
 import { Parser } from "expr-eval";
-import { fixedPointResult } from "@/types";
+import { fixedPointResult, result } from "@/types";
 
 const exprsCompiler = (exprs: string) => {
   const parser = new Parser();
@@ -12,13 +12,15 @@ export async function POST(request: NextRequest) {
   try {
     const {
       equation,
-      start,
+      x0,
+      x1,
       stoppingCriteria,
       maxIterations,
       maxError: es,
     }: {
       equation: string;
-      start: string;
+      x0: string;
+      x1: string;
       stoppingCriteria?: "max_iterations" | "max_error";
       maxIterations: string;
       maxError: string;
@@ -28,13 +30,14 @@ export async function POST(request: NextRequest) {
       return Response.json(`Equation must be specified`, {
         status: 400,
       });
-    } else if (!start || isNaN(Number(start))) {
-      return Response.json(
-        `Upper bound, Xu must be specified and must be a number`,
-        {
-          status: 400,
-        }
-      );
+    } else if (!x0 || isNaN(Number(x0))) {
+      return Response.json(`X0 must be specified and must be a number`, {
+        status: 400,
+      });
+    } else if (!x1 || isNaN(Number(x1))) {
+      return Response.json(`X1 must be specified and must be a number`, {
+        status: 400,
+      });
     } else if (!["max_iterations", "max_error"].includes(stoppingCriteria!)) {
       return Response.json(
         `stopping criteria must be specified and must be a number`,
@@ -62,7 +65,8 @@ export async function POST(request: NextRequest) {
     }
 
     const expression = exprsCompiler(equation);
-    let xi = Number(start);
+    let xi = Number(x0);
+    let xj = Number(x1);
     let iter = 0;
     // let fl = expression?.evaluate({ x: Number(xl) });
     // let xrOld: number | undefined;
@@ -70,49 +74,48 @@ export async function POST(request: NextRequest) {
     let prevEa: number | undefined;
     let maxError = Number(es);
     let maxIter = Number(maxIterations);
-    let divergenceCount = 0;
+    let diverging = false;
 
-    const results: fixedPointResult[] = [];
+    const results: result[] = [];
+    let fi = expression?.evaluate({ x: xi });
 
     do {
       ++iter;
-      const x = expression?.evaluate({ x: xi });
-      // console.log("xr", xr);
+      const fj = expression?.evaluate({ x: xj });
+      let x;
 
-      if (x !== 0 && xi) {
-        ea = Math.abs((x - xi) / x) * 100;
-      }
+      x = xj - (fj * (xi - xj)) / (fi - fj);
+      ea = Math.abs((x - xj) / x) * 100;
+
       results.push({
         itr: iter,
-        xi: x,
+        xl: xi,
+        xu: xj,
+        xr: x,
         ea,
       });
 
-      if (ea && prevEa && ea > prevEa) {
-        ++divergenceCount;
-      } else {
-        divergenceCount = 0;
+      xi = xj;
+      fi = fj;
+      xj = x;
+
+      if (iter > 2 && results[iter - 2].ea! / results[iter - 1].ea! < 2) {
+        diverging = true;
+        break;
       }
 
-      prevEa = ea;
-      xi = x;
-    } while (iter < maxIter && (!ea || ea > maxError) && divergenceCount < 4);
+      if (isNaN(fj) || isNaN(x)) {
+        diverging = true;
+        break;
+      }
+    } while (iter < maxIter && (!ea || ea > maxError) && !diverging);
 
-    if (divergenceCount == 4) {
-      return Response.json(
-        { diverge: false, results },
-        {
-          status: 200,
-        }
-      );
-    } else {
-      return Response.json(
-        { diverge: false, results },
-        {
-          status: 200,
-        }
-      );
-    }
+    return Response.json(
+      { diverge: diverging, results },
+      {
+        status: 200,
+      }
+    );
   } catch (error: any) {
     return Response.json(
       error.message ?? "Uh oh! Something isn't working right!",

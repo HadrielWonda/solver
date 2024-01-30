@@ -16,16 +16,21 @@ export default function ComputationResults({
 }) {
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState<
-    { results: fixedPointResult[]; diverge: boolean } | undefined
+    | {
+        results: fixedPointResult[];
+        diverge: boolean;
+        zeroDenominator: boolean;
+      }
+    | undefined
   >();
   const [errorMessage, setErrorMessage] = useState("");
-  console.log("maxError: ", initialValues.maxError);
+  // console.log("maxError: ", initialValues.maxError);
 
   const compute = useMemo(
     () => async () => {
       try {
         let response: Response;
-        response = await fetch("/roots/open-methods/simple-fixed-point/api", {
+        response = await fetch("/roots/open-methods/newton-raphson/api", {
           method: "post",
           body: JSON.stringify(initialValues),
         });
@@ -88,7 +93,7 @@ export default function ComputationResults({
               width: 800,
             }}
           >
-            <h3>Fixed-Point Iteration Results</h3>
+            <h3>Newton-Raphson Iteration Results</h3>
             <button onClick={() => reCompute()}>Re-run</button>
           </div>
           <table border={1} cellPadding={17} width={800}>
@@ -112,8 +117,17 @@ export default function ComputationResults({
           {results?.diverge && (
             <div className="block">
               <p>
-                Iteration was terminated because results were not converging!
-                Consider restructuring your governing equation.
+                Iteration was terminated because results were diverging or
+                converging slow! Consider restructuring your governing equation.
+              </p>
+            </div>
+          )}
+
+          {results?.zeroDenominator && (
+            <div className="block">
+              <p>
+                Iteration was terminated due to the derivative (the denominator
+                in the formula) equating to zero.
               </p>
             </div>
           )}

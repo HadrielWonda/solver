@@ -12,12 +12,14 @@ export async function POST(request: NextRequest) {
   try {
     const {
       equation,
+      derivativeEquation,
       start,
       stoppingCriteria,
       maxIterations,
       maxError: es,
     }: {
       equation: string;
+      derivativeEquation: string;
       start: string;
       stoppingCriteria?: "max_iterations" | "max_error";
       maxIterations: string;
@@ -26,6 +28,10 @@ export async function POST(request: NextRequest) {
 
     if (!equation) {
       return Response.json(`Equation must be specified`, {
+        status: 400,
+      });
+    } else if (!derivativeEquation) {
+      return Response.json(`Derivative equation must be specified`, {
         status: 400,
       });
     } else if (!start || isNaN(Number(start))) {
@@ -62,6 +68,7 @@ export async function POST(request: NextRequest) {
     }
 
     const expression = exprsCompiler(equation);
+    const derivativeExpression = exprsCompiler(derivativeEquation);
     let xi = Number(start);
     let iter = 0;
     // let fl = expression?.evaluate({ x: Number(xl) });
@@ -70,49 +77,45 @@ export async function POST(request: NextRequest) {
     let prevEa: number | undefined;
     let maxError = Number(es);
     let maxIter = Number(maxIterations);
-    let divergenceCount = 0;
+    let diverging = false;
+    let zeroDenominator = false;
 
     const results: fixedPointResult[] = [];
 
     do {
       ++iter;
-      const x = expression?.evaluate({ x: xi });
-      // console.log("xr", xr);
+      const fx = expression?.evaluate({ x: xi });
+      const dx = derivativeExpression?.evaluate({ x: xi });
+      let x;
 
-      if (x !== 0 && xi) {
+      if (dx !== 0) {
+        x = xi - fx / dx;
         ea = Math.abs((x - xi) / x) * 100;
+      } else {
+        zeroDenominator = true;
+        break;
       }
+
       results.push({
         itr: iter,
         xi: x,
         ea,
       });
 
-      if (ea && prevEa && ea > prevEa) {
-        ++divergenceCount;
-      } else {
-        divergenceCount = 0;
-      }
-
-      prevEa = ea;
       xi = x;
-    } while (iter < maxIter && (!ea || ea > maxError) && divergenceCount < 4);
 
-    if (divergenceCount == 4) {
-      return Response.json(
-        { diverge: false, results },
-        {
-          status: 200,
-        }
-      );
-    } else {
-      return Response.json(
-        { diverge: false, results },
-        {
-          status: 200,
-        }
-      );
-    }
+      if (iter > 3 && results[iter - 2].ea! / results[iter - 1].ea! < 2) {
+        diverging = true;
+        break;
+      }
+    } while (iter < maxIter && (!ea || ea > maxError) && !diverging);
+
+    return Response.json(
+      { diverge: diverging, results, zeroDenominator },
+      {
+        status: 200,
+      }
+    );
   } catch (error: any) {
     return Response.json(
       error.message ?? "Uh oh! Something isn't working right!",
