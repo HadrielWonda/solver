@@ -17,6 +17,11 @@ export default function page() {
       <li>
         <Link href="/roots/open-methods/secant">Secant method</Link>
       </li>
+      <li>
+        <Link href="/roots/open-methods/modified-secant">
+          Modified Secant method
+        </Link>
+      </li>
     </ul>
   );
 }
