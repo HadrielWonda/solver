@@ -60,12 +60,7 @@ export function falsePosition(
       ea = 0;
     }
     xrOld = xr;
-    console.log("iter", iter);
-    console.log("maxIter", maxIter);
-    console.log("ea", ea);
-    console.log("maxError", maxError);
-    console.log("continue", !ea || ea < maxError);
-  } while (iter < maxIter && (!ea || ea > maxError));
+  } while (iter < maxIter && (ea == undefined || ea > maxError));
 
   // setResult(results);
   return results;

@@ -3,9 +3,6 @@ import Input from "@/components/Input";
 import Radios from "@/components/Radios";
 import React, { useEffect, useMemo, useState } from "react";
 import { exprsCompiler } from "@/utils/compile";
-import { Expression } from "expr-eval";
-import { result } from "@/types";
-import { bisection } from "@/lib/bisection";
 import ComputationResults from "@/components/ComputationResults";
 
 export default function Page() {

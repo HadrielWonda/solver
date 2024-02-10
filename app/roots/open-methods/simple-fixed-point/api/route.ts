@@ -96,7 +96,11 @@ export async function POST(request: NextRequest) {
 
       prevEa = ea;
       xi = x;
-    } while (iter < maxIter && (!ea || ea > maxError) && divergenceCount < 4);
+    } while (
+      iter < maxIter &&
+      (ea == undefined || ea > maxError) &&
+      divergenceCount < 4
+    );
 
     if (divergenceCount == 4) {
       return Response.json(

@@ -1,6 +1,7 @@
 "use server";
 import { NextRequest } from "next/server";
 import { Parser } from "expr-eval";
+import { fixedPointResult } from "@/types";
 
 const exprsCompiler = (exprs: string) => {
   const parser = new Parser();
@@ -11,15 +12,17 @@ export async function POST(request: NextRequest) {
   try {
     const {
       equation,
-      xu,
-      xl,
+      derivativeEquation,
+      secondDerivativeEquation,
+      start,
       stoppingCriteria,
       maxIterations,
       maxError: es,
     }: {
       equation: string;
-      xu: string;
-      xl: string;
+      derivativeEquation: string;
+      secondDerivativeEquation: string;
+      start: string;
       stoppingCriteria?: "max_iterations" | "max_error";
       maxIterations: string;
       maxError: string;
@@ -29,16 +32,13 @@ export async function POST(request: NextRequest) {
       return Response.json(`Equation must be specified`, {
         status: 400,
       });
-    } else if (!xu || isNaN(Number(xu))) {
+    } else if (!derivativeEquation) {
+      return Response.json(`Derivative equation must be specified`, {
+        status: 400,
+      });
+    } else if (!start || isNaN(Number(start))) {
       return Response.json(
         `Upper bound, Xu must be specified and must be a number`,
-        {
-          status: 400,
-        }
-      );
-    } else if (!xl || isNaN(Number(xl))) {
-      return Response.json(
-        `Lower bound, Xl must be specified and must be a number`,
         {
           status: 400,
         }
@@ -70,57 +70,63 @@ export async function POST(request: NextRequest) {
     }
 
     const expression = exprsCompiler(equation);
-    let xlow = Number(xl);
-    let xup = Number(xu);
+    const derivativeExpression = exprsCompiler(derivativeEquation);
+    const secondDerivativeExpression = exprsCompiler(secondDerivativeEquation);
+    let xi = Number(start);
     let iter = 0;
-    let fl = expression?.evaluate({ x: xlow });
-    let fu = expression?.evaluate({ x: xup });
-    let xrOld: number | undefined;
+    // let fl = expression?.evaluate({ x: Number(xl) });
+    // let xrOld: number | undefined;
     let ea: number | undefined;
+    let prevEa: number | undefined;
     let maxError = Number(es);
     let maxIter = Number(maxIterations);
+    let diverging = false;
+    let zeroDenominator = false;
 
-    const results: {
-      itr: number;
-      xl: number;
-      xu: number;
-      xr: number;
-      ea: number | undefined;
-    }[] = [];
+    const results: fixedPointResult[] = [];
 
     do {
       ++iter;
-      const xr = xup - (fu * (xlow - xup)) / (fl - fu);
-      // console.log("xr", xr);
+      const fx = expression?.evaluate({ x: xi });
+      const dx = derivativeExpression?.evaluate({ x: xi });
+      const dx2 = secondDerivativeExpression?.evaluate({ x: xi });
+      let x;
 
-      if (xr !== 0 && xrOld) {
-        ea = Math.abs((xr - xrOld) / xr) * 100;
+      if (dx !== 0 && fx !== 0) {
+        x = xi - (fx * dx) / (dx * dx - fx * dx2);
+        ea = Math.abs((x - xi) / x) * 100;
+      } else {
+        zeroDenominator = true;
+        break;
       }
+
       results.push({
         itr: iter,
-        xl: xlow,
-        xu: xup,
-        xr,
+        xi: x,
         ea,
       });
-      const fr = expression?.evaluate({ x: Number(xr) });
-      const test = fl * fr;
 
-      if (test > 0) {
-        xlow = xr;
-        fl = fr;
-      } else if (test < 0) {
-        xup = xr;
-        fu = fr;
-      } else {
-        ea = 0;
+      xi = x;
+
+      if (iter > 3 && results[iter - 2].ea! / results[iter - 1].ea! < 2) {
+        diverging = true;
+        break;
       }
-      xrOld = xr;
-    } while (iter < maxIter && (ea == undefined || ea > maxError));
+      if (expression?.evaluate({ x: x }) === 0.0) {
+        break;
+      }
+    } while (
+      iter < maxIter &&
+      (ea == undefined || ea > maxError) &&
+      !diverging
+    );
 
-    return Response.json(results, {
-      status: 200,
-    });
+    return Response.json(
+      { diverge: diverging, results, zeroDenominator },
+      {
+        status: 200,
+      }
+    );
   } catch (error: any) {
     return Response.json(
       error.message ?? "Uh oh! Something isn't working right!",

@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 "use client";
 import Input from "@/components/Input";
 import Radios from "@/components/Radios";
@@ -14,9 +15,14 @@ export default function Page() {
   const [editingDerivativeEquation, setEditingDerivativeEquation] =
     useState(true);
   const [tempDerivativeEquation, setTempDerivativeEquation] = useState("");
+  const [editingSecondDerivativeEquation, setEditingSecondDerivativeEquation] =
+    useState(true);
+  const [tempSecondDerivativeEquation, setTempSecondDerivativeEquation] =
+    useState("");
   const [initialValues, setInitialValues] = useState<{
     equation: string;
     derivativeEquation: string;
+    secondDerivativeEquation: string;
     start: string;
     stoppingCriteria?: string;
     maxIterations: string;
@@ -24,6 +30,7 @@ export default function Page() {
   }>({
     equation: "",
     derivativeEquation: "",
+    secondDerivativeEquation: "",
     start: "",
     maxIterations: "1000",
     maxError: "0.0000000000001",
@@ -57,21 +64,41 @@ export default function Page() {
 
   return (
     <main>
-      <h1>Newton-Raphson Method</h1>
+      <h1>Modified Newton-Raphson Method for Multiple Roots</h1>
       <div className="block">
         <p>
-          While the Newton-Raphson is the most widely used of all root-locating
-          formulas and is often very efficient, there are situations where it
-          performs poorly. A special case is a region of
+          A problem with Newton-Raphson Method is related to the fact that not
+          only f(x) but also f'(x) goes to zero at the root. This poses problems
+          for the method, which contain the derivative (or its estimate) in the
+          denominator of its formula. This could result in division by zero when
+          the solution converges very close to the root.
           <span className="bold">multiple roots</span>.
         </p>
-        <p className="block">It is governed by the following formula</p>
+        <p>
+          An alternative, suggested by Ralston and Rabinowitz (1978), is to
+          define a new function u(x), that is, the ratio of the function to its
+          derivative, as in
+        </p>
+        <p>
+          It can be shown that this function has roots at all the same locations
+          as the original function. Therefore, can be substituted into method to
+          develop an alternative form of the Newton-Raphson method:
+        </p>
         <div className="block">
           <Image
-            src="/images/newton-raphson.png"
+            src="/images/modified-newton-raphson.png"
             alt="Newton Raphson"
-            width={221}
-            height={93}
+            width={324}
+            height={130}
+          />
+        </div>
+        <p className="block">And the result simplified to yield</p>
+        <div className="block">
+          <Image
+            src="/images/modified-newton-raphson2.png"
+            alt="Newton Raphson"
+            width={570}
+            height={124}
           />
         </div>
       </div>
@@ -184,6 +211,66 @@ export default function Page() {
                 gap: "1rem",
               }}
               onClick={() => setEditingDerivativeEquation(true)}
+            >
+              <button>Edit</button>
+            </div>
+          )}
+        </div>
+        <div className="block">
+          {editingSecondDerivativeEquation ? (
+            <Input
+              label="Enter equation second derivative - f''(x)"
+              value={tempSecondDerivativeEquation}
+              onChange={(e) => setTempSecondDerivativeEquation(e.target.value)}
+            />
+          ) : (
+            <Input
+              label="Equation second derivative - f''(x)"
+              value={initialValues.secondDerivativeEquation}
+              disabled={true}
+              // onChange={(e) =>
+              //   setInitialValues((v) => ({ ...v, equation: e.target.value }))
+              // }
+            />
+          )}
+          {editingSecondDerivativeEquation ? (
+            <div
+              style={{
+                marginTop: "0.8rem",
+                display: "flex",
+                gap: "1rem",
+              }}
+            >
+              <button
+                onClick={() => {
+                  setInitialValues((v) => ({
+                    ...v,
+                    secondDerivativeEquation: tempSecondDerivativeEquation,
+                  }));
+                  setEditingSecondDerivativeEquation(false);
+                }}
+              >
+                Save
+              </button>
+              <button
+                onClick={() => {
+                  setTempSecondDerivativeEquation(
+                    initialValues.secondDerivativeEquation
+                  );
+                  setEditingSecondDerivativeEquation(false);
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <div
+              style={{
+                marginTop: "0.8rem",
+                display: "flex",
+                gap: "1rem",
+              }}
+              onClick={() => setEditingSecondDerivativeEquation(true)}
             >
               <button>Edit</button>
             </div>

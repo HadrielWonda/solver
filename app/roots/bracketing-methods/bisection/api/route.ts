@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
         ea = 0;
       }
       xrOld = xr;
-    } while (iter < maxIter && (!ea || ea > maxError));
+    } while (iter < maxIter && (ea == undefined || ea > maxError));
 
     return Response.json(results, {
       status: 200,

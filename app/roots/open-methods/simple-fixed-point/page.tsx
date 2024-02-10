@@ -1,8 +1,7 @@
 "use client";
 import Input from "@/components/Input";
 import Radios from "@/components/Radios";
-import React, { useEffect, useMemo, useState } from "react";
-import { exprsCompiler } from "@/utils/compile";
+import React, { useEffect, useState } from "react";
 import ComputationResults from "./ComputationResults";
 
 export default function Page() {
@@ -21,14 +20,6 @@ export default function Page() {
     maxIterations: "1000",
     maxError: "0.0000000000001",
   });
-
-  const expression = useMemo(
-    () =>
-      initialValues.equation
-        ? exprsCompiler(initialValues.equation)
-        : undefined,
-    [initialValues.equation]
-  );
 
   useEffect(() => {
     setShowResults(false);

@@ -2,9 +2,7 @@
 import Input from "@/components/Input";
 import Radios from "@/components/Radios";
 import React, { useEffect, useMemo, useState } from "react";
-import { exprsCompiler } from "@/utils/compile";
 import Image from "next/image";
-import SecantFormula from "@/public/images/secant.png";
 // import ComputationResults from "./ComputationResults";
 import { FunctionPlot } from "@/lib/graph/FunctionPlot";
 import ComputationResults from "./ComputationResults";
@@ -69,7 +67,12 @@ export default function Page() {
         </p>
         <p className="block">It is governed by the following formula</p>
         <div className="block">
-          <Image src={SecantFormula} alt="Secant" />
+          <Image
+            src="/images/secant.png"
+            alt="Secant"
+            width={385}
+            height={99}
+          />
         </div>
       </div>
       <section className="block">

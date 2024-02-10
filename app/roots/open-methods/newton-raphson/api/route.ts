@@ -108,7 +108,11 @@ export async function POST(request: NextRequest) {
         diverging = true;
         break;
       }
-    } while (iter < maxIter && (!ea || ea > maxError) && !diverging);
+    } while (
+      iter < maxIter &&
+      (ea == undefined || ea > maxError) &&
+      !diverging
+    );
 
     return Response.json(
       { diverge: diverging, results, zeroDenominator },

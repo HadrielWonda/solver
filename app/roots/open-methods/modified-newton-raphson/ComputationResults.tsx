@@ -1,6 +1,6 @@
 "use client";
 
-import { result } from "@/types";
+import { fixedPointResult } from "@/types";
 import { useEffect, useMemo, useState } from "react";
 
 export default function ComputationResults({
@@ -8,8 +8,9 @@ export default function ComputationResults({
 }: {
   initialValues: {
     equation: string;
-    x0: string;
-    x1: string;
+    start: string;
+    derivativeEquation: string;
+    secondDerivativeEquation: string;
     stoppingCriteria?: string;
     maxIterations: string;
     maxError: string;
@@ -18,8 +19,9 @@ export default function ComputationResults({
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState<
     | {
-        results: result[];
+        results: fixedPointResult[];
         diverge: boolean;
+        zeroDenominator: boolean;
       }
     | undefined
   >();
@@ -30,10 +32,13 @@ export default function ComputationResults({
     () => async () => {
       try {
         let response: Response;
-        response = await fetch("/roots/open-methods/secant/api", {
-          method: "post",
-          body: JSON.stringify(initialValues),
-        });
+        response = await fetch(
+          "/roots/open-methods/modified-newton-raphson/api",
+          {
+            method: "post",
+            body: JSON.stringify(initialValues),
+          }
+        );
 
         console.log("call returned");
         const data = await response.json();
@@ -93,16 +98,14 @@ export default function ComputationResults({
               width: 800,
             }}
           >
-            <h3>Secant Iteration Results</h3>
+            <h3>Modified Newton-Raphson Iteration Results</h3>
             <button onClick={() => reCompute()}>Re-run</button>
           </div>
           <table border={1} cellPadding={17} width={800}>
             <thead>
               <tr>
                 <th>Iteration</th>
-                <th>xl</th>
-                <th>xu</th>
-                <th>xr</th>
+                <th>xi</th>
                 <th>ea(%)</th>
               </tr>
             </thead>
@@ -110,9 +113,7 @@ export default function ComputationResults({
               {results?.results?.map((result, index) => (
                 <tr key={index}>
                   <td>{result.itr}</td>
-                  <td>{result.xl}</td>
-                  <td>{result.xu}</td>
-                  <td>{result.xr}</td>
+                  <td>{result.xi}</td>
                   <td>{result.ea}</td>
                 </tr>
               ))}
@@ -122,7 +123,16 @@ export default function ComputationResults({
             <div className="block">
               <p>
                 Iteration was terminated because results were diverging or
-                converging slow!
+                converging slow! Consider restructuring your governing equation.
+              </p>
+            </div>
+          )}
+
+          {results?.zeroDenominator && (
+            <div className="block">
+              <p>
+                Iteration was terminated due to the derivative (the denominator
+                in the formula) equating to zero.
               </p>
             </div>
           )}

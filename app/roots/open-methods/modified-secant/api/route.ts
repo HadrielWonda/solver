@@ -1,7 +1,7 @@
 "use server";
 import { NextRequest } from "next/server";
 import { Parser } from "expr-eval";
-import { fixedPointResult, result } from "@/types";
+import { fixedPointResult } from "@/types";
 
 const exprsCompiler = (exprs: string) => {
   const parser = new Parser();
@@ -104,7 +104,11 @@ export async function POST(request: NextRequest) {
         diverging = true;
         break;
       }
-    } while (iter < maxIter && (!ea || ea > maxError) && !diverging);
+    } while (
+      iter < maxIter &&
+      (ea == undefined || ea > maxError) &&
+      !diverging
+    );
 
     return Response.json(
       { diverge: diverging, results },

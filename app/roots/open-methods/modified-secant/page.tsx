@@ -3,7 +3,6 @@ import Input from "@/components/Input";
 import Radios from "@/components/Radios";
 import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import ModifiedSecantFormula from "@/public/images/modified-secant.png";
 import { FunctionPlot } from "@/lib/graph/FunctionPlot";
 import ComputationResults from "./ComputationResults";
 // import ComputationResults from "./ComputationResults";
@@ -66,7 +65,12 @@ export default function Page() {
           This approximation yield the following iterative equation
         </p>
         <div className="block">
-          <Image src={ModifiedSecantFormula} alt="Modified Secant" />
+          <Image
+            src="/images/modified-secant.png"
+            alt="Modified Secant"
+            width={466}
+            height={112}
+          />
         </div>
       </div>
       <section className="block">

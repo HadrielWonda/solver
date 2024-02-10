@@ -1,6 +1,7 @@
 "use server";
 import { NextRequest } from "next/server";
 import { Expression, Parser } from "expr-eval";
+import { brentResult } from "@/types";
 
 const exprsCompiler = (exprs: string) => {
   const parser = new Parser();
@@ -103,84 +104,165 @@ export async function POST(request: NextRequest) {
     }
 
     let iter = 0;
-    // let fl = expression?.evaluate({ x: Number(xl) });
-    // let xrOld: number | undefined;
+    let xrOld: number | undefined;
     let ea: number | undefined;
     let maxError = Number(es);
     let maxIter = Number(maxIterations);
 
-    const results: {
-      itr: number;
-      method: "quadratic" | "secant" | "bisection";
-      xi: number;
-      xj: number;
-      xk: number;
-      xr: number;
-      ea: number | undefined;
-    }[] = [];
+    const results: brentResult[] = [];
 
-    const fup = expression?.evaluate({ x: xup });
-    const fmid = expression?.evaluate({ x: xmid });
-    const flow = expression?.evaluate({ x: xlow });
+    let fup = expression?.evaluate({ x: xup });
+    let fmid = expression?.evaluate({ x: xmid });
+    let flow = expression?.evaluate({ x: xlow });
 
     do {
       ++iter;
 
       // try quadratic or secant
       let xr;
+      let method: "quadratic" | "secant" | "bisection";
 
-      if (xlow !== xmid && xmid !== xup && xup !== xlow) {
-        xr = singleQuadratic(expression, Number(xi), Number(xj), Number(xk));
+      if (xlow == xmid || xmid == xup) {
+        method = "secant";
+        xr = singleSecant(expression, xup, xlow, iter);
       } else {
-        if (xlow !== xmid) {
-          xr = singleSecant(expression, xmid, xlow);
-        } else if (xmid !== xup) {
-          xr = singleSecant(expression, xup, xmid);
-        } else {
-          xr = singleSecant(expression, xup, xlow);
+        xr = singleQuadratic(expression, Number(xi), Number(xj), Number(xk));
+        method = "quadratic";
+        if (xr == xrOld) {
+          const test = flow * fmid;
+          method = "secant";
+
+          if (test > 0) {
+            xr = singleSecant(expression, xmid, xup, iter);
+          } else {
+            xr = singleSecant(expression, xlow, xmid, iter);
+          }
         }
+      }
+
+      if (xr !== 0 && xrOld) {
+        ea = Math.abs((xr - xrOld) / xr) * 100;
       }
 
       if (xr < xlow || xr > xup) {
         // Answer doesn't converge, switch to bisection
-        xr = (xlow + xup) / 2;
-
-        const fr = expression?.evaluate({ x: xr });
-        const test = flow * fr;
+        const test = flow * fmid;
 
         if (test > 0) {
-          xlow = xr;
-          // fl = fr;
-        } else if (test < 0) {
-          xup = xr;
+          xr = (xmid + xup) / 2;
+
+          if (xr !== 0 && xrOld) {
+            ea = Math.abs((xr - xrOld) / xr) * 100;
+          }
+
+          results.push({
+            method: "bisection",
+            itr: iter,
+            xi: xlow,
+            xj: xmid,
+            xk: xup,
+            xr,
+            ea,
+          });
+
+          xlow = xmid;
+          flow = fmid;
+
+          xmid = xr;
+          fmid = expression?.evaluate({ x: xr });
         } else {
-          ea = 0;
+          xr = (xmid + xlow) / 2;
+
+          if (xr !== 0 && xrOld) {
+            ea = Math.abs((xr - xrOld) / xr) * 100;
+          }
+
+          results.push({
+            method: "bisection",
+            itr: iter,
+            xi: xlow,
+            xj: xmid,
+            xk: xup,
+            xr,
+            ea,
+          });
+
+          xup = xmid;
+          fup = fmid;
+
+          xmid = xr;
+          fmid = expression?.evaluate({ x: xr });
         }
       } else {
+        results.push({
+          method,
+          itr: iter,
+          xi: xlow,
+          xj: xmid,
+          xk: xup,
+          xr,
+          ea,
+        });
+
+        if (method == "quadratic") {
+          const test = flow * fmid;
+
+          if (test > 0) {
+            xlow = xmid;
+            flow = fmid;
+
+            xmid = xr;
+            fmid = expression?.evaluate({ x: xr });
+          } else {
+            xup = xmid;
+            fup = fmid;
+
+            xmid = xr;
+            fmid = expression?.evaluate({ x: xr });
+          }
+        } else {
+          if (xmid == xlow || xmid == xup) {
+            if (xr > xup) {
+              xmid = xup;
+              fmid = fup;
+
+              xup = xr;
+              fup = expression?.evaluate({ x: xr });
+            } else if (xr < xlow) {
+              xmid = xlow;
+              fmid = flow;
+
+              xlow = xr;
+              flow = expression?.evaluate({ x: xr });
+            } else {
+              xmid = xr;
+              fmid = expression?.evaluate({ x: xr });
+            }
+          } else {
+            const test = flow * fmid;
+            method = "secant";
+
+            if (test > 0) {
+              xlow = xmid;
+              xmid = xr;
+            } else {
+              xup = xmid;
+              xmid = xr;
+            }
+          }
+        }
       }
 
-      results.push({
-        method: "bisection",
-        itr: iter,
-        xi: xlow,
-        xj: xlow,
-        xk: xlow,
-        xr,
-        ea,
-      });
-      // const fr = expression?.evaluate({ x: Number(xr) });
-      // const test = fl * fr;
-
-      // if (test > 0) {
-      //   xlow = xr;
-      //   fl = fr;
-      // } else if (test < 0) {
-      //   xup = xr;
-      // } else {
-      //   ea = 0;
+      // if (iter > 48 && iter < 52) {
+      //   console.log("iter: ", iter);
+      //   console.log("ea", ea);
+      //   console.log("maxError", maxError);
+      //   console.log("!ea", !ea);
+      //   console.log("ea! > maxError", ea! > maxError);
       // }
-      // xrOld = xr;
-    } while (iter < maxIter && (!ea || ea > maxError));
+
+      xrOld = xr;
+    } while (iter < maxIter && (ea == undefined || ea > maxError));
 
     return Response.json(results, {
       status: 200,
@@ -213,11 +295,27 @@ const singleQuadratic = (
   return xr;
 };
 
-const singleSecant = (expression: Expression, xi: number, xj: number) => {
+const singleSecant = (
+  expression: Expression,
+  xi: number,
+  xj: number,
+  iter: number
+) => {
   const fi = expression?.evaluate({ x: xi });
   const fj = expression?.evaluate({ x: xj });
 
   const xr = xj - (fj * (xi - xj)) / (fi - fj);
+
+  if (iter > 48 && iter < 52) {
+    console.log("iter: ", iter);
+    console.log("xi", xi);
+    console.log("fi", fi);
+    console.log("xj", xj);
+    console.log("fj", fj);
+    console.log("xr", xr);
+    console.log("fr", expression?.evaluate({ x: xr }));
+    console.log(">>>>>>>>\n");
+  }
 
   return xr;
 };

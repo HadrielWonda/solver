@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
-import { fixedPointResult } from "@/types";
+import { brentResult } from "@/types";
 import { useEffect, useMemo, useState } from "react";
 
 export default function ComputationResults({
@@ -18,13 +18,7 @@ export default function ComputationResults({
   };
 }) {
   const [loading, setLoading] = useState(true);
-  const [results, setResults] = useState<
-    | {
-        results: fixedPointResult[];
-        diverge: boolean;
-      }
-    | undefined
-  >();
+  const [results, setResults] = useState<brentResult[] | undefined>();
   const [errorMessage, setErrorMessage] = useState("");
   // console.log("maxError: ", initialValues.maxError);
 
@@ -92,38 +86,46 @@ export default function ComputationResults({
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              width: 800,
+              width: 1200,
             }}
           >
             <h3>Brent's Algorithm Iteration Results</h3>
             <button onClick={() => reCompute()}>Re-run</button>
           </div>
-          <table border={1} cellPadding={17} width={800}>
+          <table border={1} cellPadding={17} width={1200}>
             <thead>
               <tr>
                 <th>Iteration</th>
+                <th>Method</th>
+                <th>xi</th>
+                <th>xj</th>
+                <th>xk</th>
                 <th>x</th>
                 <th>ea(%)</th>
               </tr>
             </thead>
             <tbody>
-              {results?.results?.map((result, index) => (
+              {results?.map((result, index) => (
                 <tr key={index}>
                   <td>{result.itr}</td>
+                  <td>{result.method}</td>
                   <td>{result.xi}</td>
+                  <td>{result.xj}</td>
+                  <td>{result.xk}</td>
+                  <td>{result.xr}</td>
                   <td>{result.ea}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-          {results?.diverge && (
+          {/* {results?.diverge && (
             <div className="block">
               <p>
                 Iteration was terminated because results were diverging or
                 converging slow!
               </p>
             </div>
-          )}
+          )} */}
         </>
       )}
     </section>

@@ -3,10 +3,9 @@
 import Input from "@/components/Input";
 import Radios from "@/components/Radios";
 import React, { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
-import ModifiedSecantFormula from "@/public/images/modified-secant.png";
 import { FunctionPlot } from "@/lib/graph/FunctionPlot";
 import { exprsCompiler } from "@/utils/compile";
+import ComputationResults from "./ComputationResults";
 // import ComputationResults from "./ComputationResults";
 // import ComputationResults from "./ComputationResults";
 
@@ -309,12 +308,12 @@ export default function Page() {
           {Graph}
         </div>
       )}
-      {/* {showResults && <ComputationResults initialValues={initialValues} />} */}
       {showResults && (
         <div className="block">
-          <h3>Still in progress</h3>
+          <p>Algorithm still in progress</p>
         </div>
       )}
+      {showResults && <ComputationResults initialValues={initialValues} />}
     </main>
   );
 }

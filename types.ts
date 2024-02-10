@@ -11,3 +11,13 @@ export type fixedPointResult = {
   xi: number;
   ea?: number;
 };
+
+export type brentResult = {
+  itr: number;
+  method: "quadratic" | "secant" | "bisection";
+  xi: number;
+  xj: number;
+  xk: number;
+  xr: number;
+  ea: number | undefined;
+};
