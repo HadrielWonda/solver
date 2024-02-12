@@ -15,16 +15,21 @@ export default function page() {
         </Link>
       </li>
       <li>
-        <Link href="/roots/open-methods/modified-newton-raphson">
-          Modified Newton-Raphson Method for Multiple Roots
-        </Link>
-      </li>
-      <li>
         <Link href="/roots/open-methods/secant">Secant method</Link>
       </li>
       <li>
         <Link href="/roots/open-methods/modified-secant">
           Modified Secant method
+        </Link>
+      </li>
+      <li>
+        <Link href="/roots/open-methods/modified-newton-raphson">
+          Modified Newton-Raphson Method for Multiple Roots
+        </Link>
+      </li>
+      <li>
+        <Link href="/roots/open-methods/systems-of-nonlinear-equations">
+          Systems Of Nonlinear Equations
         </Link>
       </li>
     </ul>

@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
 
     if (divergenceCount == 4) {
       return Response.json(
-        { diverge: false, results },
+        { diverge: true, results },
         {
           status: 200,
         }

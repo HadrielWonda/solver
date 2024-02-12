@@ -12,6 +12,12 @@ export type fixedPointResult = {
   ea?: number;
 };
 
+export type equationsFixedPointResult = {
+  itr: number;
+  values: { [key: string]: number };
+  ea: { [key: string]: number };
+};
+
 export type brentResult = {
   itr: number;
   method: "quadratic" | "secant" | "bisection";
