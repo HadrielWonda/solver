@@ -59,14 +59,14 @@ export default function Page() {
   return (
     <main>
       <h1>Secant Method</h1>
-      <div className="block">
+      <div className="text-block">
         <p>
           A potential problem in implementing the Newton-Raphson method is the
           evaluation of the derivative. In the secant method the derivative is
           approximated by a backward finite divided difference.
         </p>
-        <p className="block">It is governed by the following formula</p>
-        <div className="block">
+        <p className="text-block">It is governed by the following formula</p>
+        <div className="text-block">
           <Image
             src="/images/secant.png"
             alt="Secant"
@@ -75,8 +75,8 @@ export default function Page() {
           />
         </div>
       </div>
-      <section className="block">
-        <div className="block">
+      <section className="text-block">
+        <div className="text-block">
           {editingEquation ? (
             <Input
               label="Enter equation - f(x)"
@@ -132,7 +132,7 @@ export default function Page() {
           )}
         </div>
 
-        <div className="block">
+        <div className="text-block">
           <Input
             label="Start value - x0"
             value={initialValues.x0}
@@ -141,7 +141,7 @@ export default function Page() {
             }
           />
         </div>
-        <div className="block">
+        <div className="text-block">
           <Input
             label="Start value - x1"
             value={initialValues.x1}
@@ -182,7 +182,7 @@ export default function Page() {
               />
               {initialValues.stoppingCriteria == "max_iterations" ? (
                 <>
-                  <div className="block">
+                  <div className="text-block">
                     <Input
                       label="Max number of iterations"
                       value={initialValues.maxIterations}
@@ -202,7 +202,7 @@ export default function Page() {
                   </div>
                 </>
               ) : initialValues.stoppingCriteria == "max_error" ? (
-                <div className="block">
+                <div className="text-block">
                   <Input
                     label="Max absolute % relative error - |ea|"
                     value={initialValues.maxError}
@@ -222,7 +222,7 @@ export default function Page() {
                 </div>
               ) : null}
 
-              <div className="block">
+              <div className="text-block">
                 <p>
                   NB: If the iteration is noticed to be diverging, it will be
                   automatically aborted to avoid a non-convergent infinite
@@ -233,7 +233,7 @@ export default function Page() {
           )}
       </section>
       {showResults && (
-        <div className="block">
+        <div className="text-block">
           <h3>Graph of function around initial guess</h3>
           {Graph}
         </div>

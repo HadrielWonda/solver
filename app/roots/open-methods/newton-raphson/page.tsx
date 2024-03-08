@@ -58,15 +58,15 @@ export default function Page() {
   return (
     <main>
       <h1>Newton-Raphson Method</h1>
-      <div className="block">
+      <div className="text-block">
         <p>
           While the Newton-Raphson is the most widely used of all root-locating
           formulas and is often very efficient, there are situations where it
           performs poorly. A special case is a region of
           <span className="bold">multiple roots</span>.
         </p>
-        <p className="block">It is governed by the following formula</p>
-        <div className="block">
+        <p className="text-block">It is governed by the following formula</p>
+        <div className="text-block">
           <Image
             src="/images/newton-raphson.png"
             alt="Newton Raphson"
@@ -75,8 +75,8 @@ export default function Page() {
           />
         </div>
       </div>
-      <section className="block">
-        <div className="block">
+      <section className="text-block">
+        <div className="text-block">
           {editingEquation ? (
             <Input
               label="Enter equation - f(x)"
@@ -131,7 +131,7 @@ export default function Page() {
             </div>
           )}
         </div>
-        <div className="block">
+        <div className="text-block">
           {editingDerivativeEquation ? (
             <Input
               label="Enter equation derivative - f'(x)"
@@ -190,7 +190,7 @@ export default function Page() {
           )}
         </div>
 
-        <div className="block">
+        <div className="text-block">
           <Input
             label="Start value - x"
             value={initialValues.start}
@@ -231,7 +231,7 @@ export default function Page() {
               />
               {initialValues.stoppingCriteria == "max_iterations" ? (
                 <>
-                  <div className="block">
+                  <div className="text-block">
                     <Input
                       label="Max number of iterations"
                       value={initialValues.maxIterations}
@@ -251,7 +251,7 @@ export default function Page() {
                   </div>
                 </>
               ) : initialValues.stoppingCriteria == "max_error" ? (
-                <div className="block">
+                <div className="text-block">
                   <Input
                     label="Max absolute % relative error - |ea|"
                     value={initialValues.maxError}
@@ -271,7 +271,7 @@ export default function Page() {
                 </div>
               ) : null}
 
-              <div className="block">
+              <div className="text-block">
                 <p>
                   NB: If the iteration is noticed to be diverging, it will be
                   automatically aborted to avoid a non-convergent infinite
@@ -282,7 +282,7 @@ export default function Page() {
           )}
       </section>
       {showResults && (
-        <div className="block">
+        <div className="text-block">
           <h3>Graph of function around initial guess</h3>
           {Graph}
         </div>

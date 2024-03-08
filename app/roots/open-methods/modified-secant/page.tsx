@@ -55,16 +55,16 @@ export default function Page() {
   return (
     <main>
       <h1>Modified Secant Method</h1>
-      <div className="block">
+      <div className="text-block">
         <p>
           Rather than using two arbitrary values to estimate the derivative, an
           alternative approach involves a fractional perturbation dx of the
           independent variable - x, to estimate f(x).
         </p>
-        <p className="block">
+        <p className="text-block">
           This approximation yield the following iterative equation
         </p>
-        <div className="block">
+        <div className="text-block">
           <Image
             src="/images/modified-secant.png"
             alt="Modified Secant"
@@ -73,8 +73,8 @@ export default function Page() {
           />
         </div>
       </div>
-      <section className="block">
-        <div className="block">
+      <section className="text-block">
+        <div className="text-block">
           {editingEquation ? (
             <Input
               label="Enter equation - f(x)"
@@ -130,7 +130,7 @@ export default function Page() {
           )}
         </div>
 
-        <div className="block">
+        <div className="text-block">
           <Input
             label="Start value - x"
             value={initialValues.x}
@@ -139,7 +139,7 @@ export default function Page() {
             }
           />
         </div>
-        <div className="block">
+        <div className="text-block">
           <Input
             label="Perturbation - dx"
             value={initialValues.dx}
@@ -180,7 +180,7 @@ export default function Page() {
               />
               {initialValues.stoppingCriteria == "max_iterations" ? (
                 <>
-                  <div className="block">
+                  <div className="text-block">
                     <Input
                       label="Max number of iterations"
                       value={initialValues.maxIterations}
@@ -200,7 +200,7 @@ export default function Page() {
                   </div>
                 </>
               ) : initialValues.stoppingCriteria == "max_error" ? (
-                <div className="block">
+                <div className="text-block">
                   <Input
                     label="Max absolute % relative error - |ea|"
                     value={initialValues.maxError}
@@ -220,7 +220,7 @@ export default function Page() {
                 </div>
               ) : null}
 
-              <div className="block">
+              <div className="text-block">
                 <p>
                   NB: If the iteration is noticed to be diverging, it will be
                   automatically aborted to avoid a non-convergent infinite
@@ -231,7 +231,7 @@ export default function Page() {
           )}
       </section>
       {showResults && (
-        <div className="block">
+        <div className="text-block">
           <h3>Graph of function around initial guess</h3>
           {Graph}
         </div>

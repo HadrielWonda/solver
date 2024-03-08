@@ -52,16 +52,16 @@ export default function Page() {
   return (
     <main>
       <h1>Fixed-Point Iteration Method</h1>
-      <div className="block">
+      <div className="text-block">
         <p>
           Create your governing equations for every independent variable (x &
           y), by changing subject of the equations{" "}
           <span className="bold">u(x, y), v(x, y)</span> so we have at least one
           equation defining every independent variable.
         </p>
-        {/* <p className="block bold">x = g(x)</p> */}
+        {/* <p className="text-block bold">x = g(x)</p> */}
 
-        <div className="block">
+        <div className="text-block">
           <p>Examples</p>
           <div className="indent">
             <p>
@@ -71,7 +71,7 @@ export default function Page() {
               y + 3xy<sup>2</sup> = 57 ---- ii
             </p>
           </div>
-          <div className="block indent">
+          <div className="text-block indent">
             <p>Governing equations:</p>
             <p>
               x = (10 - x<sup>2</sup>) / y
@@ -82,14 +82,14 @@ export default function Page() {
           </div>
         </div>
 
-        <div className="block">
+        <div className="text-block">
           <span className="bold">NB: </span> Not all sets of governing equations
           will converge. Sometimes you'll need to try out all possible sets of
           governing equations to find the converging set.
         </div>
       </div>
-      <section className="block">
-        <div className="block">
+      <section className="text-block">
+        <div className="text-block">
           {editingVariables ? (
             <Input
               label="List all the independent variables seperated by comma ','. e.g: x, y, z."
@@ -166,12 +166,12 @@ export default function Page() {
         </div>
         {!editingVariables && variablesList.length && (
           <>
-            <div className="block">
-              <p className="block">
+            <div className="text-block">
+              <p className="text-block">
                 Input governing equations for all independent variables
               </p>
               {variablesList.map((variable) => (
-                <div className="block" key={variable}>
+                <div className="text-block" key={variable}>
                   <Input
                     label={`${variable} = `}
                     value={governingEquations[`${variable}`]}
@@ -185,12 +185,12 @@ export default function Page() {
                 </div>
               ))}
             </div>
-            <div className="block">
-              <p className="block">
+            <div className="text-block">
+              <p className="text-block">
                 Input initial value for all independent variables
               </p>
               {variablesList.map((variable) => (
-                <div className="block" key={variable}>
+                <div className="text-block" key={variable}>
                   <Input
                     label={`${variable}0 = `}
                     value={initialValues[`${variable}`]}
@@ -233,7 +233,7 @@ export default function Page() {
             />
             {stoppingCriteria.stoppingCriteria == "max_iterations" ? (
               <>
-                <div className="block">
+                <div className="text-block">
                   <Input
                     label="Max number of iterations"
                     value={stoppingCriteria.maxIterations}
@@ -253,7 +253,7 @@ export default function Page() {
                 </div>
               </>
             ) : stoppingCriteria.stoppingCriteria == "max_error" ? (
-              <div className="block">
+              <div className="text-block">
                 <Input
                   label="Max absolute % relative error - |ea|"
                   value={stoppingCriteria.maxError}
@@ -273,7 +273,7 @@ export default function Page() {
               </div>
             ) : null}
 
-            <div className="block">
+            <div className="text-block">
               <p>
                 NB: If the iteration is noticed to be diverging, it will be
                 automatically aborted to avoid a non-convergent infinite

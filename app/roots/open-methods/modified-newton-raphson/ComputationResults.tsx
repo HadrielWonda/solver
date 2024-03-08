@@ -120,7 +120,7 @@ export default function ComputationResults({
             </tbody>
           </table>
           {results?.diverge && (
-            <div className="block">
+            <div className="text-block">
               <p>
                 Iteration was terminated because results were diverging or
                 converging slow! Consider restructuring your governing equation.
@@ -129,7 +129,7 @@ export default function ComputationResults({
           )}
 
           {results?.zeroDenominator && (
-            <div className="block">
+            <div className="text-block">
               <p>
                 Iteration was terminated due to the derivative (the denominator
                 in the formula) equating to zero.

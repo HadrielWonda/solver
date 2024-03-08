@@ -40,7 +40,7 @@ export default function Page() {
     <main>
       <h1>Bisection / Balzano&apos;s Method</h1>
       <section>
-        <div className="block">
+        <div className="text-block">
           {editingEquation ? (
             <Input
               label="Enter equation"
@@ -96,7 +96,7 @@ export default function Page() {
           )}
         </div>
 
-        <div className="block">
+        <div className="text-block">
           <h3>Enter bracket value</h3>
           <div
             style={{
@@ -152,7 +152,7 @@ export default function Page() {
               />
               {initialValues.stoppingCriteria == "max_iterations" ? (
                 <>
-                  <div className="block">
+                  <div className="text-block">
                     <Input
                       label="Max number of iterations"
                       value={initialValues.maxIterations}
@@ -172,7 +172,7 @@ export default function Page() {
                   </div>
                 </>
               ) : initialValues.stoppingCriteria == "max_error" ? (
-                <div className="block">
+                <div className="text-block">
                   <Input
                     label="Max absolute % relative error - |ea|"
                     value={initialValues.maxError}

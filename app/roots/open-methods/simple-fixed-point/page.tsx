@@ -28,15 +28,15 @@ export default function Page() {
   return (
     <main>
       <h1>Simple Fixed-Point Iteration Method</h1>
-      <div className="block">
+      <div className="text-block">
         <p>
           Create your governing equation - <span className="bold">g(x)</span>,
           by rearranging <span>f(x) = 0</span> so that <span>x</span> is on the
           left hand side of the equation.
         </p>
-        <p className="block bold">x = g(x)</p>
+        <p className="text-block bold">x = g(x)</p>
 
-        <div className="block">
+        <div className="text-block">
           <p>Examples</p>
           <div className="indent">
             <p>
@@ -46,14 +46,14 @@ export default function Page() {
               x = g(x) ={">"} x = (x<sup>2</sup> + 3) / 2
             </p>
           </div>
-          <div className="block indent">
+          <div className="text-block indent">
             <p>f(x) = 0 ={">"} sin x = 0</p>
             <p>x = g(x) ={">"} x = sin x + x</p>
           </div>
         </div>
       </div>
-      <section className="block">
-        <div className="block">
+      <section className="text-block">
+        <div className="text-block">
           {editingEquation ? (
             <Input
               label="Enter governing equation g(x)"
@@ -109,7 +109,7 @@ export default function Page() {
           )}
         </div>
 
-        <div className="block">
+        <div className="text-block">
           <Input
             label="Start value"
             value={initialValues.start}
@@ -148,7 +148,7 @@ export default function Page() {
               />
               {initialValues.stoppingCriteria == "max_iterations" ? (
                 <>
-                  <div className="block">
+                  <div className="text-block">
                     <Input
                       label="Max number of iterations"
                       value={initialValues.maxIterations}
@@ -168,7 +168,7 @@ export default function Page() {
                   </div>
                 </>
               ) : initialValues.stoppingCriteria == "max_error" ? (
-                <div className="block">
+                <div className="text-block">
                   <Input
                     label="Max absolute % relative error - |ea|"
                     value={initialValues.maxError}
@@ -188,7 +188,7 @@ export default function Page() {
                 </div>
               ) : null}
 
-              <div className="block">
+              <div className="text-block">
                 <p>
                   NB: If the iteration is noticed to be diverging, it will be
                   automatically aborted to avoid a non-convergent infinite

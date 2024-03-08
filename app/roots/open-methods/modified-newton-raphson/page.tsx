@@ -65,7 +65,7 @@ export default function Page() {
   return (
     <main>
       <h1>Modified Newton-Raphson Method for Multiple Roots</h1>
-      <div className="block">
+      <div className="text-block">
         <p>
           A problem with Newton-Raphson Method is related to the fact that not
           only f(x) but also f'(x) goes to zero at the root. This poses problems
@@ -84,7 +84,7 @@ export default function Page() {
           as the original function. Therefore, can be substituted into method to
           develop an alternative form of the Newton-Raphson method:
         </p>
-        <div className="block">
+        <div className="text-block">
           <Image
             src="/images/modified-newton-raphson.png"
             alt="Newton Raphson"
@@ -92,8 +92,8 @@ export default function Page() {
             height={130}
           />
         </div>
-        <p className="block">And the result simplified to yield</p>
-        <div className="block">
+        <p className="text-block">And the result simplified to yield</p>
+        <div className="text-block">
           <Image
             src="/images/modified-newton-raphson2.png"
             alt="Newton Raphson"
@@ -102,8 +102,8 @@ export default function Page() {
           />
         </div>
       </div>
-      <section className="block">
-        <div className="block">
+      <section className="text-block">
+        <div className="text-block">
           {editingEquation ? (
             <Input
               label="Enter equation - f(x)"
@@ -158,7 +158,7 @@ export default function Page() {
             </div>
           )}
         </div>
-        <div className="block">
+        <div className="text-block">
           {editingDerivativeEquation ? (
             <Input
               label="Enter equation derivative - f'(x)"
@@ -216,7 +216,7 @@ export default function Page() {
             </div>
           )}
         </div>
-        <div className="block">
+        <div className="text-block">
           {editingSecondDerivativeEquation ? (
             <Input
               label="Enter equation second derivative - f''(x)"
@@ -277,7 +277,7 @@ export default function Page() {
           )}
         </div>
 
-        <div className="block">
+        <div className="text-block">
           <Input
             label="Start value - x"
             value={initialValues.start}
@@ -318,7 +318,7 @@ export default function Page() {
               />
               {initialValues.stoppingCriteria == "max_iterations" ? (
                 <>
-                  <div className="block">
+                  <div className="text-block">
                     <Input
                       label="Max number of iterations"
                       value={initialValues.maxIterations}
@@ -338,7 +338,7 @@ export default function Page() {
                   </div>
                 </>
               ) : initialValues.stoppingCriteria == "max_error" ? (
-                <div className="block">
+                <div className="text-block">
                   <Input
                     label="Max absolute % relative error - |ea|"
                     value={initialValues.maxError}
@@ -358,7 +358,7 @@ export default function Page() {
                 </div>
               ) : null}
 
-              <div className="block">
+              <div className="text-block">
                 <p>
                   NB: If the iteration is noticed to be diverging, it will be
                   automatically aborted to avoid a non-convergent infinite
@@ -369,7 +369,7 @@ export default function Page() {
           )}
       </section>
       {showResults && (
-        <div className="block">
+        <div className="text-block">
           <h3>Graph of function around initial guess</h3>
           {Graph}
         </div>

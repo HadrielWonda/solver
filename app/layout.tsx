@@ -4,6 +4,20 @@ import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      "math-field": React.DetailedHTMLProps<
+        React.HTMLAttributes<MathMLElement>,
+        MathMLElement
+      >;
+    }
+  }
+  interface Window {
+    mathVirtualKeyboard: any;
+  }
+}
+
 export const metadata: Metadata = {
   title: "Solver App",
   description: "Engineering numerical solver app",
@@ -16,6 +30,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <script defer src="//unpkg.com/mathlive"></script>
+      </head>
       <body className={inter.className}>{children}</body>
     </html>
   );

@@ -107,7 +107,7 @@ export default function Page() {
   return (
     <main>
       <h1>Brent's Method</h1>
-      <div className="block">
+      <div className="text-block">
         <p>
           The general idea behind the Brent’s root finding method is whenever
           possible to use one of the quick open methods(Inverse quadratic
@@ -118,15 +118,15 @@ export default function Page() {
           guaranteed to fall within the bracket. This process is then repeated
           until the root is located to within an acceptable tolerance.
         </p>
-        {/* <p className="block">
+        {/* <p className="text-block">
           This approximation yield the following iterative equation
         </p>
-        <div className="block">
+        <div className="text-block">
           <Image src={ModifiedSecantFormula} alt="Modified Secant" />
         </div> */}
       </div>
-      <section className="block">
-        <div className="block">
+      <section className="text-block">
+        <div className="text-block">
           {editingEquation ? (
             <Input
               label="Enter equation - f(x)"
@@ -182,7 +182,7 @@ export default function Page() {
           )}
         </div>
 
-        <div className="block">
+        <div className="text-block">
           <h3>Enter initial values</h3>
           <p>Make sure values bracket the root.</p>
           <div
@@ -252,7 +252,7 @@ export default function Page() {
               />
               {initialValues.stoppingCriteria == "max_iterations" ? (
                 <>
-                  <div className="block">
+                  <div className="text-block">
                     <Input
                       label="Max number of iterations"
                       value={initialValues.maxIterations}
@@ -272,7 +272,7 @@ export default function Page() {
                   </div>
                 </>
               ) : initialValues.stoppingCriteria == "max_error" ? (
-                <div className="block">
+                <div className="text-block">
                   <Input
                     label="Max absolute % relative error - |ea|"
                     value={initialValues.maxError}
@@ -292,7 +292,7 @@ export default function Page() {
                 </div>
               ) : null}
 
-              <div className="block">
+              <div className="text-block">
                 <p>
                   NB: If the iteration is noticed to be diverging, it will be
                   automatically aborted to avoid a non-convergent infinite
@@ -303,13 +303,13 @@ export default function Page() {
           )}
       </section>
       {showResults && (
-        <div className="block">
+        <div className="text-block">
           <h3>Graph of function around initial guess</h3>
           {Graph}
         </div>
       )}
       {showResults && (
-        <div className="block">
+        <div className="text-block">
           <p>Algorithm still in progress</p>
         </div>
       )}
