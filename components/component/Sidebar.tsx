@@ -1,13 +1,8 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useClickAway } from "react-use";
 import { AiOutlineRollback } from "react-icons/ai";
 import { FaPlus } from "react-icons/fa6";
-import { BiHomeSmile, BiUser } from "react-icons/bi";
-import { HiOutlineChatBubbleBottomCenterText } from "react-icons/hi2";
-import { FiSettings, FiShoppingCart } from "react-icons/fi";
 import { Switch } from "@/components/ui/switch";
-import { Select } from "@/components/ui/select";
 import {
   AccordionTrigger,
   AccordionContent,
@@ -21,43 +16,30 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Separator } from "../ui/separator";
+import { FunctionPlotProps } from "@/lib/graph/FunctionPlot";
 
 type Checked = DropdownMenuCheckboxItemProps["checked"];
-import { CardTitle, CardHeader, CardContent, Card } from "@/components/ui/card";
-import { ResponsiveLine } from "@nivo/line";
-import { Separator } from "../ui/separator";
 
 export const Sidebar = ({
   open,
   close,
+  options,
+  setOptions,
 }: {
   open: boolean;
   close: () => void;
+  options: FunctionPlotProps["options"];
+  setOptions: React.Dispatch<
+    React.SetStateAction<FunctionPlotProps["options"]>
+  >;
 }) => {
-  // const ref = useRef(null);
-  // useClickAway(ref, () => close());
-
   const [settings, setSettings] = useState<{
-    showGrid: boolean;
-    xAxisType: "linear" | "log";
-    yAxisType: "linear" | "log";
     functions: never[];
-    tip:
-      | undefined
-      | {
-          xLine: true;
-          yLine: true;
-        };
   }>({
-    showGrid: false,
-    xAxisType: "linear",
-    yAxisType: "linear",
     functions: [],
-    tip: undefined,
   });
 
   const [showStatusBar, setShowStatusBar] = useState<Checked>(true);
@@ -93,10 +75,8 @@ export const Sidebar = ({
               </label>
               <Switch
                 id="toggleGrid"
-                checked={settings.showGrid}
-                onCheckedChange={(v) =>
-                  setSettings((s) => ({ ...s, showGrid: v }))
-                }
+                checked={options?.grid}
+                onCheckedChange={(v) => setOptions((s) => ({ ...s, grid: v }))}
               />
             </div>
             <div className="flex items-center mt-3">
@@ -107,10 +87,10 @@ export const Sidebar = ({
                 Show Tip:
               </label>
               <Switch
-                id="toggleGrid"
-                checked={Boolean(settings.tip)}
+                id="toggleTip"
+                checked={Boolean(options?.tip)}
                 onCheckedChange={(v) =>
-                  setSettings((s) => ({
+                  setOptions((s) => ({
                     ...s,
                     tip: v
                       ? {
@@ -142,24 +122,29 @@ export const Sidebar = ({
                       variant="outline"
                       className="flex-1 min-w-56 flex justify-between items-center"
                     >
-                      <span>{settings.xAxisType}</span>
+                      <span>{options?.xAxis?.type}</span>
 
                       <ChevronDownIcon className="h-5 w-5" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56">
                     <DropdownMenuCheckboxItem
-                      checked={settings.xAxisType == "linear"}
+                      checked={options?.xAxis?.type == "linear"}
                       onCheckedChange={(v) =>
-                        v && setSettings((s) => ({ ...s, xAxisType: "linear" }))
+                        v &&
+                        setOptions((s) => ({
+                          ...s,
+                          xAxis: { type: "linear" },
+                        }))
                       }
                     >
                       Linear
                     </DropdownMenuCheckboxItem>
                     <DropdownMenuCheckboxItem
-                      checked={settings.xAxisType == "log"}
+                      checked={options?.xAxis?.type == "log"}
                       onCheckedChange={(v) =>
-                        v && setSettings((s) => ({ ...s, xAxisType: "log" }))
+                        v &&
+                        setOptions((s) => ({ ...s, xAxis: { type: "log" } }))
                       }
                     >
                       Log
@@ -184,24 +169,29 @@ export const Sidebar = ({
                       variant="outline"
                       className="flex-1 min-w-56 flex justify-between items-center"
                     >
-                      <span>{settings.yAxisType}</span>
+                      <span>{options?.yAxis?.type}</span>
 
                       <ChevronDownIcon className="h-5 w-5" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56">
                     <DropdownMenuCheckboxItem
-                      checked={settings.yAxisType == "linear"}
+                      checked={options?.yAxis?.type == "linear"}
                       onCheckedChange={(v) =>
-                        v && setSettings((s) => ({ ...s, yAxisType: "linear" }))
+                        v &&
+                        setOptions((s) => ({
+                          ...s,
+                          yAxis: { type: "linear" },
+                        }))
                       }
                     >
                       Linear
                     </DropdownMenuCheckboxItem>
                     <DropdownMenuCheckboxItem
-                      checked={settings.yAxisType == "log"}
+                      checked={options?.yAxis?.type == "log"}
                       onCheckedChange={(v) =>
-                        v && setSettings((s) => ({ ...s, yAxisType: "log" }))
+                        v &&
+                        setOptions((s) => ({ ...s, yAxis: { type: "log" } }))
                       }
                     >
                       Log

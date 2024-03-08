@@ -2,7 +2,7 @@
 
 import { Sidebar } from "@/components/component/Sidebar";
 import { GiHamburgerMenu } from "react-icons/gi";
-import { FunctionPlot } from "@/lib/graph/FunctionPlot";
+import { FunctionPlot, FunctionPlotProps } from "@/lib/graph/FunctionPlot";
 import React, {
   useCallback,
   useEffect,
@@ -21,15 +21,21 @@ import {
 } from "@/components/ui/breadcrumb";
 
 export default function Page() {
-  const [equation, setEquation] = useState("x^2");
-  const [plottedEquation, setPlottedEquation] = useState("x^2");
+  const [options, setOptions] = useState<FunctionPlotProps["options"]>({
+    data: [
+      {
+        fn: "x^2",
+      },
+    ],
+    grid: false,
+    xAxis: { type: "linear" },
+    yAxis: { type: "linear" },
+    tip: undefined,
+  });
+  console.log("options", options);
   const [size, setSize] = useState<
     undefined | { width: number; height: number }
   >();
-
-  const plotEquation = () => {
-    setPlottedEquation(equation);
-  };
 
   const elementRef = useRef<HTMLDivElement>(null);
 
@@ -49,41 +55,13 @@ export default function Page() {
         <FunctionPlot
           options={{
             ...size,
-            data: [
-              {
-                fn: plottedEquation,
-              },
-            ],
+            ...options,
           }}
         />
       ) : null,
-    [plottedEquation, size]
+    [options, size]
   );
 
-  // Get a ref to the mathfield element
-  // (see `ref={mf}` in the markup below)
-  const mf = useRef<any>(null);
-
-  // Customize the mathfield when it is created
-  // useEffect(() => {
-  //   mf.current.mathVirtualKeyboardPolicy = "manual";
-  //   mf.current.addEventListener("focusin", () =>
-  //     window.mathVirtualKeyboard.show()
-  //   );
-  //   mf.current.addEventListener("focusout", () =>
-  //     window.mathVirtualKeyboard.hide()
-  //   );
-  //   mf.current.menuItems = [];
-  //   mf.current.mathVirtualKeyboardPolicy = "manual";
-  //   mf.current.addEventListener("focusin", () =>
-  //     window.mathVirtualKeyboard.show()
-  //   );
-  //   mf.current.addEventListener("focusout", () =>
-  //     window.mathVirtualKeyboard.hide()
-  //   );
-  // }, []);
-
-  const [value, setValue] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const closeSidebar = useCallback(() => {
     setSidebarOpen(false);
@@ -110,7 +88,12 @@ export default function Page() {
     <div className="w-full h-screen flex">
       {/* <Component /> */}
 
-      <Sidebar open={sidebarOpen} close={closeSidebar} />
+      <Sidebar
+        open={sidebarOpen}
+        close={closeSidebar}
+        options={options}
+        setOptions={setOptions}
+      />
       <div ref={elementRef} className="flex-1 h-screen relative">
         <div className="absolute top-3 left-5 flex items-center gap-3">
           {!sidebarOpen && (
