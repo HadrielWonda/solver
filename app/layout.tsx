@@ -31,6 +31,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <script
+          defer
+          src="//cdnjs.cloudflare.com/ajax/libs/mathjs/1.5.2/math.min.js"
+        ></script>
         <script defer src="//unpkg.com/mathlive"></script>
       </head>
       <body className={inter.className}>{children}</body>

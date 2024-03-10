@@ -22,11 +22,7 @@ import {
 
 export default function Page() {
   const [options, setOptions] = useState<FunctionPlotProps["options"]>({
-    data: [
-      {
-        fn: "x^2",
-      },
-    ],
+    data: [],
     grid: false,
     xAxis: { type: "linear" },
     yAxis: { type: "linear" },

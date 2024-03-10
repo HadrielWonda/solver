@@ -24,18 +24,22 @@
     "function-plot": "^1.24.0",
     "interval-arithmetic-eval": "^0.5.1",
     "lucide-react": "^0.350.0",
+    "mathjs": "^12.4.0",
+    "mathlive": "^0.98.6",
     "next": "14.0.4",
     "react": "^18",
     "react-dom": "^18",
     "react-icons": "^5.0.1",
     "react-use": "^17.5.0",
     "tailwind-merge": "^2.2.1",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/uuid": "^9.0.8",
     "autoprefixer": "^10.4.18",
     "eslint": "^8",
     "eslint-config-next": "14.0.4",
