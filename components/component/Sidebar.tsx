@@ -25,16 +25,45 @@ import * as mathlive from "mathlive";
 import "mathlive/static.css";
 import { v4 as uuid } from "uuid";
 import functionPlot from "function-plot";
+import { Input } from "../ui/input";
 
 type Checked = DropdownMenuCheckboxItemProps["checked"];
-type functionSetting = {
-  fnType?: string;
-  graphType: "interval" | "scatter" | "polyline";
-  fn: string;
-  latex: string;
-  id: string;
-  color: string;
-};
+type functionSetting =
+  | {
+      fnType?: "Single variable";
+      graphType: "interval" | "scatter" | "polyline";
+      fn: string;
+      latex: string;
+      id: string;
+      color: string;
+    }
+  | {
+      fnType: "implicit";
+      graphType: "interval" | "scatter" | "polyline";
+      fn: string;
+      latex: string;
+      id: string;
+      color: string;
+    }
+  | {
+      fnType: "parametric";
+      graphType: "polyline";
+      x: string;
+      y: string;
+      xLatex: string;
+      yLatex: string;
+      id: string;
+      color: string;
+    }
+  | {
+      fnType: "polar";
+      graphType: "polyline";
+      r: string;
+      rLatex: string;
+      scope: { a: number; r0: number; gamma: number };
+      id: string;
+      color: string;
+    };
 
 export const Sidebar = ({
   open,
@@ -56,9 +85,7 @@ export const Sidebar = ({
   const updateFunction = (v: functionSetting, id: string) => {
     setOptions((o) => ({
       ...o,
-      data: o?.data?.map((i) =>
-        (i as functionSetting).id == id ? { ...i, ...v } : i
-      ),
+      data: o?.data?.map((i) => ((i as functionSetting).id == id ? v : i)),
     }));
   };
   const deleteFunction = (id: string) => {
@@ -159,7 +186,7 @@ export const Sidebar = ({
                     >
                       <Button
                         variant="outline"
-                        className="flex-1 min-w-56 flex justify-between items-center"
+                        className="flex-1 min-w-52 flex justify-between items-center"
                       >
                         <span>{options?.xAxis?.type}</span>
 
@@ -206,7 +233,7 @@ export const Sidebar = ({
                     >
                       <Button
                         variant="outline"
-                        className="flex-1 min-w-56 flex justify-between items-center"
+                        className="flex-1 min-w-52 flex justify-between items-center"
                       >
                         <span>{options?.yAxis?.type}</span>
 
@@ -295,7 +322,12 @@ const FunctionBlock = ({
   id: string;
 }) => {
   const [mode, setMode] = useState<"view" | "edit">(
-    initialSetting.fn ? "view" : "edit"
+    (!initialSetting.fnType && initialSetting.fn) ||
+      (initialSetting.fnType == "Single variable" && initialSetting.fn) ||
+      (initialSetting.fnType == "implicit" && initialSetting.fn) ||
+      (initialSetting.fnType == "parametric" && initialSetting.x)
+      ? "view"
+      : "edit"
   );
   const [settings, setSettings] = useState<functionSetting>({
     ...initialSetting,
@@ -329,23 +361,69 @@ const FunctionBlock = ({
 
   return (
     <AccordionItem value={id}>
-      <AccordionTrigger className="px-3 py-2 flex items-center justify-between cursor-pointer">
-        <h3 className="flex items-center text-base font-semibold">
+      <AccordionTrigger className="px-3 py-2 flex items-center justify-between cursor-pointer w-full">
+        <h3 className="flex flex-1 items-center text-base font-semibold overflow-hidden">
           <div
             className={`w-4 h-4 mr-3`}
             style={{
-              backgroundColor: initialSetting.color,
+              backgroundColor: settings.color,
             }}
           ></div>
-          {settings.fn ? (
-            <>
-              <span>f(x) = </span>
+          {(!settings.fnType && settings.fn) ||
+          (settings.fnType == "Single variable" && settings.fn) ? (
+            <div className="flex flex-1 overflow-hidden text-ellipsis">
+              <span className="whitespace-nowrap">f(x) = </span>
               <span
                 dangerouslySetInnerHTML={{
                   __html: mathlive.convertLatexToMarkup(settings.latex),
                 }}
               />
-            </>
+            </div>
+          ) : settings.fnType == "implicit" && settings.fn ? (
+            <div className="flex flex-1 overflow-hidden text-ellipsis">
+              <span className="whitespace-nowrap">f(x, y) = 0 = </span>
+              <span
+                dangerouslySetInnerHTML={{
+                  __html: mathlive.convertLatexToMarkup(settings.latex),
+                }}
+              />
+            </div>
+          ) : settings.fnType == "polar" && settings.r ? (
+            <div className="flex-1 overflow-hidden">
+              <div className="flex gap-2 flex-1 overflow-hidden text-ellipsis">
+                <span className="whitespace-nowrap">r(r0, θ, a, γ) = </span>
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: mathlive.convertLatexToMarkup(settings.rLatex),
+                  }}
+                  style={{
+                    textOverflow: "ellipsis",
+                  }}
+                />
+              </div>
+            </div>
+          ) : settings.fnType == "parametric" && settings.x ? (
+            <div className="flex-1 overflow-hidden">
+              <div className="flex gap-2 flex-1 overflow-hidden text-ellipsis">
+                <span className="whitespace-nowrap">x(t) = </span>
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: mathlive.convertLatexToMarkup(settings.xLatex),
+                  }}
+                  style={{
+                    textOverflow: "ellipsis",
+                  }}
+                />
+              </div>
+              <div className="flex gap-2 flex-1 overflow-hidden text-ellipsis">
+                <span className="whitespace-nowrap">y(t) = </span>
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: mathlive.convertLatexToMarkup(settings.yLatex),
+                  }}
+                />
+              </div>
+            </div>
           ) : (
             "function"
           )}
@@ -373,19 +451,112 @@ const FunctionBlock = ({
                 </label>
                 <span>{settings.graphType}</span>
               </div>
-              <div className="flex gap-3 items-center">
-                <label
-                  className="text-sm font-medium text-gray-900"
-                  htmlFor={id}
-                >
-                  f(x) =
-                </label>
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: mathlive.convertLatexToMarkup(settings.latex),
-                  }}
-                />
-              </div>
+              {!settings.fnType || settings.fnType == "Single variable" ? (
+                <div className="flex gap-3 items-center">
+                  <label
+                    className="text-sm font-medium text-gray-900 whitespace-nowrap"
+                    htmlFor={id}
+                  >
+                    f(x) =
+                  </label>
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: mathlive.convertLatexToMarkup(settings.latex),
+                    }}
+                  />
+                </div>
+              ) : settings.fnType == "implicit" ? (
+                <div className="flex gap-3 items-center">
+                  <label
+                    className="text-sm font-medium text-gray-900 whitespace-nowrap"
+                    htmlFor={id}
+                  >
+                    f(x, y) = 0 =
+                  </label>
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: mathlive.convertLatexToMarkup(settings.latex),
+                    }}
+                  />
+                  {/* r = f(r0,θ,a,γ) */}
+                </div>
+              ) : settings.fnType == "parametric" ? (
+                <>
+                  <div className="flex gap-3 items-center">
+                    <label
+                      className="text-sm font-medium text-gray-900 whitespace-nowrap"
+                      htmlFor={id}
+                    >
+                      x(t) =
+                    </label>
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: mathlive.convertLatexToMarkup(settings.xLatex),
+                      }}
+                    />
+                  </div>
+                  <div className="flex gap-3 items-center">
+                    <label
+                      className="text-sm font-medium text-gray-900 whitespace-nowrap"
+                      htmlFor={id}
+                    >
+                      y(t) =
+                    </label>
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: mathlive.convertLatexToMarkup(settings.yLatex),
+                      }}
+                    />
+                  </div>
+                </>
+              ) : settings.fnType == "polar" ? (
+                <>
+                  <h3>
+                    Where θ is the polar angle, a is the radius of the circle
+                    with center (r0,γ)
+                  </h3>
+                  <div className="flex gap-3 items-center">
+                    <label
+                      className="text-sm font-medium text-gray-900 whitespace-nowrap"
+                      htmlFor={id}
+                    >
+                      r(r0, θ, a, γ) =
+                    </label>
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: mathlive.convertLatexToMarkup(settings.rLatex),
+                      }}
+                    />
+                  </div>
+                  <div className="flex gap-3 items-center">
+                    <label
+                      className="text-sm font-medium text-gray-900 whitespace-nowrap"
+                      htmlFor={id}
+                    >
+                      a =
+                    </label>
+                    <div>{settings.scope.a}</div>
+                  </div>
+                  <div className="flex gap-3 items-center">
+                    <label
+                      className="text-sm font-medium text-gray-900 whitespace-nowrap"
+                      htmlFor={id}
+                    >
+                      r0 =
+                    </label>
+                    <div>{settings.scope.r0}</div>
+                  </div>
+                  <div className="flex gap-3 items-center">
+                    <label
+                      className="text-sm font-medium text-gray-900 whitespace-nowrap"
+                      htmlFor={id}
+                    >
+                      γ =
+                    </label>
+                    <div>{settings.scope.gamma}</div>
+                  </div>
+                </>
+              ) : null}
               <div className="flex gap-3 items-center mt-3">
                 <Button
                   variant="default"
@@ -416,7 +587,7 @@ const FunctionBlock = ({
                   <DropdownMenuTrigger className="ml-2 flex-1" id={id} asChild>
                     <Button
                       variant="outline"
-                      className="flex-1 min-w-56 flex justify-between items-center"
+                      className="flex-1 min-w-52 flex justify-between items-center"
                     >
                       <span>{settings.fnType ?? "Single variable"}</span>
 
@@ -427,7 +598,26 @@ const FunctionBlock = ({
                     <DropdownMenuCheckboxItem
                       checked={settings.fnType == undefined}
                       onCheckedChange={(v) =>
-                        v && setSettings((s) => ({ ...s, fnType: undefined }))
+                        v &&
+                        setSettings((s) =>
+                          !s.fnType || s.fnType == "Single variable"
+                            ? {
+                                fnType: undefined,
+                                graphType: s.graphType,
+                                fn: s.fn,
+                                latex: s.latex,
+                                id: s.id,
+                                color: s.color,
+                              }
+                            : {
+                                fnType: undefined,
+                                graphType: s.graphType,
+                                fn: "",
+                                latex: "",
+                                id: s.id,
+                                color: s.color,
+                              }
+                        )
                       }
                     >
                       Single varible: y = f(x)
@@ -435,7 +625,28 @@ const FunctionBlock = ({
                     <DropdownMenuCheckboxItem
                       checked={settings.fnType == "implicit"}
                       onCheckedChange={(v) =>
-                        v && setSettings((s) => ({ ...s, fnType: "implicit" }))
+                        v &&
+                        setSettings((s) =>
+                          !s.fnType ||
+                          s.fnType == "Single variable" ||
+                          s.fnType == "implicit"
+                            ? {
+                                fnType: "implicit",
+                                graphType: s.graphType,
+                                fn: s.fn,
+                                latex: s.latex,
+                                id: s.id,
+                                color: s.color,
+                              }
+                            : {
+                                fnType: "implicit",
+                                graphType: s.graphType,
+                                fn: "",
+                                latex: "",
+                                id: s.id,
+                                color: s.color,
+                              }
+                        )
                       }
                     >
                       Implicit: f(x,y) = 0
@@ -444,18 +655,48 @@ const FunctionBlock = ({
                       checked={settings.fnType == "parametric"}
                       onCheckedChange={(v) =>
                         v &&
-                        setSettings((s) => ({ ...s, fnType: "parametric" }))
+                        setSettings((s) =>
+                          s.fnType !== "parametric"
+                            ? {
+                                fnType: "parametric",
+                                graphType: "polyline",
+                                x: "",
+                                xLatex: "",
+                                y: "",
+                                yLatex: "",
+                                id: s.id,
+                                color: s.color,
+                              }
+                            : s
+                        )
                       }
                     >
-                      Parametric: r = f(r0,θ,a,γ)
+                      Parametric: x(t), y(t)
                     </DropdownMenuCheckboxItem>
                     <DropdownMenuCheckboxItem
                       checked={settings.fnType == "polar"}
                       onCheckedChange={(v) =>
-                        v && setSettings((s) => ({ ...s, fnType: "polar" }))
+                        v &&
+                        setSettings((s) =>
+                          s.fnType !== "polar"
+                            ? {
+                                fnType: "polar",
+                                graphType: "polyline",
+                                r: "",
+                                rLatex: "",
+                                scope: {
+                                  a: 1,
+                                  r0: 0,
+                                  gamma: 0,
+                                },
+                                id: s.id,
+                                color: s.color,
+                              }
+                            : s
+                        )
                       }
                     >
-                      Polar: r = f(θ)
+                      Polar: r(r0,θ,a,γ)
                     </DropdownMenuCheckboxItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -471,7 +712,7 @@ const FunctionBlock = ({
                   <DropdownMenuTrigger className="ml-2 flex-1" id={id} asChild>
                     <Button
                       variant="outline"
-                      className="flex-1 min-w-56 flex justify-between items-center"
+                      className="flex-1 min-w-52 flex justify-between items-center"
                     >
                       <span>{settings.graphType}</span>
 
@@ -483,7 +724,14 @@ const FunctionBlock = ({
                       checked={settings.graphType == "interval"}
                       onCheckedChange={(v) =>
                         v &&
-                        setSettings((s) => ({ ...s, graphType: "interval" }))
+                        setSettings(
+                          (s) =>
+                            ({ ...s, graphType: "interval" } as functionSetting)
+                        )
+                      }
+                      disabled={
+                        settings.fnType == "parametric" ||
+                        settings.fnType == "polar"
                       }
                     >
                       Interval
@@ -492,7 +740,14 @@ const FunctionBlock = ({
                       checked={settings.graphType == "scatter"}
                       onCheckedChange={(v) =>
                         v &&
-                        setSettings((s) => ({ ...s, graphType: "scatter" }))
+                        setSettings(
+                          (s) =>
+                            ({ ...s, graphType: "scatter" } as functionSetting)
+                        )
+                      }
+                      disabled={
+                        settings.fnType == "parametric" ||
+                        settings.fnType == "polar"
                       }
                     >
                       Scatter
@@ -509,26 +764,235 @@ const FunctionBlock = ({
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              <div className="flex gap-3 items-center">
-                <label
-                  className="text-sm font-medium text-gray-900"
-                  htmlFor={id}
-                >
-                  f(x) =
-                </label>
-                <math-field
-                  ref={mf}
-                  onInput={(evt) =>
-                    setSettings((s) => ({
-                      ...s,
-                      fn: latexToMathjs((evt.target as HTMLInputElement).value),
-                      latex: (evt.target as HTMLInputElement).value,
-                    }))
-                  }
-                >
-                  {settings.latex}
-                </math-field>
-              </div>
+              {!settings.fnType || settings.fnType == "Single variable" ? (
+                <div className="flex gap-3 items-center">
+                  <label
+                    className="text-sm font-medium text-gray-900 whitespace-nowrap"
+                    htmlFor={id}
+                  >
+                    f(x) =
+                  </label>
+                  <math-field
+                    ref={mf}
+                    onInput={(evt) =>
+                      setSettings((s) => ({
+                        ...s,
+                        fn: latexToMathjs(
+                          (evt.target as HTMLInputElement).value
+                        ),
+                        latex: (evt.target as HTMLInputElement).value,
+                      }))
+                    }
+                    style={{
+                      flexGrow: 1,
+                      maxWidth: "220px",
+                    }}
+                  >
+                    {settings.latex}
+                  </math-field>
+                </div>
+              ) : settings.fnType == "implicit" ? (
+                <div className="flex gap-3 items-center">
+                  <label
+                    className="text-sm font-medium text-gray-900 whitespace-nowrap"
+                    htmlFor={id}
+                  >
+                    f(x, y) = 0 =
+                  </label>
+                  <math-field
+                    ref={mf}
+                    onInput={(evt) =>
+                      setSettings((s) => ({
+                        ...s,
+                        fn: latexToMathjs(
+                          (evt.target as HTMLInputElement).value
+                        ),
+                        latex: (evt.target as HTMLInputElement).value,
+                      }))
+                    }
+                    style={{
+                      flexGrow: 1,
+                      maxWidth: "220px",
+                    }}
+                  >
+                    {settings.latex}
+                  </math-field>
+                </div>
+              ) : settings.fnType == "parametric" ? (
+                <>
+                  <div className="flex gap-3 items-center">
+                    <label
+                      className="text-sm font-medium text-gray-900 whitespace-nowrap"
+                      htmlFor={id}
+                    >
+                      x(t) =
+                    </label>
+                    <math-field
+                      ref={mf}
+                      onInput={(evt) =>
+                        setSettings((s) => ({
+                          ...s,
+                          x: latexToMathjs(
+                            (evt.target as HTMLInputElement).value
+                          ),
+                          xLatex: (evt.target as HTMLInputElement).value,
+                        }))
+                      }
+                      style={{
+                        flexGrow: 1,
+                        maxWidth: "220px",
+                      }}
+                    >
+                      {settings.xLatex}
+                    </math-field>
+                  </div>
+                  <div className="flex gap-3 items-center">
+                    <label
+                      className="text-sm font-medium text-gray-900 whitespace-nowrap"
+                      htmlFor={id}
+                    >
+                      y(t) =
+                    </label>
+                    <math-field
+                      ref={mf}
+                      onInput={(evt) =>
+                        setSettings((s) => ({
+                          ...s,
+                          y: latexToMathjs(
+                            (evt.target as HTMLInputElement).value
+                          ),
+                          yLatex: (evt.target as HTMLInputElement).value,
+                        }))
+                      }
+                      style={{
+                        flexGrow: 1,
+                        maxWidth: "220px",
+                      }}
+                    >
+                      {settings.yLatex}
+                    </math-field>
+                  </div>
+                </>
+              ) : settings.fnType == "polar" ? (
+                <>
+                  <div className="flex gap-3 items-center">
+                    <label
+                      className="text-sm font-medium text-gray-900 whitespace-nowrap"
+                      htmlFor={id}
+                    >
+                      r(r0, θ, a, γ) =
+                    </label>
+                    <math-field
+                      ref={mf}
+                      onInput={(evt) =>
+                        setSettings((s) => ({
+                          ...s,
+                          r: latexToMathjs(
+                            (evt.target as HTMLInputElement).value
+                          ),
+                          rLatex: (evt.target as HTMLInputElement).value,
+                        }))
+                      }
+                      style={{
+                        flexGrow: 1,
+                        maxWidth: "180px",
+                      }}
+                    >
+                      {settings.rLatex}
+                    </math-field>
+                  </div>
+                  <div className="flex gap-3 items-center">
+                    <label
+                      className="text-sm font-medium text-gray-900 whitespace-nowrap"
+                      htmlFor={id}
+                    >
+                      a =
+                    </label>
+                    <Input
+                      type="number"
+                      placeholder="a"
+                      value={settings.scope.a}
+                      onChange={(e) =>
+                        setSettings((s) =>
+                          s.fnType == "polar"
+                            ? ({
+                                ...s,
+                                fnType: "polar",
+                                graphType: "polyline",
+                                scope: {
+                                  ...s.scope,
+                                  a: e.target.value
+                                    ? 0
+                                    : Number(e.target.value),
+                                },
+                              } as functionSetting)
+                            : s
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="flex gap-3 items-center">
+                    <label
+                      className="text-sm font-medium text-gray-900 whitespace-nowrap"
+                      htmlFor={id}
+                    >
+                      r0 =
+                    </label>
+                    <Input
+                      type="number"
+                      placeholder="a"
+                      value={settings.scope.r0}
+                      onChange={(e) =>
+                        setSettings((s) =>
+                          s.fnType == "polar"
+                            ? ({
+                                ...s,
+                                fnType: "polar",
+                                graphType: "polyline",
+                                scope: {
+                                  ...s.scope,
+                                  r0: e.target.value
+                                    ? 0
+                                    : Number(e.target.value),
+                                },
+                              } as functionSetting)
+                            : s
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="flex gap-3 items-center">
+                    <label
+                      className="text-sm font-medium text-gray-900 whitespace-nowrap"
+                      htmlFor={id}
+                    >
+                      γ =
+                    </label>
+                    <Input
+                      type="number"
+                      placeholder="a"
+                      value={settings.scope.gamma}
+                      onChange={(e) =>
+                        setSettings((s) =>
+                          s.fnType == "polar"
+                            ? ({
+                                ...s,
+                                fnType: "polar",
+                                graphType: "polyline",
+                                scope: {
+                                  ...s.scope,
+                                  gamma: e.target.value
+                                    ? 0
+                                    : Number(e.target.value),
+                                },
+                              } as functionSetting)
+                            : s
+                        )
+                      }
+                    />
+                  </div>
+                </>
+              ) : null}
               <div className="flex gap-3 items-center mt-3">
                 <Button
                   variant="destructive"
@@ -544,6 +1008,7 @@ const FunctionBlock = ({
                   variant="default"
                   className="flex-1"
                   onClick={() => {
+                    console.log("settings", settings);
                     updateSetting(settings);
                     setMode("view");
                   }}

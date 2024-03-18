@@ -21,11 +21,13 @@ export function latexToMathjs(latexString: string): string {
     { pattern: /\\sqrt\{(.*?)\}/g, replacement: "sqrt($1)" }, // Square root conversion
     { pattern: /\\pi/g, replacement: "PI" }, // Mathematical constant pi
     { pattern: /\\theta/g, replacement: "theta" }, // Theta symbol
+    { pattern: /\\gamma/g, replacement: "gamma" }, // Gamma symbol
     { pattern: /\\exponentialE\^{(.*?)}/g, replacement: "exp($1)" }, // Exponential function with ^ notation
     { pattern: /\\exponentialE\^(\d)/g, replacement: "exp($1)" }, // Exponential function of a constant with ^ notation
     { pattern: /\\exp/g, replacement: "exp" }, // Exponential function with \left and \right notation
     { pattern: /\\log/g, replacement: "log" }, // Exponential function with \left and \right notation
     { pattern: /\\ln/g, replacement: "ln" }, // Exponential function with \left and \right notation
+    { pattern: /\\left\((.*?)\\right\)/g, replacement: "($1)" }, // Left and right parenthesis removal
     // Add more replacements as needed
   ];
 
