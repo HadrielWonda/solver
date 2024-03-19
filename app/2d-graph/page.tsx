@@ -95,28 +95,18 @@ export default function Page() {
           {!sidebarOpen && (
             <button
               onClick={openSidebar}
-              className="p-3 border-2 border-zinc-800 rounded-xl z-10 bg-white"
+              className="p-3 border-2 border-borderColor rounded-xl z-10 bg-white"
               aria-label="toggle sidebar"
             >
               <GiHamburgerMenu />
             </button>
           )}
 
-          <div className="p-3 bg-white border-2 border-zinc-800 rounded-xl z-10">
+          <div className="p-3 bg-white border-2 border-borderColor rounded-xl z-10">
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
                   <BreadcrumbLink href="/">Home</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/roots">Roots</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/roots/bracketing-methods">
-                    Bracketing Methods
-                  </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>

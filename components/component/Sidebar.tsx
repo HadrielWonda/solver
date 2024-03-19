@@ -114,15 +114,15 @@ export const Sidebar = ({
       {open && (
         <motion.div
           {...framerSidebarPanel}
-          className="top-0 bottom-0 left-0 z-50 flex flex-col w-full h-screen max-w-xs border-r-2 border-zinc-800 bg-white"
+          className="top-0 bottom-0 left-0 z-50 flex flex-col w-full h-screen max-w-xs border-r-2 border-borderColor bg-white"
           // ref={ref}
           aria-label="Sidebar"
         >
-          <div className="flex w-full items-center justify-between p-3 border-b-2 border-zinc-800">
+          <div className="flex w-full items-center justify-between p-3 border-b-2 border-borderColor">
             <span>Control Panel</span>
             <button
               onClick={close}
-              className="p-3 border-2 border-zinc-800 rounded-xl"
+              className="p-3 border-2 border-borderColor rounded-xl"
               aria-label="close sidebar"
             >
               <AiOutlineRollback />
@@ -273,7 +273,7 @@ export const Sidebar = ({
                 <h3 className="text-base font-semibold">Functions</h3>
                 <button
                   onClick={addFunction}
-                  className="p-3 border-2 border-zinc-800 rounded-xl"
+                  className="p-3 border-2 border-borderColor rounded-xl"
                   aria-label="close sidebar"
                 >
                   <FaPlus />

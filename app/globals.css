@@ -123,3 +123,18 @@ math-field {
 math-field::part(menu-toggle) {
   display: none;
 }
+
+mtd {
+  padding: 0.5ex 0.4em;
+}
+
+pre {
+  position: relative;
+  background: #d3d6db;
+  padding: 10px;
+  font-size: 15px;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  border: 1px solid #e6e7e9;
+  max-width: 500px;
+}
