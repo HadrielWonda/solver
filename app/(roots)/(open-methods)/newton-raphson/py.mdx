@@ -1,0 +1,45 @@
+```py
+import sympy as sp
+
+import sympy as sp
+
+def newton_raphson(start, expression_str, differential_expression_str, max_iter=1000, max_error=0.0000001):
+    xi = start
+    iteration = 0
+    error_abs = None
+    zero_denominator = False
+    f = sp.sympify(expression_str)
+    d = sp.sympify(differential_expression_str)
+
+    results = []
+
+    diverging = False
+
+    while iteration < max_iter:
+        iteration += 1
+
+        dx = d.subs('x', xi)
+        if dx == 0:
+            zero_denominator = True
+            break
+
+        x = xi - f.subs('x', xi) / dx
+        error_abs = abs((x - xi) / x) * 100
+        results.append({
+            'itr': iteration,
+            'xi': x,
+            'ea': error_abs,
+        })
+
+        xi = x
+
+        if iteration > 3 and results[iteration - 2]['ea'] / results[iteration - 1]['ea'] < 2:
+            diverging = True
+            break
+
+        if error_abs is not None and error_abs < max_error:
+            break
+
+    return {"results": results, "diverging": diverging, "zero_denominator": zero_denominator}
+
+```

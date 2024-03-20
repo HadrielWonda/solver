@@ -1,21 +1,29 @@
 "use client";
 import Input from "@/components/Input";
 import Radios from "@/components/Radios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import ComputationResults from "./ComputationResults";
+import { FunctionPlot } from "@/lib/graph/FunctionPlot";
+// import ComputationResults from "./ComputationResults";
 
 export default function Page() {
   const [showResults, setShowResults] = useState(false);
   const [editingEquation, setEditingEquation] = useState(true);
   const [tempEquation, setTempEquation] = useState("");
+  const [editingDerivativeEquation, setEditingDerivativeEquation] =
+    useState(true);
+  const [tempDerivativeEquation, setTempDerivativeEquation] = useState("");
   const [initialValues, setInitialValues] = useState<{
     equation: string;
+    derivativeEquation: string;
     start: string;
     stoppingCriteria?: string;
     maxIterations: string;
     maxError: string;
   }>({
     equation: "",
+    derivativeEquation: "",
     start: "",
     maxIterations: "1000",
     maxError: "0.0000000000001",
@@ -25,44 +33,59 @@ export default function Page() {
     setShowResults(false);
   }, [initialValues]);
 
+  const Graph = useMemo(
+    () =>
+      initialValues.equation && initialValues.start ? (
+        <FunctionPlot
+          options={{
+            xAxis: {
+              domain: [
+                Number(initialValues.start) - 6,
+                Number(initialValues.start) + 6,
+              ],
+            },
+            data: [
+              {
+                fn: initialValues.equation,
+              },
+            ],
+          }}
+        />
+      ) : null,
+    [initialValues.equation, initialValues.start]
+  );
+
   return (
     <main>
-      <h1>Simple Fixed-Point Iteration Method</h1>
+      <h1>Newton-Raphson Method</h1>
       <div className="text-block">
         <p>
-          Create your governing equation - <span className="bold">g(x)</span>,
-          by rearranging <span>f(x) = 0</span> so that <span>x</span> is on the
-          left hand side of the equation.
+          While the Newton-Raphson is the most widely used of all root-locating
+          formulas and is often very efficient, there are situations where it
+          performs poorly. A special case is a region of
+          <span className="bold">multiple roots</span>.
         </p>
-        <p className="text-block bold">x = g(x)</p>
-
+        <p className="text-block">It is governed by the following formula</p>
         <div className="text-block">
-          <p>Examples</p>
-          <div className="indent">
-            <p>
-              f(x) = 0 ={">"} x<sup>2</sup> - 2x + 3 = 0
-            </p>
-            <p>
-              x = g(x) ={">"} x = (x<sup>2</sup> + 3) / 2
-            </p>
-          </div>
-          <div className="text-block indent">
-            <p>f(x) = 0 ={">"} sin x = 0</p>
-            <p>x = g(x) ={">"} x = sin x + x</p>
-          </div>
+          <Image
+            src="/images/newton-raphson.png"
+            alt="Newton Raphson"
+            width={221}
+            height={93}
+          />
         </div>
       </div>
       <section className="text-block">
         <div className="text-block">
           {editingEquation ? (
             <Input
-              label="Enter governing equation g(x)"
+              label="Enter equation - f(x)"
               value={tempEquation}
               onChange={(e) => setTempEquation(e.target.value)}
             />
           ) : (
             <Input
-              label="Equation g(x)"
+              label="Equation - f(x)"
               value={initialValues.equation}
               disabled={true}
               // onChange={(e) =>
@@ -108,10 +131,68 @@ export default function Page() {
             </div>
           )}
         </div>
+        <div className="text-block">
+          {editingDerivativeEquation ? (
+            <Input
+              label="Enter equation derivative - f'(x)"
+              value={tempDerivativeEquation}
+              onChange={(e) => setTempDerivativeEquation(e.target.value)}
+            />
+          ) : (
+            <Input
+              label="Equation derivative - f'(x)"
+              value={initialValues.derivativeEquation}
+              disabled={true}
+              // onChange={(e) =>
+              //   setInitialValues((v) => ({ ...v, equation: e.target.value }))
+              // }
+            />
+          )}
+          {editingDerivativeEquation ? (
+            <div
+              style={{
+                marginTop: "0.8rem",
+                display: "flex",
+                gap: "1rem",
+              }}
+            >
+              <button
+                onClick={() => {
+                  setInitialValues((v) => ({
+                    ...v,
+                    derivativeEquation: tempDerivativeEquation,
+                  }));
+                  setEditingDerivativeEquation(false);
+                }}
+              >
+                Save
+              </button>
+              <button
+                onClick={() => {
+                  setTempDerivativeEquation(initialValues.derivativeEquation);
+                  setEditingDerivativeEquation(false);
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <div
+              style={{
+                marginTop: "0.8rem",
+                display: "flex",
+                gap: "1rem",
+              }}
+              onClick={() => setEditingDerivativeEquation(true)}
+            >
+              <button>Edit</button>
+            </div>
+          )}
+        </div>
 
         <div className="text-block">
           <Input
-            label="Start value"
+            label="Start value - x"
             value={initialValues.start}
             onChange={(e) =>
               setInitialValues((v) => ({ ...v, start: e.target.value }))
@@ -120,7 +201,9 @@ export default function Page() {
         </div>
 
         {initialValues.equation &&
+          initialValues.derivativeEquation &&
           !editingEquation &&
+          !editingDerivativeEquation &&
           initialValues.start &&
           !isNaN(Number(initialValues.start)) && (
             <>
@@ -198,6 +281,12 @@ export default function Page() {
             </>
           )}
       </section>
+      {showResults && (
+        <div className="text-block">
+          <h3>Graph of function around initial guess</h3>
+          {Graph}
+        </div>
+      )}
       {showResults && <ComputationResults initialValues={initialValues} />}
     </main>
   );

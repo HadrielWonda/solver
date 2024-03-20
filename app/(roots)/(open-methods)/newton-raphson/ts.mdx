@@ -1,0 +1,49 @@
+```ts
+function newtonRaphson(
+  start: number,
+  expressionEvaluator: (x: number) => number,
+  differentialExpressionEvaluator: (x: number) => number,
+  maxIter: number = 1000,
+  maxError: number = 0.0000001
+) {
+  let xi = start;
+  let iter = 0;
+  let errorAbslt: number | undefined;
+  let divergenceCount = 0;
+  let zeroDenominator = false;
+  const f = expressionEvaluator;
+  const d = differentialExpressionEvaluator;
+
+  const results: {
+    itr: number;
+    xi: number;
+    ea: number | undefined;
+  }[] = [];
+
+  do {
+    ++iter;
+
+    if (dx == 0) {
+      zeroDenominator = true;
+      break;
+    }
+
+    x = xi - f(x) / d(x);
+    errorAbslt = Math.abs((x - xi) / x) * 100;
+    results.push({
+      itr: iter,
+      xi: x,
+      ea: errorAbslt,
+    });
+
+    xi = x;
+
+    if (iter > 3 && results[iter - 2].ea! / results[iter - 1].ea! < 2) {
+      diverging = true;
+      break;
+    }
+  } while (iter < maxIter && (ea == undefined || ea > maxError) && !diverging);
+
+  return { results, diverging, zeroDenominator };
+}
+```

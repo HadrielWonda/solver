@@ -43,7 +43,7 @@ export default function Home() {
               </h4>
               <div className="grid w-full grid-cols-2 items-start justify-center gap-4 md:grid-cols-4">
                 <Tab href="/simple-fixed-point">Simple Fixed Point Method</Tab>
-                <Tab href="/false-position">False Postion method</Tab>
+                <Tab href="/newton-raphson">Newton-Raphson Method</Tab>
                 <Tab href="/modified-false-position" className="col-span-2">
                   Modified False Postion method
                 </Tab>

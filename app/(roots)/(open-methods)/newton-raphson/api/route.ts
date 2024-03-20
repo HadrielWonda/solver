@@ -67,14 +67,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const expression = exprsCompiler(equation);
-    const derivativeExpression = exprsCompiler(derivativeEquation);
+    let expression;
+    let derivativeExpression;
+    try {
+      expression = exprsCompiler(equation);
+    } catch (error) {
+      return Response.json(`Invalid Function Expression`, {
+        status: 400,
+      });
+    }
+    try {
+      derivativeExpression = exprsCompiler(derivativeEquation);
+    } catch (error) {
+      return Response.json(`Invalid Derivative Function Expression`, {
+        status: 400,
+      });
+    }
+
     let xi = Number(start);
     let iter = 0;
     // let fl = expression?.evaluate({ x: Number(xl) });
     // let xrOld: number | undefined;
     let ea: number | undefined;
-    let prevEa: number | undefined;
     let maxError = Number(es);
     let maxIter = Number(maxIterations);
     let diverging = false;
