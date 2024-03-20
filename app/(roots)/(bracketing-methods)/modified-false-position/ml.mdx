@@ -1,5 +1,5 @@
 ```ts
-function falsePosition(
+function bisection(
   xu: number,
   xl: number,
   expressionEvaluator: (x: number) => number,
@@ -9,8 +9,6 @@ function falsePosition(
   let iter = 0;
   let xrOld: number | undefined;
   let errorAbslt: number | undefined;
-  let fl = expressionEvaluator(xl);
-  let fu = expressionEvaluator(xu);
 
   const results: {
     itr: number;
@@ -22,7 +20,7 @@ function falsePosition(
 
   do {
     ++iter;
-    const xr = xu - (fu * (xl - xu)) / (fl - fu);
+    const xr = (xl + xu) / 2;
 
     if (xr !== 0 && xrOld) {
       errorAbslt = Math.abs((xr - xrOld) / xr) * 100;
@@ -35,14 +33,13 @@ function falsePosition(
       ea: errorAbslt,
     });
     const fr = expressionEvaluator(xr);
+    const fl = expressionEvaluator(xl);
     const test = fl * fr;
 
     if (test > 0) {
       xl = xr;
-      fl = fr;
     } else if (test < 0) {
       xu = xr;
-      fu = fr;
     } else {
       errorAbslt = 0;
     }

@@ -1,5 +1,5 @@
 ```ts
-function falsePosition(
+function modifiedFalsePosition(
   xu: number,
   xl: number,
   expressionEvaluator: (x: number) => number,
@@ -11,6 +11,9 @@ function falsePosition(
   let errorAbslt: number | undefined;
   let fl = expressionEvaluator(xl);
   let fu = expressionEvaluator(xu);
+
+  let iu = 0;
+  let il = 0;
 
   const results: {
     itr: number;
@@ -40,9 +43,21 @@ function falsePosition(
     if (test > 0) {
       xl = xr;
       fl = fr;
+
+      il = 0;
+      ++iu;
+      if (iu >= 2) {
+        fu = fu / 2;
+      }
     } else if (test < 0) {
       xu = xr;
       fu = fr;
+
+      iu = 0;
+      ++il;
+      if (il >= 2) {
+        fl = fl / 2;
+      }
     } else {
       errorAbslt = 0;
     }

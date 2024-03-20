@@ -1,7 +1,7 @@
 ```py
 import sympy as sp
 
-def false_position_method(xu,
+def modified_false_position_method(xu,
   xl,
   expression,
   maxIter = 1000,
@@ -41,11 +41,22 @@ def false_position_method(xu,
 
 
         if test > 0:
-           xl = xr
-           fl = fr
+          xl = xr
+          fl = fr
+
+          il = 0
+          iu+=1
+          if iu >= 2:
+            fu = fu / 2
+
         elif test < 0:
-            xu = xr
-            fu = fr
+          xu = xr
+          fu = fr
+
+          iu = 0
+          il+=1
+          if il >= 2:
+            fl = fl / 2
         else:
             errorAbslt = 0
 

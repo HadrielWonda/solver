@@ -90,7 +90,12 @@ export default function Page() {
       }}
     />
   ) : (
-    <BisectionSolve />
+    <BisectionSolve
+      intro={() => {
+        router.push(pathname + "?" + createQueryString("mode", "intor"));
+        setMode("intro");
+      }}
+    />
   );
 }
 
@@ -303,7 +308,7 @@ const BisectionIntro = ({ solve }: { solve: () => void }) => {
   );
 };
 
-const BisectionSolve = () => {
+const BisectionSolve = ({ intro }: { intro: () => void }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const closeSidebar = useCallback(() => {
     setSidebarOpen(false);
@@ -385,32 +390,48 @@ const BisectionSolve = () => {
         running={isMutating}
       />
       <div className="flex-1 flex flex-col w-full h-screen relative overflow-y-hidden">
-        <div className="pt-3 pl-5 flex items-center gap-3">
-          {!sidebarOpen && (
-            <button
-              onClick={openSidebar}
-              className="p-3 border-2 border-borderColor rounded-xl z-10 bg-white"
-              aria-label="toggle sidebar"
-            >
-              <GiHamburgerMenu />
-            </button>
-          )}
+        <div className="pt-3 px-5 flex items-center gap-3 justify-between">
+          <div className="flex items-center gap-3">
+            {!sidebarOpen && (
+              <button
+                onClick={openSidebar}
+                className="p-3 border-2 border-borderColor rounded-xl z-10 bg-white"
+                aria-label="toggle sidebar"
+              >
+                <GiHamburgerMenu />
+              </button>
+            )}
 
-          <div className="p-3 bg-white border-2 border-borderColor rounded-xl z-10">
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/">Home</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>
-                    Bisection / Balzano&apos;s Method
-                  </BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
+            <div className="p-3 bg-white border-2 border-borderColor rounded-xl z-10">
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>
+                      Bisection / Balzano&apos;s Method
+                    </BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+            </div>
           </div>
+          <Tabs
+            defaultValue="solve"
+            // className="w-[400px]"
+          >
+            <TabsList className="w-fit">
+              <TabsTrigger value="intro" onClick={intro}>
+                Intro
+              </TabsTrigger>
+              <TabsTrigger value="solve">Solve</TabsTrigger>
+              <TabsTrigger disabled value="steps">
+                Steps
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
         {isMutating ? (
           <div className="flex-1">
