@@ -69,11 +69,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const expression = exprsCompiler(equation);
+    let expression;
+    let fl;
+    try {
+      expression = exprsCompiler(equation);
+      fl = expression?.evaluate({ x: Number(xl) });
+    } catch (error) {
+      return Response.json(`Invalid Function Expression`, {
+        status: 400,
+      });
+    }
+
     let xlow = Number(xl);
     let xup = Number(xu);
     let iter = 0;
-    let fl = expression?.evaluate({ x: Number(xl) });
     let xrOld: number | undefined;
     let ea: number | undefined;
     let maxError = Number(es);

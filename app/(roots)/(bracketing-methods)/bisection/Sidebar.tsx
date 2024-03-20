@@ -27,16 +27,17 @@ export const Sidebar = ({
 }: {
   open: boolean;
   close: () => void;
-  setInitialSettings: React.Dispatch<
-    React.SetStateAction<{
+  setInitialSettings: (
+    settings: {
       equation: string;
       xu: number;
       xl: number;
       stoppingCriteria: "max_error" | "max_iterations";
       maxIterations: number;
       maxError: number;
-    }>
-  >;
+    },
+    latex: string
+  ) => void;
   running: boolean;
 }) => {
   const [mode, setMode] = useState<"edit" | "solve">("edit");
@@ -53,14 +54,17 @@ export const Sidebar = ({
   const mf = useRef<any>(null);
 
   const solve = () => {
-    setInitialSettings({
-      equation: settings.equation,
-      xu: Number(settings.xu),
-      xl: Number(settings.xl),
-      stoppingCriteria: settings.stoppingCriteria,
-      maxError: Number(settings.maxError),
-      maxIterations: Number(settings.maxIterations),
-    });
+    setInitialSettings(
+      {
+        equation: settings.equation,
+        xu: Number(settings.xu),
+        xl: Number(settings.xl),
+        stoppingCriteria: settings.stoppingCriteria,
+        maxError: Number(settings.maxError),
+        maxIterations: Number(settings.maxIterations),
+      },
+      settings.latex
+    );
     setMode("solve");
   };
 

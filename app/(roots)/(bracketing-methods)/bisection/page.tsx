@@ -1,8 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { exprsCompiler } from "@/utils/compile";
-import ComputationResults from "@/components/ComputationResults";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -19,12 +17,10 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import TSCodeBlock from "./ts.mdx";
 import PYCodeBlock from "./py.mdx";
 import MLCodeBlock from "./ml.mdx";
@@ -33,9 +29,35 @@ import "../../../../public/prism.css";
 import Prism from "../../../../public/prism.js";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GiHamburgerMenu } from "react-icons/gi";
+import { MdError } from "react-icons/md";
 import { Sidebar } from "./Sidebar";
 import { result } from "@/types";
 import { RiFileList3Line } from "react-icons/ri";
+import useSWRMutation from "swr/mutation";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import * as mathlive from "mathlive";
+import { mkConfig, generateCsv, download } from "export-to-csv";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
+
+class ResponseError extends Error {
+  response: any;
+  constructor(message: string, res: any) {
+    super(message);
+    this.response = res;
+  }
+}
+
+// const fetcher = (...args: any[]) => fetch(...args).then((res) => res.json());
+
+const csvConfig = mkConfig({ useKeysAsHeaders: true });
 
 export default function Page() {
   const [mode, setMode] = useState<"intro" | "solve" | "steps">("intro");
@@ -265,8 +287,6 @@ const BisectionSolve = () => {
     setSidebarOpen(true);
   }, [setSidebarOpen]);
 
-  // const [showResults, setShowResults] = useState(false);
-  const [running, setRunning] = useState(false);
   const [initialValues, setInitialValues] = useState<{
     equation: string;
     xu: number;
@@ -282,8 +302,46 @@ const BisectionSolve = () => {
     maxIterations: 1000,
     maxError: 0.0000000000001,
   });
+  const [latex, setLatex] = useState("");
 
-  const [results, setResults] = useState<result[] | undefined>();
+  // const [results, setResults] = useState<result[] | undefined>(iterationResult);
+
+  const {
+    trigger,
+    data: results,
+    isMutating,
+    error: resultError,
+  } = useSWRMutation(
+    "/api/user",
+    async () => {
+      const res = await fetch("/bisection/api", {
+        method: "post",
+        body: JSON.stringify(initialValues),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw new ResponseError("Bad fetch response", result);
+      }
+
+      return result as Promise<result[]>;
+    },
+    {
+      async onError(err, key, config) {
+        // if (err instanceof ResponseError) {
+        //   // Handle known errors
+        // } else {
+        //   // Handle unexpected errors
+        // }
+        toast.error(err.response);
+        console.log("err.message", err.response);
+      },
+    }
+  );
+
+  // console.log("data", results);
+  console.log("resultError", resultError);
 
   return (
     <div className="w-full h-screen flex">
@@ -292,10 +350,16 @@ const BisectionSolve = () => {
       <Sidebar
         open={sidebarOpen}
         close={closeSidebar}
-        setInitialSettings={setInitialValues}
-        running={running}
+        setInitialSettings={(v, l) => {
+          setInitialValues(v);
+          setLatex(l);
+          setTimeout(() => {
+            trigger();
+          }, 200);
+        }}
+        running={isMutating}
       />
-      <div className="flex-1 flex flex-col w-full h-screen relative">
+      <div className="flex-1 flex flex-col w-full h-screen relative overflow-y-hidden">
         <div className="pt-3 pl-5 flex items-center gap-3">
           {!sidebarOpen && (
             <button
@@ -323,33 +387,213 @@ const BisectionSolve = () => {
             </Breadcrumb>
           </div>
         </div>
-        <div className="flex-1">
-          {running ? (
-            <></>
-          ) : results?.length ? (
-            <></>
-          ) : (
-            <div className="flex items-center justify-center w-full min-h-[400px] flex-col gap-2 p-4 text-center h-full">
-              <RiFileList3Line className="text-gray-500" size={64} />
-
+        {isMutating ? (
+          <div className="flex-1">
+            <div className="py-8 px-5">
+              <Skeleton className="h-12 w-[300px] mb-6" />
               <div className="space-y-2">
-                <h3 className="text-2xl font-bold text-gray-500">
-                  No Results Created
-                </h3>
-                <p className="max-w-[600px] text-gray-500 dark:text-gray-400">
-                  Fill parameters and run computation to generate results
+                <Skeleton className="h-5 w-[340px]" />
+                <Skeleton className="h-4 w-[340px]" />
+                <Skeleton className="h-4 w-[340px]" />
+              </div>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[100px]">Iteration</TableHead>
+                  <TableHead>xl</TableHead>
+                  <TableHead>xu</TableHead>
+                  <TableHead className="">xr</TableHead>
+                  <TableHead className="">Abs. Rel. Error (%)</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="font-medium">
+                    <Skeleton className="h-4 w-[80%]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[60%]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[70%]" />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Skeleton className="h-4 w-[50%]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[70%]" />
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">
+                    <Skeleton className="h-4 w-[80%]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[60%]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[70%]" />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Skeleton className="h-4 w-[50%]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[70%]" />
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">
+                    <Skeleton className="h-4 w-[80%]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[60%]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[70%]" />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Skeleton className="h-4 w-[50%]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[70%]" />
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">
+                    <Skeleton className="h-4 w-[80%]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[60%]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[70%]" />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Skeleton className="h-4 w-[50%]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[70%]" />
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">
+                    <Skeleton className="h-4 w-[80%]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[60%]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[70%]" />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Skeleton className="h-4 w-[50%]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[70%]" />
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+            <div className="my-6 flex justify-end px-5">
+              <Skeleton className="h-12 w-[300px]" />
+            </div>
+          </div>
+        ) : resultError ? (
+          <div className="flex items-center justify-center w-full min-h-[400px] flex-col gap-2 p-4 text-center h-full">
+            <MdError className="text-red-600" size={64} />
+
+            <div className="space-y-2">
+              <h3 className="text-2xl font-bold text-red-600">
+                {resultError.response}
+              </h3>
+              <p className="max-w-[600px] text-gray-500 dark:text-gray-400">
+                Edit parameters and run computation to generate results
+              </p>
+            </div>
+          </div>
+        ) : results?.length ? (
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="py-8 px-5">
+              <div className="flex flex-1 gap-2 overflow-hidden text-ellipsis mb-6">
+                <span className="whitespace-nowrap font-[1.2rem]">f(x) = </span>
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: mathlive.convertLatexToMarkup(latex),
+                  }}
+                  style={{
+                    fontSize: "1.2rem",
+                  }}
+                />
+              </div>
+              <div className="space-y-2">
+                <p className="font-semibold">
+                  <span>Root: </span>{" "}
+                  <span>{results[results.length - 1].xr}</span>
+                </p>
+                <p className="t text-gray-500 font-normal text-sm">
+                  <span>Relative Absolute Error: </span>{" "}
+                  <span>{results[results.length - 1].ea}%</span>
+                </p>
+                <p className="t text-gray-500 font-normal text-sm">
+                  <span>Number of iterations: </span>{" "}
+                  <span>{results.length}</span>
                 </p>
               </div>
             </div>
-          )}
-          {/* {showResults && (
-            <ComputationResults
-              initialValues={initialValues}
-              method="Bisection"
-            />
-          )} */}
-        </div>
+            <Table className="flex-1 overflow-scroll">
+              {/* <TableCaption>A list of your recent invoices.</TableCaption> */}
+              <TableHeader className="sticky top-0 bg-white">
+                <TableRow>
+                  <TableHead className="w-[100px]">Iteration</TableHead>
+                  <TableHead>xl</TableHead>
+                  <TableHead>xu</TableHead>
+                  <TableHead className="">xr</TableHead>
+                  <TableHead className="">Abs. Rel. Error (%)</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody className="h-100% overflow-auto">
+                {results.map((r) => (
+                  <TableRow key={r.itr}>
+                    <TableCell>{r.itr}</TableCell>
+                    <TableCell>{r.xl}</TableCell>
+                    <TableCell>{r.xu}</TableCell>
+                    <TableCell className="font-medium">{r.xr}</TableCell>
+                    <TableCell className="">{r.ea}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <div className="my-6 flex justify-end px-5">
+              <Button
+                onClick={() => {
+                  const newResults = [...results];
+                  newResults[0].ea = 0;
+                  const csv = generateCsv(csvConfig)(results);
+                  download(csvConfig)(csv);
+                }}
+              >
+                Export as CSV
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center w-full min-h-[400px] flex-col gap-2 p-4 text-center h-full">
+            <RiFileList3Line className="text-gray-500" size={64} />
+
+            <div className="space-y-2">
+              <h3 className="text-2xl font-bold text-gray-500">
+                No Results Created
+              </h3>
+              <p className="max-w-[600px] text-gray-500 dark:text-gray-400">
+                Fill parameters and run computation to generate results
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 };
+
+// $$ \frac{668.06}{x}\cdot\left(1-\exp\left(-0.146843\cdot x\right)\right)-40 $$
