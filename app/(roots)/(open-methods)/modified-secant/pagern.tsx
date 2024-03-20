@@ -3,7 +3,6 @@ import Input from "@/components/Input";
 import Radios from "@/components/Radios";
 import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-// import ComputationResults from "./ComputationResults";
 import { FunctionPlot } from "@/lib/graph/FunctionPlot";
 import ComputationResults from "./ComputationResults";
 // import ComputationResults from "./ComputationResults";
@@ -14,15 +13,15 @@ export default function Page() {
   const [tempEquation, setTempEquation] = useState("");
   const [initialValues, setInitialValues] = useState<{
     equation: string;
-    x0: string;
-    x1: string;
+    x: string;
+    dx: string;
     stoppingCriteria?: string;
     maxIterations: string;
     maxError: string;
   }>({
     equation: "",
-    x0: "",
-    x1: "",
+    x: "",
+    dx: "",
     maxIterations: "1000",
     maxError: "0.0000000000001",
   });
@@ -33,17 +32,14 @@ export default function Page() {
 
   const Graph = useMemo(
     () =>
-      initialValues.equation && initialValues.x0 && initialValues.x1 ? (
+      initialValues.equation && initialValues.x ? (
         <FunctionPlot
           options={{
             xAxis: {
-              domain:
-                Number(initialValues.x0) > Number(initialValues.x1)
-                  ? [Number(initialValues.x1) - 6, Number(initialValues.x0) + 6]
-                  : [
-                      Number(initialValues.x0) - 6,
-                      Number(initialValues.x1) + 6,
-                    ],
+              domain: [
+                Number(initialValues.x) - 6,
+                Number(initialValues.x) + 6,
+              ],
             },
             data: [
               {
@@ -53,25 +49,27 @@ export default function Page() {
           }}
         />
       ) : null,
-    [initialValues.equation, initialValues.x0, initialValues.x1]
+    [initialValues.equation, initialValues.x]
   );
 
   return (
     <main>
-      <h1>Secant Method</h1>
+      <h1>Modified Secant Method</h1>
       <div className="text-block">
         <p>
-          A potential problem in implementing the Newton-Raphson method is the
-          evaluation of the derivative. In the secant method the derivative is
-          approximated by a backward finite divided difference.
+          Rather than using two arbitrary values to estimate the derivative, an
+          alternative approach involves a fractional perturbation dx of the
+          independent variable - x, to estimate f(x).
         </p>
-        <p className="text-block">It is governed by the following formula</p>
+        <p className="text-block">
+          This approximation yield the following iterative equation
+        </p>
         <div className="text-block">
           <Image
-            src="/images/secant.png"
-            alt="Secant"
-            width={385}
-            height={99}
+            src="/images/modified-secant.png"
+            alt="Modified Secant"
+            width={466}
+            height={112}
           />
         </div>
       </div>
@@ -134,29 +132,29 @@ export default function Page() {
 
         <div className="text-block">
           <Input
-            label="Start value - x0"
-            value={initialValues.x0}
+            label="Start value - x"
+            value={initialValues.x}
             onChange={(e) =>
-              setInitialValues((v) => ({ ...v, x0: e.target.value }))
+              setInitialValues((v) => ({ ...v, x: e.target.value }))
             }
           />
         </div>
         <div className="text-block">
           <Input
-            label="Start value - x1"
-            value={initialValues.x1}
+            label="Perturbation - dx"
+            value={initialValues.dx}
             onChange={(e) =>
-              setInitialValues((v) => ({ ...v, x1: e.target.value }))
+              setInitialValues((v) => ({ ...v, dx: e.target.value }))
             }
           />
         </div>
 
         {initialValues.equation &&
           !editingEquation &&
-          initialValues.x0 &&
-          !isNaN(Number(initialValues.x0)) &&
-          initialValues.x1 &&
-          !isNaN(Number(initialValues.x1)) && (
+          initialValues.x &&
+          !isNaN(Number(initialValues.x)) &&
+          initialValues.dx &&
+          !isNaN(Number(initialValues.dx)) && (
             <>
               <Radios
                 title="Select stopping criterion type"

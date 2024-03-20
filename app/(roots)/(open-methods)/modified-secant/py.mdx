@@ -5,9 +5,9 @@ import sympy as sp
 
 import sympy as sp
 
-def secant(x0, x1, expression_str, max_iter=1000, max_error=0.0000001):
-    xi = x0
-    xj = x1
+import sympy as sp
+
+def modified_secant(xi, dx, expression_str, max_iter=1000, max_error=0.0000001):
     iter = 0
     ea = None
     diverging = False
@@ -16,32 +16,28 @@ def secant(x0, x1, expression_str, max_iter=1000, max_error=0.0000001):
 
     x = sp.symbols('x')
     f = sp.sympify(expression_str)
-    fi = f.subs(x, xi)
 
     while iter < max_iter:
         iter += 1
-        fj = f.subs(x, xj)
+        fi = f.subs(x, xi)
+        fj = f.subs(x, xi + dx)
 
-        x = xj - (fj * (xi - xj)) / (fi - fj)
-        ea = abs((x - xj) / x) * 100
+        x_new = xi - (fi * dx) / (fj - fi)
+        ea = abs((x_new - xi) / x_new) * 100
 
         results.append({
             'itr': iter,
-            'xl': xi,
-            'xu': xj,
-            'xr': x,
+            'xi': x_new,
             'ea': ea,
         })
 
-        xi = xj
-        fi = fj
-        xj = x
+        xi = x_new
 
         if iter > 2 and results[iter - 2]['ea'] / results[iter - 1]['ea'] < 2:
             diverging = True
             break
 
-        if sp.isnan(fj) or sp.isnan(x):
+        if sp.isnan(fj) or sp.isnan(fi) or sp.isnan(x_new):
             diverging = True
             break
 

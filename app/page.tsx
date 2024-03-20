@@ -45,6 +45,7 @@ export default function Home() {
                 <Tab href="/simple-fixed-point">Simple Fixed Point Method</Tab>
                 <Tab href="/newton-raphson">Newton-Raphson Method</Tab>
                 <Tab href="/secant">Secant Method</Tab>
+                <Tab href="/modified-secant">Modified Secant Method</Tab>
               </div>
             </div>
           </div>

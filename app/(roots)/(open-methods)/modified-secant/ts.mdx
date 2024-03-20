@@ -1,47 +1,41 @@
 ```ts
-function secant(
-  x0: number,
-  x1: number,
+function modifiedSecant(
+  xi: number,
+  dx: number,
   expressionEvaluator: (x: number) => number,
   maxIter: number = 1000,
   maxError: number = 0.0000001
 ) {
-  let xi = x0;
-  let xj = x1;
   let iter = 0;
   let ea: number | undefined;
   let prevEa: number | undefined;
+  let maxError = Number(es);
+  let maxIter = Number(maxIterations);
   let diverging = false;
 
-  const results: result[] = [];
-  let fi = expressionEvaluator(xi);
+  const results: fixedPointResult[] = [];
 
   do {
     ++iter;
-    const fj = expressionEvaluator(xj);
-    let x;
-
-    x = xj - (fj * (xi - xj)) / (fi - fj);
-    ea = Math.abs((x - xj) / x) * 100;
+    const fi = expressionEvaluator(xi);
+    const fj = expressionEvaluator(xi + dx);
+    let x = xi - (fi * dx) / (fj - fi);
+    ea = Math.abs((x - xi) / x) * 100;
 
     results.push({
       itr: iter,
-      xl: xi,
-      xu: xj,
-      xr: x,
+      xi: x,
       ea,
     });
 
-    xi = xj;
-    fi = fj;
-    xj = x;
+    xi = x;
 
     if (iter > 2 && results[iter - 2].ea! / results[iter - 1].ea! < 2) {
       diverging = true;
       break;
     }
 
-    if (isNaN(fj) || isNaN(x)) {
+    if (isNaN(fj) || isNaN(fi) || isNaN(x)) {
       diverging = true;
       break;
     }
