@@ -1,0 +1,49 @@
+```ts
+function simpleFixedPoint(
+  start: number,
+  expressionEvaluator: (x: number) => number,
+  maxIter: number = 1000,
+  maxError: number = 0.0000001
+) {
+  let xi = start;
+  let iter = 0;
+  let errorAbslt: number | undefined;
+  let prevError: number | undefined;
+  let divergenceCount = 0;
+
+  const results: {
+    itr: number;
+    xi: number;
+    ea: number | undefined;
+  }[] = [];
+
+  do {
+    ++iter;
+    const x = expressionEvaluator(xi);
+
+    if (x !== 0 && xi) {
+      errorAbslt = Math.abs((x - xi) / x) * 100;
+    }
+    results.push({
+      itr: iter,
+      xi: x,
+      ea: errorAbslt,
+    });
+
+    if (errorAbslt && prevError && errorAbslt > prevError) {
+      ++divergenceCount;
+    } else {
+      divergenceCount = 0;
+    }
+
+    prevError = errorAbslt;
+    xi = x;
+  } while (
+    iter < maxIter &&
+    (ea == undefined || ea > maxError) &&
+    divergenceCount < 4
+  );
+
+  return results;
+}
+```

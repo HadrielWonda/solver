@@ -92,7 +92,7 @@ export default function Page() {
   ) : (
     <BisectionSolve
       intro={() => {
-        router.push(pathname + "?" + createQueryString("mode", "intor"));
+        router.push(pathname + "?" + createQueryString("mode", "intro"));
         setMode("intro");
       }}
     />
@@ -615,7 +615,7 @@ const BisectionSolve = ({ intro }: { intro: () => void }) => {
                 onClick={() => {
                   const newResults = [...results];
                   newResults[0].ea = 0;
-                  const csv = generateCsv(csvConfig)(results);
+                  const csv = generateCsv(csvConfig)(newResults);
                   download(csvConfig)(csv);
                 }}
               >

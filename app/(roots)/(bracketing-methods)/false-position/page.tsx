@@ -655,7 +655,7 @@ const FalsePositionSolve = () => {
                 onClick={() => {
                   const newResults = [...results];
                   newResults[0].ea = 0;
-                  const csv = generateCsv(csvConfig)(results);
+                  const csv = generateCsv(csvConfig)(newResults);
                   download(csvConfig)(csv);
                 }}
               >

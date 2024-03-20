@@ -37,6 +37,18 @@ export default function Home() {
                 </Tab>
               </div>
             </div>
+            <div className="w-full mb-12">
+              <h4 className="bold font-bold my-2 text-left">
+                Roots of Equations - Open Methods
+              </h4>
+              <div className="grid w-full grid-cols-2 items-start justify-center gap-4 md:grid-cols-4">
+                <Tab href="/simple-fixed-point">Simple Fixed Point Method</Tab>
+                <Tab href="/false-position">False Postion method</Tab>
+                <Tab href="/modified-false-position" className="col-span-2">
+                  Modified False Postion method
+                </Tab>
+              </div>
+            </div>
           </div>
         </div>
       </div>

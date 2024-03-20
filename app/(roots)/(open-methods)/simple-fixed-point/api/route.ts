@@ -29,12 +29,9 @@ export async function POST(request: NextRequest) {
         status: 400,
       });
     } else if (!start || isNaN(Number(start))) {
-      return Response.json(
-        `Upper bound, Xu must be specified and must be a number`,
-        {
-          status: 400,
-        }
-      );
+      return Response.json(`Start, Xi must be specified and must be a number`, {
+        status: 400,
+      });
     } else if (!["max_iterations", "max_error"].includes(stoppingCriteria!)) {
       return Response.json(
         `stopping criteria must be specified and must be a number`,
@@ -61,7 +58,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const expression = exprsCompiler(equation);
+    let expression;
+
+    try {
+      expression = exprsCompiler(equation);
+    } catch (error) {
+      return Response.json(`Invalid Function Expression`, {
+        status: 400,
+      });
+    }
     let xi = Number(start);
     let iter = 0;
     // let fl = expression?.evaluate({ x: Number(xl) });
