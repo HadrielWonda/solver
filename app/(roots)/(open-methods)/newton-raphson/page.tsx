@@ -386,6 +386,7 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
 
       return result as Promise<{
         diverge: boolean;
+        zeroDenominator: boolean;
         results: fixedPointResult[];
       }>;
     },
@@ -606,6 +607,18 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
                   <AlertDescription>
                     Iteration was terminated because results were not
                     converging! Consider restructuring your governing equation.
+                  </AlertDescription>
+                </Alert>
+              </div>
+            )}
+            {results.zeroDenominator && (
+              <div className="px-5 pb-8">
+                <Alert variant="destructive">
+                  <ExclamationTriangleIcon className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>
+                    Iteration was terminated due to the derivative (the
+                    denominator in the formula) equating to zero.
                   </AlertDescription>
                 </Alert>
               </div>
