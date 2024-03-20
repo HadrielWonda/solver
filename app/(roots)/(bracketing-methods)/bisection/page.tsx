@@ -46,6 +46,7 @@ import * as mathlive from "mathlive";
 import { mkConfig, generateCsv, download } from "export-to-csv";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 class ResponseError extends Error {
   response: any;
@@ -59,11 +60,35 @@ class ResponseError extends Error {
 
 const csvConfig = mkConfig({ useKeysAsHeaders: true });
 
+type paramMode = "intro" | "solve" | "steps" | null;
+
 export default function Page() {
-  const [mode, setMode] = useState<"intro" | "solve" | "steps">("intro");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const search = searchParams.get("mode") as paramMode;
+  const [mode, setMode] = useState<"intro" | "solve" | "steps">(
+    search ? search : "intro"
+  );
+
+  const createQueryString = useCallback(
+    (name: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set(name, value);
+
+      return params.toString();
+    },
+    [searchParams]
+  );
 
   return mode == "intro" ? (
-    <BisectionIntro solve={() => setMode("solve")} />
+    <BisectionIntro
+      solve={() => {
+        router.push(pathname + "?" + createQueryString("mode", "solve"));
+        setMode("solve");
+      }}
+    />
   ) : (
     <BisectionSolve />
   );
