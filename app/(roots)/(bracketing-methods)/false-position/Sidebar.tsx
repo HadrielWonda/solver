@@ -115,7 +115,7 @@ export const Sidebar = ({
             </button>
           </div>
           <div className=" flex-1 w-full overflow-auto p-3">
-            <h3 className="font-semibold mb-4">Bisection Method</h3>
+            <h3 className="font-semibold mb-4">False Position Method</h3>
             <div className="py-3 overflow-hidden">
               <label
                 className="text-sm font-medium text-gray-900 whitespace-nowrap block"

@@ -2,7 +2,7 @@ import React, { ReactNode } from "react";
 
 export function MathBlock({ children }: { children: ReactNode }) {
   return (
-    <math className="my-4 mx-4">
+    <math className="my-4 mx-4 text-[1.2rem]">
       <mtable>{children}</mtable>
     </math>
   );
