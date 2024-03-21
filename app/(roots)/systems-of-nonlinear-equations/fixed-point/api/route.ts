@@ -1,7 +1,7 @@
 "use server";
 import { NextRequest } from "next/server";
 import { Expression, Parser } from "expr-eval";
-import { equationsFixedPointResult, fixedPointResult } from "@/types";
+import { equationsFixedPointResult } from "@/types";
 
 const exprsCompiler = (exprs: string) => {
   const parser = new Parser();

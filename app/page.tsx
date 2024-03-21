@@ -57,6 +57,29 @@ export default function Home() {
                 <Tab href="/brent">Brent's Method</Tab>
               </div>
             </div>
+            <div className="w-full mb-12">
+              <h4 className="bold font-bold my-2 text-left">
+                Roots of Equations - Multiple Roots
+              </h4>
+              <div className="grid w-full grid-cols-2 items-start justify-center gap-4 md:grid-cols-4">
+                <Tab href="/modified-newton-raphson" className="col-span-2">
+                  Modified Newton-Raphson Method
+                </Tab>
+              </div>
+            </div>
+            <div className="w-full mb-12">
+              <h4 className="bold font-bold my-2 text-left">
+                Systems of Non-Linear Equations
+              </h4>
+              <div className="grid w-full grid-cols-2 items-start justify-center gap-4 md:grid-cols-4">
+                <Tab
+                  href="/systems-of-nonlinear-equations/fixed-point"
+                  className="col-span-2"
+                >
+                  Fixed Point Method
+                </Tab>
+              </div>
+            </div>
           </div>
         </div>
       </div>

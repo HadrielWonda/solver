@@ -1,0 +1,44 @@
+```py
+from typing import Callable, Dict, List
+
+def exprs_compiler(exprs: str) -> Callable:
+    parser = Parser()
+    return parser.parse(exprs)
+
+def fixed_iteration(variables_list: List[str], governing_equations: Dict[str, str], initial_values: Dict[str, float], stopping_criteria: str, max_iterations: int, max_error: float) -> Dict:
+    expressions = {variable: exprs_compiler(governing_equations[variable]) for variable in variables_list}
+    iter = 0
+    prev_ea = {variable: 0 for variable in variables_list}
+    divergence_count = {variable: 0 for variable in variables_list}
+
+    results = [{'itr': iter, 'values': initial_values, 'ea': {}}]
+    prev_values = initial_values.copy()
+    substitute = initial_values.copy()
+
+    while iter < max_iterations:
+        iter += 1
+        new_values = {}
+
+        for variable in variables_list:
+            x = expressions[variable](substitute)
+            new_values[variable] = x
+            substitute[variable] = x
+
+        ea = {variable: abs((new_values[variable] - prev_values[variable]) / new_values[variable]) * 100 if new_values[variable] != 0 else None for variable in variables_list}
+
+        results.append({'itr': iter, 'values': new_values, 'ea': ea})
+
+        for variable in variables_list:
+            if ea[variable] and (ea[variable] > prev_ea[variable] or ea[variable] > 50):
+                divergence_count[variable] += 1
+            else:
+                divergence_count[variable] = 0
+
+        prev_ea = ea
+        prev_values = new_values
+
+    diverge = any(value == 4 for value in divergence_count.values())
+
+    return {'diverge': diverge, 'results': results}
+
+```

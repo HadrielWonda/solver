@@ -64,6 +64,10 @@ declare global {
         React.HTMLAttributes<HTMLElement>,
         HTMLElement
       >;
+      msqrt: React.DetailedHTMLProps<
+        React.HTMLAttributes<HTMLElement>,
+        HTMLElement
+      >;
     }
   }
   interface Window {
