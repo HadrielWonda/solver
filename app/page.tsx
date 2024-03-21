@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import Tab from "@/components/ui/Tab";
 import Link from "next/link";
 
@@ -46,6 +47,14 @@ export default function Home() {
                 <Tab href="/newton-raphson">Newton-Raphson Method</Tab>
                 <Tab href="/secant">Secant Method</Tab>
                 <Tab href="/modified-secant">Modified Secant Method</Tab>
+              </div>
+            </div>
+            <div className="w-full mb-12">
+              <h4 className="bold font-bold my-2 text-left">
+                Roots of Equations - Hybrids
+              </h4>
+              <div className="grid w-full grid-cols-2 items-start justify-center gap-4 md:grid-cols-4">
+                <Tab href="/brent">Brent's Method</Tab>
               </div>
             </div>
           </div>

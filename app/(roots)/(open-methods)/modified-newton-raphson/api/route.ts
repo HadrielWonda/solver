@@ -69,9 +69,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const expression = exprsCompiler(equation);
-    const derivativeExpression = exprsCompiler(derivativeEquation);
-    const secondDerivativeExpression = exprsCompiler(secondDerivativeEquation);
+    let expression;
+    let derivativeExpression;
+    let secondDerivativeExpression;
+
+    try {
+      expression = exprsCompiler(equation);
+    } catch (error) {
+      return Response.json(`Invalid Function Expression`, {
+        status: 400,
+      });
+    }
+
+    try {
+      derivativeExpression = exprsCompiler(derivativeEquation);
+    } catch (error) {
+      return Response.json(`Invalid Derivative Function Expression`, {
+        status: 400,
+      });
+    }
+
+    try {
+      secondDerivativeExpression = exprsCompiler(secondDerivativeEquation);
+    } catch (error) {
+      return Response.json(`Invalid Second Derivative Function Expression`, {
+        status: 400,
+      });
+    }
+
     let xi = Number(start);
     let iter = 0;
     // let fl = expression?.evaluate({ x: Number(xl) });

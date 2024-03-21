@@ -1,0 +1,50 @@
+```py
+import sympy as sp
+
+def modified_newton_raphson(start, expression_str, differential_expression_str, second_differential_expression_str, max_iter=1000, max_error=0.0000001):
+    xi = start
+    iter = 0
+    ea = None
+    divergence_count = 0
+    zero_denominator = False
+
+    results = []
+
+    x = sp.symbols('x')
+    f = sp.sympify(expression_str)
+    d = sp.sympify(differential_expression_str)
+    d2 = sp.sympify(second_differential_expression_str)
+
+    while iter < max_iter:
+        iter += 1
+
+        fx = f.subs(x, xi)
+        dx = d.subs(x, xi)
+        dx2 = d2.subs(x, xi)
+
+        if dx != 0 and fx != 0:
+            x_new = xi - (fx * dx) / (dx * dx - fx * dx2)
+            ea = abs((x_new - xi) / x_new) * 100
+        else:
+            zero_denominator = True
+            break
+
+        results.append({
+            'itr': iter,
+            'xi': x_new,
+            'ea': ea,
+        })
+
+        xi = x_new
+
+        if iter > 3 and results[iter - 2]['ea'] / results[iter - 1]['ea'] < 2:
+            diverging = True
+            break
+
+        if ea is not None and ea < max_error:
+            break
+
+    return {'results': results, 'diverging': diverging, 'zero_denominator': zero_denominator}
+
+
+```

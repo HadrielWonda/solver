@@ -26,7 +26,7 @@ export default function ComputationResults({
     () => async () => {
       try {
         let response: Response;
-        response = await fetch("/roots/brent/api", {
+        response = await fetch("/brent/api", {
           method: "post",
           body: JSON.stringify(initialValues),
         });

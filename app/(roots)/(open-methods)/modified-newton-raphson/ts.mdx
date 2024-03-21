@@ -1,8 +1,9 @@
 ```ts
-function newtonRaphson(
+function modifiedNewtonRaphson(
   start: number,
   expressionEvaluator: (x: number) => number,
   differentialExpressionEvaluator: (x: number) => number,
+  secondDifferentialExpressionEvaluator: (x: number) => number,
   maxIter: number = 1000,
   maxError: number = 0.0000001
 ) {
@@ -13,6 +14,7 @@ function newtonRaphson(
   let zeroDenominator = false;
   const f = expressionEvaluator;
   const d = differentialExpressionEvaluator;
+  const d2 = secondDifferentialExpressionEvaluator;
 
   const results: {
     itr: number;
@@ -23,14 +25,19 @@ function newtonRaphson(
   do {
     ++iter;
 
-    const dx = d(xi);
-    if (dx == 0) {
+    const fx = expressionEvaluator(xi);
+    const dx = differentialExpressionEvaluator(xi);
+    const dx2 = secondDifferentialExpressionEvaluator(xi);
+    let x;
+
+    if (dx !== 0 && fx !== 0) {
+      x = xi - (fx * dx) / (dx * dx - fx * dx2);
+      ea = Math.abs((x - xi) / x) * 100;
+    } else {
       zeroDenominator = true;
       break;
     }
 
-    const x = xi - f(xi) / dx;
-    errorAbslt = Math.abs((x - xi) / x) * 100;
     results.push({
       itr: iter,
       xi: x,
