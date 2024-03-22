@@ -74,9 +74,15 @@ export default function Home() {
               <div className="grid w-full grid-cols-2 items-start justify-center gap-4 md:grid-cols-4">
                 <Tab
                   href="/systems-of-nonlinear-equations/fixed-point"
-                  className="col-span-2"
+                  className=""
                 >
                   Fixed Point Method
+                </Tab>
+                <Tab
+                  href="/systems-of-nonlinear-equations/newton-raphson"
+                  className=""
+                >
+                  Newton-Raphson Method
                 </Tab>
               </div>
             </div>

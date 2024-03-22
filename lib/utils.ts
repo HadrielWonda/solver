@@ -14,8 +14,6 @@ export function latexToMathjs(latexString: string): string {
   const rules: ReplacementRule[] = [
     { pattern: /\\frac\{(.*?)\}\{(.*?)\}/g, replacement: "(($1)/($2))" }, // Fraction conversion
     { pattern: /\\left\((.*?)\\right\)/g, replacement: "($1)" }, // Left and right parenthesis removal
-    { pattern: /\\cdot/g, replacement: "*" }, // Multiplication symbol replacement
-    { pattern: /\\cdot/g, replacement: "*" }, // Multiplication symbol replacement
     { pattern: /\\sin/g, replacement: "sin" }, // Trigonometric function conversion
     { pattern: /\\cos/g, replacement: "cos" },
     { pattern: /\\tan/g, replacement: "tan" },
@@ -28,7 +26,8 @@ export function latexToMathjs(latexString: string): string {
     { pattern: /\\exp/g, replacement: "exp" }, // Exponential function with \left and \right notation
     { pattern: /\\log/g, replacement: "log" }, // Exponential function with \left and \right notation
     { pattern: /\\ln/g, replacement: "ln" }, // Exponential function with \left and \right notation
-    { pattern: /\\left\((.*?)\\right\)/g, replacement: "($1)" }, // Left and right parenthesis removal
+    { pattern: /\\cdot/g, replacement: "*" }, // Multiplication symbol replacement
+    { pattern: /\\cdot/g, replacement: "*" }, // Multiplication symbol replacement
     // Add more replacements as needed
   ];
 

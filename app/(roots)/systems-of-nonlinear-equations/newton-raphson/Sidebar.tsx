@@ -3,13 +3,22 @@ import { AnimatePresence, motion } from "framer-motion";
 import { AiOutlineRollback } from "react-icons/ai";
 import * as mathlive from "mathlive";
 import "mathlive/static.css";
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { latexToMathjs } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { MathBlock, MathData, MathRow } from "@/components/ui/math";
+import { MathBlock, MathData, MathField, MathRow } from "@/components/ui/math";
+import { Switch } from "@/components/ui/switch";
 
 type FPIterationSettings = {
   equation: string;
@@ -19,6 +28,35 @@ type FPIterationSettings = {
   maxIterations: string;
   maxError: string;
 };
+
+const equationVaribleNames = [
+  "u",
+  "v",
+  "w",
+  "x",
+  "y",
+  "z",
+  "a",
+  "b",
+  "c",
+  "d",
+  "e",
+  "f",
+  "g",
+  "h",
+  "i",
+  "j",
+  "k",
+  "l",
+  "m",
+  "n",
+  "o",
+  "p",
+  "q",
+  "r",
+  "s",
+  "t",
+];
 
 export const Sidebar = ({
   open,
@@ -40,10 +78,11 @@ export const Sidebar = ({
     },
     GE: {
       [key: string]: string;
-    },
+    }[],
     L: {
       [key: string]: string;
-    }
+    }[],
+    AD: boolean
   ) => void;
   running: boolean;
 }) => {
@@ -61,14 +100,17 @@ export const Sidebar = ({
     maxIterations: "1000",
     maxError: "0.0000000000001",
   });
-  const [governingEquations, setGoverningEquations] = useState<{
-    [key: string]: string;
-  }>({});
-  const [latex, setLatex] = useState<{
-    [key: string]: string;
-  }>({});
-
-  const mf = useRef<any>(null);
+  const [governingEquations, setGoverningEquations] = useState<
+    {
+      [key: string]: string;
+    }[]
+  >([]);
+  const [latex, setLatex] = useState<
+    {
+      [key: string]: string;
+    }[]
+  >([]);
+  const [autoDifferentiate, setAutoDifferentiate] = useState(false);
 
   const solve = () => {
     setInitialSettings(
@@ -76,10 +118,12 @@ export const Sidebar = ({
       initialValues,
       stoppingCriteria,
       governingEquations,
-      latex
+      latex,
+      autoDifferentiate
     );
   };
 
+  const mf = useRef<any>(null);
   // Customize the mathfield when it is created
   useEffect(() => {
     if (mf.current) {
@@ -101,10 +145,19 @@ export const Sidebar = ({
     }
   }, []);
 
+  const availableEquationVariableNames = useMemo(
+    () => equationVaribleNames.filter((v) => !variablesList.includes(v)),
+    [variablesList]
+  );
+
   const completeValues = useMemo(() => {
     if (!variablesString || !Boolean(variablesList.length)) return false;
 
-    if (!Object.entries(governingEquations).every(([_, value]) => value !== ""))
+    if (
+      !governingEquations.every((item) =>
+        Object.entries(item).every(([_, value]) => value !== "")
+      )
+    )
       return false;
     if (
       Object.entries(initialValues).every(([_, value]) => !isNaN(Number(value)))
@@ -119,6 +172,16 @@ export const Sidebar = ({
     initialValues,
     variablesList.length,
   ]);
+
+  console.log("latex", latex);
+
+  // useEffect(() => {
+  //   first
+
+  //   return () => {
+  //     second
+  //   }
+  // }, [va])
 
   return (
     <AnimatePresence mode="wait" initial={false}>
@@ -139,7 +202,7 @@ export const Sidebar = ({
             </button>
           </div>
           <div className=" flex-1 w-full overflow-auto p-3 pb-4">
-            <h3 className="font-semibold mb-4">Fixed-Point Iteration</h3>
+            <h3 className="font-semibold mb-4">Newton-Raphson Method</h3>
             <div className="mt-3 grid w-full max-w-sm items-center gap-1.5">
               {/* <h4 className="font-semibold mb-4">
                 List all the independent variables seperated by comma ','. e.g:
@@ -159,63 +222,94 @@ export const Sidebar = ({
                     .replace(" ", "")
                     .split(",")
                     .filter(Boolean);
+                  const basic: {
+                    [key: string]: string;
+                  } = {
+                    eqn: "",
+                  };
+                  vlist.forEach((v) => {
+                    basic[v] = "";
+                  });
+                  const value: {
+                    [key: string]: string;
+                  }[] = [];
+                  vlist.forEach((v) => {
+                    value.push({ ...basic });
+                  });
+                  // value[0]["eqn"] = "asdf";
+                  // console.log("value", value);
+
+                  setGoverningEquations([...JSON.parse(JSON.stringify(value))]);
+                  setLatex([...JSON.parse(JSON.stringify(value))]);
                   setVariablesList(vlist);
                 }}
               />
             </div>
 
+            <div className="flex items-center gap-4 mt-4">
+              <h4 className="font-semibold">Auto Differentiate:</h4>
+              <Switch
+                id="autoDifferentiate"
+                checked={autoDifferentiate}
+                onCheckedChange={(v) => setAutoDifferentiate(v)}
+              />
+            </div>
+
             {variablesList.length ? (
               <div className="space-y-3 mt-5">
-                <h4 className="font-semibold mb-2">Governing Equations</h4>
-                {variablesList.map((v) => (
-                  <div className="pb-3 overflow-hidden" key={v}>
-                    <label
-                      className="text-sm font-medium text-gray-900 whitespace-nowrap block mb-1"
-                      // htmlFor={id}
-                    >
-                      <math>
-                        <mrow>
-                          <mtd>
-                            <msub>
-                              <mi>{v}</mi>
-                              <mrow>
-                                <mi>i</mi>
-                                <mo>+</mo>
-                                <mn>1</mn>
-                              </mrow>
-                            </msub>
-                          </mtd>
-                          <mtd>
-                            <mo>=</mo>
-                          </mtd>
-                        </mrow>
-                      </math>{" "}
-                    </label>
-                    <math-field
-                      ref={mf}
-                      onInput={(evt) => {
-                        setGoverningEquations((s) => ({
-                          ...s,
-                          [`${v}`]: latexToMathjs(
-                            (evt.target as HTMLInputElement).value
-                          ),
-                        }));
-                        setLatex((s) => ({
-                          ...s,
-                          [`${v}`]: (evt.target as HTMLInputElement).value,
-                        }));
-                      }}
-                      style={{
-                        width: "100%",
-                        maxWidth: "353px",
-                      }}
-                    >
-                      {latex[v]}
-                    </math-field>
-                  </div>
-                ))}
+                <h4 className="font-semibold mb-2">Equations</h4>
+                {!autoDifferentiate
+                  ? variablesList.map((vi, i) => (
+                      <VariableParameters
+                        latex={latex}
+                        setLatex={setLatex}
+                        governingEquations={governingEquations}
+                        setGoverningEquations={setGoverningEquations}
+                        variablesList={variablesList}
+                        i={i}
+                        key={vi}
+                      />
+                    ))
+                  : variablesList.map((v, i) => (
+                      <div className="pb-3 overflow-hidden" key={v}>
+                        <label
+                          className="text-sm font-medium text-gray-900 whitespace-nowrap block mb-1"
+                          // htmlFor={id}
+                        >
+                          {`${
+                            availableEquationVariableNames[i]
+                          }(${variablesList.join(", ")}) = 0 =`}
+                        </label>
+                        <math-field
+                          ref={mf}
+                          onInput={(evt) => {
+                            const eqns = [
+                              ...JSON.parse(JSON.stringify(governingEquations)),
+                            ];
+                            eqns[i]["eqn"] = latexToMathjs(
+                              (evt.target as HTMLInputElement).value
+                            );
+                            setGoverningEquations(eqns);
+                            setLatex((s) => {
+                              const eqns = [...JSON.parse(JSON.stringify(s))];
+                              eqns[i]["eqn"] = (
+                                evt.target as HTMLInputElement
+                              ).value;
+                              return eqns;
+                            });
+                          }}
+                          style={{
+                            width: "100%",
+                            maxWidth: "353px",
+                          }}
+                        >
+                          {latex[i]["eqn"]}
+                        </math-field>
+                      </div>
+                    ))}
               </div>
             ) : null}
+
             {variablesList.length ? (
               <div className="space-y-3 mt-5">
                 <h4 className="font-semibold mb-4">Initial Values</h4>
@@ -240,6 +334,7 @@ export const Sidebar = ({
                 ))}
               </div>
             ) : null}
+
             <div className="space-y-3 mt-8">
               <h4 className="font-semibold mb-4">Stopping Criterion</h4>
               <Tabs
@@ -318,4 +413,102 @@ const framerSidebarPanel = {
   animate: { x: 0 },
   exit: { x: "-100%" },
   transition: { duration: 0.3 },
+};
+
+const VariableParameters = ({
+  variablesList,
+  i,
+  latex,
+  setLatex,
+  governingEquations,
+  setGoverningEquations,
+}: {
+  variablesList: string[];
+  i: number;
+  latex: {
+    [key: string]: string;
+  }[];
+  setLatex: Dispatch<
+    SetStateAction<
+      {
+        [key: string]: string;
+      }[]
+    >
+  >;
+  governingEquations: {
+    [key: string]: string;
+  }[];
+  setGoverningEquations: Dispatch<
+    SetStateAction<
+      {
+        [key: string]: string;
+      }[]
+    >
+  >;
+}) => {
+  const availableEquationVariableNames = useMemo(
+    () => equationVaribleNames.filter((v) => !variablesList.includes(v)),
+    [variablesList]
+  );
+
+  return (
+    <div className="pb-3 overflow-hidden space-y-2">
+      <h3>
+        Equation {i + 1}:{" "}
+        {`${availableEquationVariableNames[i]}(${variablesList.join(", ")})`}{" "}
+      </h3>
+      <div className="pb-1 overflow-hidden">
+        <MathField
+          label={`${availableEquationVariableNames[i]}(${variablesList.join(
+            ", "
+          )}) = 0 =`}
+          onInput={(evt) => {
+            setGoverningEquations((s) => {
+              const eqns = [...JSON.parse(JSON.stringify(s))];
+              let lv = (evt.target as HTMLInputElement).value;
+              let tlv = latexToMathjs(lv);
+              console.log("values", lv, tlv);
+              eqns[i]["eqn"] = tlv;
+              console.log("transformedEqns", eqns);
+              return eqns;
+            });
+            setLatex((s) => {
+              const eqns = [...JSON.parse(JSON.stringify(s))];
+              eqns[i]["eqn"] = (evt.target as HTMLInputElement).value;
+              return eqns;
+            });
+          }}
+        >
+          {latex[i]["eqn"]}
+        </MathField>
+      </div>
+      {variablesList.map((v, j) => (
+        <div className="pb-1 overflow-hidden" key={`${v}${i}`}>
+          <MathField
+            label={`ẟ${availableEquationVariableNames[i]}/ẟ${v} =`}
+            onInput={(evt) => {
+              setGoverningEquations((s) => {
+                const eqns = [...JSON.parse(JSON.stringify(s))];
+                eqns[i][v] = latexToMathjs(
+                  (evt.target as HTMLInputElement).value
+                );
+                return eqns;
+              });
+              setLatex((s) => {
+                const eqns = [...s];
+                eqns[i][v] = (evt.target as HTMLInputElement).value;
+                return eqns;
+              });
+            }}
+            style={{
+              width: "100%",
+              maxWidth: "353px",
+            }}
+          >
+            {latex[i][v]}
+          </MathField>
+        </div>
+      ))}
+    </div>
+  );
 };

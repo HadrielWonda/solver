@@ -1,0 +1,102 @@
+```ts
+import { Parser } from "expr-eval";
+
+interface GoverningEquations {
+  [key: string]: string;
+}
+
+interface InitialValues {
+  [key: string]: number;
+}
+
+interface StoppingCriteria {
+  stoppingCriteria?: "max_iterations" | "max_error";
+  maxIterations: string;
+  maxError: string;
+}
+
+interface EquationsFixedPointResult {
+  itr: number;
+  values: {
+    [key: string]: number;
+  };
+  ea: {
+    [key: string]: number | undefined;
+  };
+}
+
+const exprsCompiler = (exprs: string) => {
+  const parser = new Parser();
+  return parser.parse(exprs);
+};
+
+export function fixedIteration(
+  variablesList: string[],
+  governingEquations: GoverningEquations,
+  initialValues: InitialValues,
+  stoppingCriteria: StoppingCriteria
+): { diverge: boolean; results: EquationsFixedPointResult[] } {
+  const expressions: { [key: string]: any } = {};
+  for (const variable of variablesList) {
+    expressions[variable] = exprsCompiler(governingEquations[variable]);
+  }
+
+  let iter = 0;
+  let prevEa: { [key: string]: number } = {};
+  let divergenceCount: { [key: string]: number } = {};
+  for (const variable of variablesList) {
+    divergenceCount[variable] = 0;
+  }
+
+  const results: EquationsFixedPointResult[] = [
+    {
+      itr: iter,
+      values: initialValues,
+      ea: {},
+    },
+  ];
+  let prevValues = { ...initialValues };
+  const substitute = { ...initialValues };
+
+  do {
+    ++iter;
+    const newValues: { [key: string]: number } = {};
+    for (const variable of variablesList) {
+      const x = expressions[variable].evaluate(substitute);
+      newValues[variable] = x;
+      substitute[variable] = x;
+    }
+    for (const variable of variablesList) {
+      if (newValues[variable] !== 0 && prevValues[variable]) {
+        const ea =
+          Math.abs(
+            (newValues[variable] - prevValues[variable]) / newValues[variable]
+          ) * 100;
+        prevEa[variable] = ea;
+        results.push({
+          itr: iter,
+          values: newValues,
+          ea: prevEa,
+        });
+        if (ea && prevEa[variable] && (ea > prevEa[variable] || ea > 50)) {
+          divergenceCount[variable] = ++divergenceCount[variable];
+        } else {
+          divergenceCount[variable] = 0;
+        }
+      }
+    }
+    prevValues = newValues;
+  } while (
+    iter < parseInt(stoppingCriteria.maxIterations) &&
+    Object.values(prevEa).every(
+      (value) =>
+        value == undefined || value > parseFloat(stoppingCriteria.maxError)
+    ) &&
+    Object.values(divergenceCount).every((value) => value < 4)
+  );
+
+  const diverge = Object.values(divergenceCount).some((value) => value == 4);
+
+  return { diverge, results };
+}
+```
