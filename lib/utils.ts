@@ -13,6 +13,8 @@ interface ReplacementRule {
 export function latexToMathjs(latexString: string): string {
   const rules: ReplacementRule[] = [
     { pattern: /\\frac\{(.*?)\}\{(.*?)\}/g, replacement: "(($1)/($2))" }, // Fraction conversion
+    // { pattern: /\\frac\{(\d)(\d)\}/g, replacement: "(($1)/($2))" }, // Fraction conversion
+    { pattern: /\^\{(.*)\}/g, replacement: "^($1)" }, // Fraction conversion
     { pattern: /\\left\((.*?)\\right\)/g, replacement: "($1)" }, // Left and right parenthesis removal
     { pattern: /\\sin/g, replacement: "sin" }, // Trigonometric function conversion
     { pattern: /\\cos/g, replacement: "cos" },

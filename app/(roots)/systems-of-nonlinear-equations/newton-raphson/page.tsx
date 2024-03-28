@@ -901,7 +901,7 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
       console.log("values: ", JSON.stringify(value));
       let response: Response;
       const res = await fetch(
-        "http://127.0.0.1:8000/systems-of-nonlinear-equations/newton-raphson",
+        "https://solver-python-api0.onrender.com/systems-of-nonlinear-equations/newton-raphson",
         {
           method: "POST",
           headers: {

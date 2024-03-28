@@ -156,7 +156,8 @@ export const Sidebar = ({
     if (
       !governingEquations.every((item) =>
         Object.entries(item).every(([_, value]) => value !== "")
-      )
+      ) &&
+      !autoDifferentiate
     )
       return false;
     if (
