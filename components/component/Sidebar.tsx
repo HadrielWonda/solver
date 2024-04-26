@@ -101,6 +101,7 @@ export const Sidebar = ({
       {
         graphType: "interval",
         fn: "",
+        fnType: "linear",
         latex: "",
         id,
         color: colors[functionList.length].formatHex(),
