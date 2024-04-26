@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
+import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -88,16 +89,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <script
+        {/* <script
           defer
           src="//cdnjs.cloudflare.com/ajax/libs/mathjs/1.5.2/math.min.js"
-        ></script>
+        ></script> */}
         <script defer src="//unpkg.com/mathlive"></script>
       </head>
       <body className={inter.className}>
         {children}
         <Toaster richColors />
       </body>
+      <Script src="//cdnjs.cloudflare.com/ajax/libs/mathjs/1.5.2/math.min.js" />
+      <Script src="//unpkg.com/mathlive" />
     </html>
   );
 }
