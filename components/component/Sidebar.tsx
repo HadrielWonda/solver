@@ -30,7 +30,7 @@ import { Input } from "../ui/input";
 type Checked = DropdownMenuCheckboxItemProps["checked"];
 type functionSetting =
   | {
-      fnType?: "Single variable";
+      fnType?: "linear";
       graphType: "interval" | "scatter" | "polyline";
       fn: string;
       latex: string;
@@ -81,7 +81,7 @@ export const Sidebar = ({
   const colors = functionPlot.globals.COLORS;
   const functionList: functionSetting[] =
     (options?.data as functionSetting[]) ?? [];
-  console.log(functionList[2]);
+  console.log("functionList", functionList);
   const updateFunction = (v: functionSetting, id: string) => {
     setOptions((o) => ({
       ...o,
@@ -108,6 +108,8 @@ export const Sidebar = ({
     ];
     setOptions((o) => ({ ...o, data: newFunctionList }));
   };
+
+  // console.log("options", options);
 
   return (
     <AnimatePresence mode="wait" initial={false}>
@@ -323,7 +325,7 @@ const FunctionBlock = ({
 }) => {
   const [mode, setMode] = useState<"view" | "edit">(
     (!initialSetting.fnType && initialSetting.fn) ||
-      (initialSetting.fnType == "Single variable" && initialSetting.fn) ||
+      (initialSetting.fnType == "linear" && initialSetting.fn) ||
       (initialSetting.fnType == "implicit" && initialSetting.fn) ||
       (initialSetting.fnType == "parametric" && initialSetting.x)
       ? "view"
@@ -332,6 +334,8 @@ const FunctionBlock = ({
   const [settings, setSettings] = useState<functionSetting>({
     ...initialSetting,
   });
+  console.log("initialSetting", initialSetting);
+  console.log("settings", settings);
 
   const mf = useRef<any>(null);
   // const [value, setValue] = useState("");
@@ -370,7 +374,7 @@ const FunctionBlock = ({
             }}
           ></div>
           {(!settings.fnType && settings.fn) ||
-          (settings.fnType == "Single variable" && settings.fn) ? (
+          (settings.fnType == "linear" && settings.fn) ? (
             <div className="flex flex-1 overflow-hidden text-ellipsis">
               <span className="whitespace-nowrap">f(x) = </span>
               <span
@@ -440,7 +444,11 @@ const FunctionBlock = ({
                 >
                   Equation Type:
                 </label>
-                <span>{settings.fnType ?? "Single variable"}</span>
+                <span>
+                  {settings.fnType == "linear"
+                    ? "Single variable"
+                    : settings.fnType}
+                </span>
               </div>
               <div className="flex gap-3 items-center mt-4">
                 <label
@@ -451,7 +459,7 @@ const FunctionBlock = ({
                 </label>
                 <span>{settings.graphType}</span>
               </div>
-              {!settings.fnType || settings.fnType == "Single variable" ? (
+              {!settings.fnType || settings.fnType == "linear" ? (
                 <div className="flex gap-3 items-center">
                   <label
                     className="text-sm font-medium text-gray-900 whitespace-nowrap"
@@ -589,7 +597,11 @@ const FunctionBlock = ({
                       variant="outline"
                       className="flex-1 min-w-52 flex justify-between items-center"
                     >
-                      <span>{settings.fnType ?? "Single variable"}</span>
+                      <span>
+                        {settings.fnType == "linear"
+                          ? "Single variable"
+                          : settings.fnType}
+                      </span>
 
                       <ChevronDownIcon className="h-5 w-5" />
                     </Button>
@@ -600,7 +612,7 @@ const FunctionBlock = ({
                       onCheckedChange={(v) =>
                         v &&
                         setSettings((s) =>
-                          !s.fnType || s.fnType == "Single variable"
+                          !s.fnType || s.fnType == "linear"
                             ? {
                                 fnType: undefined,
                                 graphType: s.graphType,
@@ -628,7 +640,7 @@ const FunctionBlock = ({
                         v &&
                         setSettings((s) =>
                           !s.fnType ||
-                          s.fnType == "Single variable" ||
+                          s.fnType == "linear" ||
                           s.fnType == "implicit"
                             ? {
                                 fnType: "implicit",
@@ -764,7 +776,7 @@ const FunctionBlock = ({
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              {!settings.fnType || settings.fnType == "Single variable" ? (
+              {!settings.fnType || settings.fnType == "linear" ? (
                 <div className="flex gap-3 items-center">
                   <label
                     className="text-sm font-medium text-gray-900 whitespace-nowrap"
