@@ -86,6 +86,22 @@ export default function Home() {
                 </Tab>
               </div>
             </div>
+            <div className="w-full mb-12">
+              <h4 className="bold font-bold my-2 text-left">
+                Roots of Polynomials
+              </h4>
+              <div className="grid w-full grid-cols-2 items-start justify-center gap-4 md:grid-cols-4">
+                <Tab href="/roots-of-polynomials/muller" className="">
+                  Muller's Method
+                </Tab>
+                {/* <Tab
+                  href="/systems-of-nonlinear-equations/newton-raphson"
+                  className=""
+                >
+                  Newton-Raphson Method
+                </Tab> */}
+              </div>
+            </div>
           </div>
         </div>
       </div>
