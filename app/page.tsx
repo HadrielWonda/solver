@@ -94,6 +94,34 @@ export default function Home() {
                 <Tab href="/roots-of-polynomials/muller" className="">
                   Muller's Method
                 </Tab>
+                <Tab
+                  href="/roots-of-polynomials/bairstow"
+                  disabled
+                  className=""
+                >
+                  Bairstow's Method
+                </Tab>
+                {/* <Tab
+                  href="/systems-of-nonlinear-equations/newton-raphson"
+                  className=""
+                >
+                  Newton-Raphson Method
+                </Tab> */}
+              </div>
+            </div>
+            <div className="w-full mb-12">
+              <h4 className="bold font-bold my-2 text-left">Curve Fitting</h4>
+              <div className="grid w-full grid-cols-2 items-start justify-center gap-4 md:grid-cols-4">
+                <Tab href="/roots-of-polynomials/muller" disabled className="">
+                  Linear Least-Square Regression
+                </Tab>
+                <Tab
+                  href="/roots-of-polynomials/bairstow"
+                  disabled
+                  className=""
+                >
+                  Polynomial Least-Square Regression
+                </Tab>
                 {/* <Tab
                   href="/systems-of-nonlinear-equations/newton-raphson"
                   className=""
@@ -103,9 +131,25 @@ export default function Home() {
               </div>
             </div>
           </div>
+          <div className="w-full mt-24">
+            <h3 className="font-bold my-6 text-left text-xl tracking-tighter sm:text-2xl md:text-3xl">
+              Numerical Differentiation and Integration
+            </h3>
+            <div className="w-full mb-12">
+              <h4 className="bold font-bold my-2 text-left">
+                Newton-Cotes Integration Formulas
+              </h4>
+              <div className="grid w-full grid-cols-2 items-start justify-center gap-4 md:grid-cols-4">
+                <Tab href="/newton-cotes/trapezoidal">Trapezoidal Rule</Tab>
+                <Tab href="#" disabled>
+                  3D Graph Plotter
+                </Tab>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <ul>
+      {/* <ul>
         <li>
           <Link href="/roots">Roots of Equations</Link>
         </li>
@@ -130,7 +174,7 @@ export default function Home() {
         <li>
           <Link href="/pde">Partial Differential Equations</Link>
         </li>
-      </ul>
+      </ul> */}
     </main>
   );
 }
