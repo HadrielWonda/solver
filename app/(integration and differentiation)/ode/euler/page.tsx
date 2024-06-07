@@ -659,6 +659,10 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
                   <span>initial value y({initialValues?.x1}): </span>{" "}
                   <span>{initialValues?.y1}</span>
                 </p>
+                <p className="t text-gray-500 font-normal text-sm">
+                  <span>final value y({initialValues?.x2}): </span>{" "}
+                  <span>{results[results.length - 1]?.y}</span>
+                </p>
               </div>
             </div>
             <Table className="flex-1 overflow-scroll">
