@@ -654,13 +654,16 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
     "/api/user",
     async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8000/newton-cotes/simpson1", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(initialValues),
-        });
+        const res = await fetch(
+          "https://solver-python-api.onrender.com/newton-cotes/simpson1",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(initialValues),
+          }
+        );
 
         console.log("phase 1");
         const result = await res.json();

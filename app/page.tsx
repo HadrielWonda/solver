@@ -112,13 +112,17 @@ export default function Home() {
             <div className="w-full mb-12">
               <h4 className="bold font-bold my-2 text-left">Curve Fitting</h4>
               <div className="grid w-full grid-cols-2 items-start justify-center gap-4 md:grid-cols-4">
-                <Tab href="/roots-of-polynomials/muller" disabled className="">
+                <Tab
+                  href="/roots-of-polynomials/muller"
+                  disabled
+                  className="col-span-2"
+                >
                   Linear Least-Square Regression
                 </Tab>
                 <Tab
                   href="/roots-of-polynomials/bairstow"
                   disabled
-                  className=""
+                  className="col-span-2"
                 >
                   Polynomial Least-Square Regression
                 </Tab>
@@ -164,6 +168,9 @@ export default function Home() {
                 <Tab href="/ode/heun">Heun’s Method</Tab>
                 <Tab href="/ode/midpoint" className="col-span-2">
                   The Midpoint (or Improved Polygon) Method
+                </Tab>
+                <Tab href="/ode/midpoint" className="col-span-2" disabled>
+                  Second-Order Runge-Kutta: Ralston’s Method
                 </Tab>
                 {/* <Tab href="/newton-cotes/simpson1">Simpson’s 1/3 Rule</Tab>
                 <Tab href="/newton-cotes/simpson3">Simpson’s 3/8 Rule</Tab>

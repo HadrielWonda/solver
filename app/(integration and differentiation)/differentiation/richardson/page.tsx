@@ -323,7 +323,7 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
     async () => {
       try {
         const res = await fetch(
-          "http://127.0.0.1:8000/differentiation/richardson",
+          "https://solver-python-api.onrender.com/differentiation/richardson",
           {
             method: "POST",
             headers: {

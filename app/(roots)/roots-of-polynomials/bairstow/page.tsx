@@ -749,7 +749,7 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
     "/api/user",
     async () => {
       const res = await fetch(
-        "http://127.0.0.1:8000/roots-of-polynomials/muller",
+        "https://solver-python-api.onrender.com/roots-of-polynomials/muller",
         {
           method: "POST",
           headers: {

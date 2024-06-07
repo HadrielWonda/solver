@@ -710,7 +710,7 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
     "/api/user",
     async () => {
       const res = await fetch(
-        "http://127.0.0.1:8000/newton-cotes/trapezoidal",
+        "https://solver-python-api.onrender.com/newton-cotes/trapezoidal",
         {
           method: "POST",
           headers: {
