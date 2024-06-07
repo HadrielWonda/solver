@@ -147,6 +147,9 @@ export default function Home() {
                 <Tab href="/differentiation/hadf" className="col-span-2">
                   High-Accuracy Differentiation Formulas
                 </Tab>
+                <Tab href="/differentiation/richardson">
+                  Richardson Extrapolation
+                </Tab>
                 <Tab href="#" disabled>
                   3D Graph Plotter
                 </Tab>
