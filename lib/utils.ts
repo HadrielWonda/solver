@@ -12,8 +12,8 @@ interface ReplacementRule {
 
 export function latexToMathjs(latexString: string): string {
   const rules: ReplacementRule[] = [
+    { pattern: /\\frac\{(\d)(\d)\}/g, replacement: "(($1)/($2))" }, // Fraction conversion
     { pattern: /\\frac\{(.*?)\}\{(.*?)\}/g, replacement: "(($1)/($2))" }, // Fraction conversion
-    // { pattern: /\\frac\{(\d)(\d)\}/g, replacement: "(($1)/($2))" }, // Fraction conversion
     { pattern: /\^\{(.*)\}/g, replacement: "^($1)" }, // Fraction conversion
     { pattern: /\\left\((.*?)\\right\)/g, replacement: "($1)" }, // Left and right parenthesis removal
     { pattern: /\\sin/g, replacement: "sin" }, // Trigonometric function conversion
@@ -23,13 +23,13 @@ export function latexToMathjs(latexString: string): string {
     { pattern: /\\pi/g, replacement: "PI" }, // Mathematical constant pi
     { pattern: /\\theta/g, replacement: "theta" }, // Theta symbol
     { pattern: /\\gamma/g, replacement: "gamma" }, // Gamma symbol
-    { pattern: /\\exponentialE\^{(.*?)}/g, replacement: "exp($1)" }, // Exponential function with ^ notation
-    { pattern: /\\exponentialE\^(\d)/g, replacement: "exp($1)" }, // Exponential function of a constant with ^ notation
-    { pattern: /\\exp/g, replacement: "exp" }, // Exponential function with \left and \right notation
     { pattern: /\\log/g, replacement: "log" }, // Exponential function with \left and \right notation
     { pattern: /\\ln/g, replacement: "ln" }, // Exponential function with \left and \right notation
     { pattern: /\\cdot/g, replacement: "*" }, // Multiplication symbol replacement
-    { pattern: /\\cdot/g, replacement: "*" }, // Multiplication symbol replacement
+    { pattern: /\\exponentialE[\^*]?(\d)/g, replacement: "exp($1)" },
+    { pattern: /\\exponentialE\^(\d)/g, replacement: "exp($1)" }, // Exponential function of a constant with ^ notation
+    { pattern: /\\exponentialE[\^*]?/g, replacement: "exp" },
+    { pattern: /\\exp[\^*]?/g, replacement: "exp" }, // Exponential function with \left and \right notation
     // Add more replacements as needed
   ];
 

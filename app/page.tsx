@@ -161,6 +161,7 @@ export default function Home() {
               </h4>
               <div className="grid w-full grid-cols-2 items-start justify-center gap-4 md:grid-cols-4">
                 <Tab href="/ode/euler">Euler’s Method</Tab>
+                <Tab href="/ode/heun">Heun’s Method</Tab>
                 {/* <Tab href="/newton-cotes/simpson1">Simpson’s 1/3 Rule</Tab>
                 <Tab href="/newton-cotes/simpson3">Simpson’s 3/8 Rule</Tab>
                 <Tab href="/newton-cotes/boole">Boole’s Rule</Tab>
