@@ -106,7 +106,9 @@ export const Sidebar = ({
             </button>
           </div>
           <div className=" flex-1 w-full overflow-auto p-3">
-            <h3 className="font-semibold mb-4 text-xl">The Trapezoidal Rule</h3>
+            <h3 className="font-semibold mb-4 text-xl">
+              The Simpson’s 1/3 Rule
+            </h3>
             <div className="space-y-3 mt-8">
               <h4 className="font-semibold mb-4">Model</h4>
               <Tabs

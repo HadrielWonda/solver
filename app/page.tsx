@@ -141,6 +141,9 @@ export default function Home() {
               </h4>
               <div className="grid w-full grid-cols-2 items-start justify-center gap-4 md:grid-cols-4">
                 <Tab href="/newton-cotes/trapezoidal">Trapezoidal Rule</Tab>
+                <Tab href="/newton-cotes/simpson1">Simpson’s 1/3 Rule</Tab>
+                <Tab href="/newton-cotes/simpson3">Simpson’s 3/8 Rule</Tab>
+                <Tab href="/newton-cotes/Boole">Boole’s Rule</Tab>
                 <Tab href="#" disabled>
                   3D Graph Plotter
                 </Tab>
