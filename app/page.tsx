@@ -143,7 +143,10 @@ export default function Home() {
                 <Tab href="/newton-cotes/trapezoidal">Trapezoidal Rule</Tab>
                 <Tab href="/newton-cotes/simpson1">Simpson’s 1/3 Rule</Tab>
                 <Tab href="/newton-cotes/simpson3">Simpson’s 3/8 Rule</Tab>
-                <Tab href="/newton-cotes/Boole">Boole’s Rule</Tab>
+                <Tab href="/newton-cotes/boole">Boole’s Rule</Tab>
+                <Tab href="/differentiation/hadf" className="col-span-2">
+                  High-Accuracy Differentiation Formulas
+                </Tab>
                 <Tab href="#" disabled>
                   3D Graph Plotter
                 </Tab>
