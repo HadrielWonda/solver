@@ -172,6 +172,15 @@ export default function Home() {
                 <Tab href="/ode/ralston" className="col-span-2">
                   Second-Order Runge-Kutta: Ralston’s Method
                 </Tab>
+                <Tab href="/ode/rk3" className="col-span-2">
+                  Third-Order Runge-Kutta Method
+                </Tab>
+                <Tab href="/ode/rk4" className="col-span-2">
+                  Fourth-Order Runge-Kutta Method
+                </Tab>
+                <Tab href="/ode/rk4" className="col-span-2">
+                  Fifth-Order Runge-Kutta: Butcher’s Method
+                </Tab>
                 {/* <Tab href="/newton-cotes/simpson1">Simpson’s 1/3 Rule</Tab>
                 <Tab href="/newton-cotes/simpson3">Simpson’s 3/8 Rule</Tab>
                 <Tab href="/newton-cotes/boole">Boole’s Rule</Tab>

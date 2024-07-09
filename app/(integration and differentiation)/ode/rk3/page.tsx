@@ -117,7 +117,7 @@ const CodeDialog = () => {
       onAnimationStart={() => setReRenderTrigger((i) => !i)}
     >
       <DialogHeader>
-        <DialogTitle>Second-Order Runge-Kutta: Ralston’s Method</DialogTitle>
+        <DialogTitle>Third-Order Runge-Kutta Methods</DialogTitle>
         <DialogDescription>
           Copy code to make changes or run in a different enviroment.
         </DialogDescription>
@@ -201,7 +201,7 @@ const IntroSection = ({ solve }: { solve: () => void }) => {
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
                     <BreadcrumbPage>
-                      Second-Order Runge-Kutta: Ralston’s Method
+                      Third-Order Runge-Kutta Methods
                     </BreadcrumbPage>
                   </BreadcrumbItem>
                 </BreadcrumbList>
@@ -211,7 +211,7 @@ const IntroSection = ({ solve }: { solve: () => void }) => {
           <div className="space-y-2">
             <div className="mb-12 mt-2">
               <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl md:text-6xl text-center mb-4">
-                Second-Order Runge-Kutta: Ralston’s Method
+                Third-Order Runge-Kutta Methods
               </h1>
               <div className="flex gap-4 justify-center items-center">
                 <Button onClick={solve}>Start Computation</Button>
@@ -228,23 +228,28 @@ const IntroSection = ({ solve }: { solve: () => void }) => {
               <RKSection />
               <section>
                 <h4 className="bold font-bold my-2 text-left">
-                  Second-Order Runge-Kutta: Ralston’s Method
+                  Third-Order Runge-Kutta Methods
                 </h4>
 
                 <Parargraph>
-                  The second-order Runge-Kutta equation is
+                  For n = 3, a derivation similar to the one for the
+                  second-order method can be performed. The result of this
+                  derivation is six equations with eight unknowns. Therefore,
+                  values for two of the unknowns must be specifi ed a priori in
+                  order to determine the remaining parameters. One common
+                  version that results is
                 </Parargraph>
                 <MathBlock>
                   <MathRow>
                     <MathData>
-                      <msubsup>
+                      <msub>
                         <mi>y</mi>
                         <mrow>
                           <mi>i</mi>
                           <mo>+</mo>
                           <mn>1</mn>
                         </mrow>
-                      </msubsup>
+                      </msub>
                     </MathData>
                     <MathData>
                       <mo>=</mo>
@@ -253,25 +258,25 @@ const IntroSection = ({ solve }: { solve: () => void }) => {
                       <mi>y</mi>
                       <mi>i</mi>
                       <mo>+</mo>
+                      <mfrac>
+                        <mn>1</mn>
+                        <mn>6</mn>
+                      </mfrac>
                       <mo>(</mo>
                       <msub>
-                        <mi>a</mi>
-                        <mn>1</mn>
-                      </msub>
-                      <msub>
                         <mi>k</mi>
                         <mn>1</mn>
                       </msub>
-                      <mo> </mo>
                       <mo>+</mo>
-                      <mo> </mo>
-                      <msub>
-                        <mi>a</mi>
-                        <mn>2</mn>
-                      </msub>
+                      <mn>4</mn>
                       <msub>
                         <mi>k</mi>
                         <mn>2</mn>
+                      </msub>
+                      <mo>+</mo>
+                      <msub>
+                        <mi>k</mi>
+                        <mn>3</mn>
                       </msub>
                       <mo>)</mo>
                       <mo>&#x2219;</mo>
@@ -298,237 +303,7 @@ const IntroSection = ({ solve }: { solve: () => void }) => {
                         <mi>x</mi>
                         <mi>i</mi>
                       </msub>
-                      <mo>,</mo>
-                      <msub>
-                        <mi>y</mi>
-                        <mi>i</mi>
-                      </msub>
-                      <mo>)</mo>
-                    </MathData>
-                  </MathRow>
-                  <MathRow>
-                    <MathData>
-                      <msub>
-                        <mi>k</mi>
-                        <mn>2</mn>
-                      </msub>
-                    </MathData>
-                    <MathData>
-                      <mo>=</mo>
-                    </MathData>
-                    <MathData>
-                      <mi>f</mi>
-                      <mo>(</mo>
-                      <msub>
-                        <mi>x</mi>
-                        <mi>i</mi>
-                      </msub>
-                      <mo>+</mo>
-                      <msub>
-                        <mi>p</mi>
-                        <mn>1</mn>
-                      </msub>
-                      <mi>h</mi>
-                      <mo>,</mo>
-                      <mo> </mo>
-                      <msub>
-                        <mi>y</mi>
-                        <mi>i</mi>
-                        <mo>+</mo>
-                        <msub>
-                          <mi>q</mi>
-                          <mn>11</mn>
-                        </msub>
-                        <msub>
-                          <mi>k</mi>
-                          <mn>1</mn>
-                        </msub>
-                        <mo>&#x2219;</mo>
-                        <mi>h</mi>
-                      </msub>
-                      <mo>)</mo>
-                    </MathData>
-                  </MathRow>
-                </MathBlock>
-                <Parargraph>
-                  Values for al, a2, p1, and q11 are evaluated by setting the
-                  equation equal to a Taylor series expansion to the
-                  second-order term. By doing this, we derive three equations to
-                  evaluate the four unknown constants. The three equations are
-                </Parargraph>
-                <MathBlock>
-                  <MathRow>
-                    <MathData>
-                      <msub>
-                        <mi>a</mi>
-                        <mn>1</mn>
-                      </msub>
-                      <mo>+</mo>
-                      <msub>
-                        <mi>a</mi>
-                        <mn>2</mn>
-                      </msub>
-                    </MathData>
-                    <MathData>
-                      <mo>=</mo>
-                    </MathData>
-                    <MathData>
-                      <mn>1</mn>
-                    </MathData>
-                  </MathRow>
-                  <MathRow>
-                    <MathData>
-                      <msub>
-                        <mi>a</mi>
-                        <mn>2</mn>
-                      </msub>
-                      <msub>
-                        <mi>p</mi>
-                        <mn>1</mn>
-                      </msub>
-                    </MathData>
-                    <MathData>
-                      <mo>=</mo>
-                    </MathData>
-                    <MathData>
-                      <mfrac>
-                        <mn>1</mn>
-                        <mn>2</mn>
-                      </mfrac>
-                    </MathData>
-                  </MathRow>
-                  <MathRow>
-                    <MathData>
-                      <msub>
-                        <mi>a</mi>
-                        <mn>2</mn>
-                      </msub>
-                      <msub>
-                        <mi>q</mi>
-                        <mn>11</mn>
-                      </msub>
-                    </MathData>
-                    <MathData>
-                      <mo>=</mo>
-                    </MathData>
-                    <MathData>
-                      <mfrac>
-                        <mn>1</mn>
-                        <mn>2</mn>
-                      </mfrac>
-                    </MathData>
-                  </MathRow>
-                </MathBlock>
-                <Parargraph>
-                  Ralston (1962) and Ralston and Rabinowitz (1978) determined
-                  that choosing{" "}
-                  <math>
-                    <msub>
-                      <mi>a</mi>
-                      <mn>2</mn>
-                    </msub>
-                    <mo>=</mo>{" "}
-                    <mfrac>
-                      <mn>2</mn>
-                      <mn>3</mn>
-                    </mfrac>
-                  </math>{" "}
-                  provides a minimum bound on the truncation error for the
-                  second-order RK algorithms. For this version,{" "}
-                  <math>
-                    <msub>
-                      <mi>a</mi>
-                      <mn>1</mn>
-                    </msub>
-                    <mo>=</mo>{" "}
-                    <mfrac>
-                      <mn>1</mn>
-                      <mn>3</mn>
-                    </mfrac>
-                  </math>{" "}
-                  and{" "}
-                  <math>
-                    <msub>
-                      <mi>p</mi>
-                      <mn>1</mn>
-                    </msub>
-                    <mo>=</mo>{" "}
-                    <msub>
-                      <mi>q</mi>
-                      <mn>11</mn>
-                    </msub>
-                    <mo>=</mo>{" "}
-                    <mfrac>
-                      <mn>3</mn>
-                      <mn>4</mn>
-                    </mfrac>
-                  </math>{" "}
-                  and yields
-                </Parargraph>
-                <MathBlock>
-                  <MathRow>
-                    <MathData>
-                      <msub>
-                        <mi>y</mi>
-                        <mrow>
-                          <mi>i</mi>
-                          <mo>+</mo>
-                          <mn>1</mn>
-                        </mrow>
-                      </msub>
-                    </MathData>
-                    <MathData>
-                      <mo>=</mo>
-                    </MathData>
-                    <MathData>
-                      <mi>y</mi>
-                      <mi>i</mi>
-                      <mo>+</mo>
-
-                      <mo>(</mo>
-                      <mfrac>
-                        <mn>1</mn>
-                        <mn>3</mn>
-                      </mfrac>
-                      <msub>
-                        <mi>k</mi>
-                        <mn>1</mn>
-                      </msub>
-                      <mo>+</mo>
-                      <mfrac>
-                        <mn>2</mn>
-                        <mn>3</mn>
-                      </mfrac>
-                      <msub>
-                        <mi>k</mi>
-                        <mn>2</mn>
-                      </msub>
-                      <mo>)</mo>
-                      <mo>&#x2219;</mo>
-                      <mi>h</mi>
-                    </MathData>
-                  </MathRow>
-                </MathBlock>
-                <Parargraph>Where</Parargraph>
-                <MathBlock>
-                  <MathRow>
-                    <MathData>
-                      <msub>
-                        <mi>k</mi>
-                        <mn>1</mn>
-                      </msub>
-                    </MathData>
-                    <MathData>
-                      <mo>=</mo>
-                    </MathData>
-                    <MathData>
-                      <mi>f</mi>
-                      <mo>(</mo>
-                      <msub>
-                        <mi>x</mi>
-                        <mi>i</mi>
-                      </msub>
-                      <mo>,</mo>
+                      <mo>, </mo>
                       <msub>
                         <mi>y</mi>
                         <mi>i</mi>
@@ -555,8 +330,8 @@ const IntroSection = ({ solve }: { solve: () => void }) => {
                       </msub>
                       <mo>+</mo>
                       <mfrac>
-                        <mn>3</mn>
-                        <mn>4</mn>
+                        <mn>1</mn>
+                        <mn>2</mn>
                       </mfrac>
                       <mi>h</mi>
                       <mo>, </mo>
@@ -566,8 +341,8 @@ const IntroSection = ({ solve }: { solve: () => void }) => {
                       </msub>
                       <mo>+</mo>
                       <mfrac>
-                        <mn>3</mn>
-                        <mn>4</mn>
+                        <mn>1</mn>
+                        <mn>2</mn>
                       </mfrac>
                       <msub>
                         <mi>k</mi>
@@ -578,7 +353,53 @@ const IntroSection = ({ solve }: { solve: () => void }) => {
                       <mo>)</mo>
                     </MathData>
                   </MathRow>
+                  <MathRow>
+                    <MathData>
+                      <msub>
+                        <mi>k</mi>
+                        <mn>3</mn>
+                      </msub>
+                    </MathData>
+                    <MathData>
+                      <mo>=</mo>
+                    </MathData>
+                    <MathData>
+                      <mi>f</mi>
+                      <mo>(</mo>
+                      <msub>
+                        <mi>x</mi>
+                        <mi>i</mi>
+                      </msub>
+                      <mo>+</mo>
+                      <mi>h</mi>
+                      <mo>, </mo>
+                      <msub>
+                        <mi>y</mi>
+                        <mi>i</mi>
+                      </msub>
+                      <mo>-</mo>
+                      <msub>
+                        <mi>k</mi>
+                        <mn>1</mn>
+                      </msub>
+                      <mi>h</mi>
+                      <mo>+</mo>
+                      <mn>2</mn>
+                      <msub>
+                        <mi>k</mi>
+                        <mn>2</mn>
+                      </msub>
+                      <mi>h</mi>
+                      <mo>)</mo>
+                    </MathData>
+                  </MathRow>
                 </MathBlock>
+                <Parargraph>
+                  In any case, the third-order RK methods yield exact results
+                  when the solution is a cubic. When dealing with polynomials,
+                  it will also be exact when the differential equation is cubic
+                  and the solution is quartic.
+                </Parargraph>
               </section>
             </div>
             <div>
@@ -629,7 +450,7 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
     async () => {
       try {
         const res = await fetch(
-          "https://solver-python-api.onrender.com/ode/ralston",
+          "https://solver-python-api.onrender.com/ode/rk3",
           {
             method: "POST",
             headers: {
@@ -659,6 +480,7 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
             y: number;
             k1: number;
             k2: number;
+            k3: number;
           }[]
         >;
       } catch (error: Error | any) {
@@ -720,7 +542,7 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
                     <BreadcrumbPage>
-                      Second-Order Runge-Kutta: Ralston’s Method
+                      Third-Order Runge-Kutta Methods
                     </BreadcrumbPage>
                   </BreadcrumbItem>
                 </BreadcrumbList>
@@ -785,6 +607,14 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
                       <msub>
                         <mi>k</mi>
                         <mn>2</mn>
+                      </msub>
+                    </math>
+                  </TableHead>
+                  <TableHead className="">
+                    <math>
+                      <msub>
+                        <mi>k</mi>
+                        <mn>3</mn>
                       </msub>
                     </math>
                   </TableHead>
@@ -951,6 +781,14 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
                       </msub>
                     </math>
                   </TableHead>
+                  <TableHead className="">
+                    <math>
+                      <msub>
+                        <mi>k</mi>
+                        <mn>3</mn>
+                      </msub>
+                    </math>
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className="h-100% overflow-auto">
@@ -961,6 +799,7 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
                     <TableCell className="font-medium">{r.y}</TableCell>
                     <TableCell>{r.k1}</TableCell>
                     <TableCell>{r.k2}</TableCell>
+                    <TableCell>{r.k3}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -973,6 +812,7 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
                       ...r,
                       k1: r.k1 ?? 0,
                       k2: r.k2 ?? 0,
+                      k3: r.k3 ?? 0,
                     })),
                   ];
                   // newResults[0].ea = 0;
