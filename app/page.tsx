@@ -169,7 +169,7 @@ export default function Home() {
                 <Tab href="/ode/midpoint" className="col-span-2">
                   The Midpoint (or Improved Polygon) Method
                 </Tab>
-                <Tab href="/ode/midpoint" className="col-span-2" disabled>
+                <Tab href="/ode/ralston" className="col-span-2">
                   Second-Order Runge-Kutta: Ralston’s Method
                 </Tab>
                 {/* <Tab href="/newton-cotes/simpson1">Simpson’s 1/3 Rule</Tab>

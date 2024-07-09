@@ -16,6 +16,7 @@ export function latexToMathjs(latexString: string): string {
     { pattern: /\\frac\{(.*?)\}\{(.*?)\}/g, replacement: "(($1)/($2))" }, // Fraction conversion
     { pattern: /\^\{(.*)\}/g, replacement: "^($1)" }, // Fraction conversion
     { pattern: /\\left\((.*?)\\right\)/g, replacement: "($1)" }, // Left and right parenthesis removal
+    // { pattern: /\\left(.*?)\\right/g, replacement: "($1)" }, // Left and right parenthesis removal
     { pattern: /\\sin/g, replacement: "sin" }, // Trigonometric function conversion
     { pattern: /\\cos/g, replacement: "cos" },
     { pattern: /\\tan/g, replacement: "tan" },
@@ -30,6 +31,7 @@ export function latexToMathjs(latexString: string): string {
     { pattern: /\\exponentialE\^(\d)/g, replacement: "exp($1)" }, // Exponential function of a constant with ^ notation
     { pattern: /\\exponentialE[\^*]?/g, replacement: "exp" },
     { pattern: /\\exp[\^*]?/g, replacement: "exp" }, // Exponential function with \left and \right notation
+    { pattern: /\\left\((.*?)\\right\)/g, replacement: "($1)" },
     // Add more replacements as needed
   ];
 
