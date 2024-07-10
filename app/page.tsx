@@ -178,21 +178,31 @@ export default function Home() {
                 <Tab href="/ode/rk4" className="col-span-2">
                   Fourth-Order Runge-Kutta Method
                 </Tab>
-                <Tab href="/ode/rk4" className="col-span-2">
+                <Tab href="/ode/rk5" className="col-span-2">
                   Fifth-Order Runge-Kutta: Butcher’s Method
                 </Tab>
-                {/* <Tab href="/newton-cotes/simpson1">Simpson’s 1/3 Rule</Tab>
-                <Tab href="/newton-cotes/simpson3">Simpson’s 3/8 Rule</Tab>
-                <Tab href="/newton-cotes/boole">Boole’s Rule</Tab>
-                <Tab href="/differentiation/hadf" className="col-span-2">
-                  High-Accuracy Differentiation Formulas
+              </div>
+            </div>
+            <div className="w-full mb-12">
+              <h4 className="bold font-bold my-2 text-left">Systems of ODEs</h4>
+              <div className="grid w-full grid-cols-2 items-start justify-center gap-4 md:grid-cols-4">
+                <Tab href="/sys-of-ode/euler">Euler’s Method</Tab>
+                <Tab href="/sys-of-ode/heun">Heun’s Method</Tab>
+                <Tab href="/sys-of-ode/midpoint" className="col-span-2">
+                  The Midpoint (or Improved Polygon) Method
                 </Tab>
-                <Tab href="/differentiation/richardson">
-                  Richardson Extrapolation
+                <Tab href="/sys-of-ode/ralston" className="col-span-2">
+                  Second-Order Runge-Kutta: Ralston’s Method
                 </Tab>
-                <Tab href="#" disabled>
-                  3D Graph Plotter
-                </Tab> */}
+                <Tab href="/sys-of-ode/rk3" className="col-span-2">
+                  Third-Order Runge-Kutta Method
+                </Tab>
+                <Tab href="/sys-of-ode/rk4" className="col-span-2">
+                  Fourth-Order Runge-Kutta Method
+                </Tab>
+                <Tab href="/sys-of-ode/rk5" className="col-span-2">
+                  Fifth-Order Runge-Kutta: Butcher’s Method
+                </Tab>
               </div>
             </div>
           </div>
