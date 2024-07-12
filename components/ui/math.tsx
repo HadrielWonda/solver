@@ -5,13 +5,15 @@ import "mathlive/static.css";
 
 export function MathBlock({
   children,
+  className,
   ...props
 }: {
   children: ReactNode;
+  className?: string;
   props?: any;
 }) {
   return (
-    <math className="my-4 mx-4 text-[1.2rem]" {...props}>
+    <math className={cn("my-4 mx-4 text-[1.2rem]", className)} {...props}>
       <mtable className="border-spacing-y-2">{children}</mtable>
     </math>
   );

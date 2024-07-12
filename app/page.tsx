@@ -205,6 +205,16 @@ export default function Home() {
                 </Tab>
               </div>
             </div>
+            <div className="w-full mb-12">
+              <h4 className="bold font-bold my-2 text-left">
+                Boundary & Eigen Value Problem
+              </h4>
+              <div className="grid w-full grid-cols-2 items-start justify-center gap-4 md:grid-cols-4">
+                <Tab href="/boundary-and-eigen/fdm">
+                  Finite Difference Method
+                </Tab>
+              </div>
+            </div>
           </div>
         </div>
       </div>
