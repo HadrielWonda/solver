@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import Script from "next/script";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -104,8 +105,10 @@ export default function RootLayout({
         <script defer src="//unpkg.com/mathlive"></script>
       </head>
       <body className={inter.className}>
-        {children}
-        <Toaster richColors />
+        <TooltipProvider>
+          {children}
+          <Toaster richColors />
+        </TooltipProvider>
       </body>
       <Script src="//cdnjs.cloudflare.com/ajax/libs/mathjs/1.5.2/math.min.js" />
       <Script src="//unpkg.com/mathlive" />

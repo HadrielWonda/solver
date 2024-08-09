@@ -91,8 +91,8 @@ export const Sidebar = ({
     !isNaN(Number(settings.x1)) &&
     !isNaN(Number(settings.x2)) &&
     !isNaN(Number(settings.y1)) &&
-    !isNaN(Number(settings.h)) &&
-    settings.latex.includes("x");
+    !isNaN(Number(settings.h));
+  // && settings.latex.includes("x");
 
   return (
     <AnimatePresence mode="wait" initial={false}>

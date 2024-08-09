@@ -515,11 +515,11 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
           {
             iteration: number;
             x: number;
-            y: number;
-            k1: number;
-            k2: number;
-            k3: number;
-            k4: number;
+            y: string;
+            k1: string;
+            k2: string;
+            k3: string;
+            k4: string;
           }[]
         >;
       } catch (error: Error | any) {
