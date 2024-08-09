@@ -113,15 +113,15 @@ export default function Home() {
               <h4 className="bold font-bold my-2 text-left">Curve Fitting</h4>
               <div className="grid w-full grid-cols-2 items-start justify-center gap-4 md:grid-cols-4">
                 <Tab
-                  href="/roots-of-polynomials/muller"
-                  disabled
+                  href="/curve-fitting/linear-regression"
+                  // disabled
                   className="col-span-2"
                 >
                   Linear Least-Square Regression
                 </Tab>
                 <Tab
-                  href="/roots-of-polynomials/bairstow"
-                  disabled
+                  href="/curve-fitting/polynomial-regression"
+                  // disabled
                   className="col-span-2"
                 >
                   Polynomial Least-Square Regression
