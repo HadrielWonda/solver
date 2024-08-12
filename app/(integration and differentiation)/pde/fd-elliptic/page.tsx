@@ -502,7 +502,7 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
     async () => {
       try {
         const res = await fetch(
-          "http://127.0.0.1:8000/pde/finite-difference-elliptic",
+          "https://solver-python-api.onrender.com/pde/finite-difference-elliptic",
           {
             method: "POST",
             headers: {

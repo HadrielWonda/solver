@@ -104,9 +104,7 @@ export const Sidebar = ({
             </button>
           </div>
           <div className=" flex-1 w-full overflow-auto p-3">
-            <h3 className="font-semibold mb-4 text-xl">
-              High-Accuracy Differentiation Formulas
-            </h3>
+            <h3 className="font-semibold mb-4 text-xl">Linear Regression</h3>
             <div className="space-y-3 mt-8">
               <h4 className="font-semibold mb-4">Data Model</h4>
               <Tabs
@@ -138,6 +136,7 @@ export const Sidebar = ({
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
+
               {settings.dataType == "equation" ? (
                 <div className="py-3 overflow-hidden">
                   <label

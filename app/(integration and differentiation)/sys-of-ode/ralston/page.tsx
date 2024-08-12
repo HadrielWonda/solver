@@ -626,13 +626,16 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
     "/api/user",
     async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8000/sys-of-ode/ralston", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(initialValues),
-        });
+        const res = await fetch(
+          "https://solver-python-api.onrender.com/sys-of-ode/ralston",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(initialValues),
+          }
+        );
 
         const result = await res.json();
 
