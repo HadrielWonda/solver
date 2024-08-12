@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { run } from "node:test";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import TableUploadModal from "@/components/component/TableUploadModal";
 
 // export type equationSettings = {
 //   dataType: "equation" | "data";
@@ -19,8 +20,8 @@ import { run } from "node:test";
 //   n: string;
 // };
 
-export type differentiationSettings = {
-  dataType: "equation" | "data";
+export type regressionSettings = {
+  data?: string[][];
   type: "forward" | "backward" | "central";
   order: "1" | "2" | "3" | "4";
   equation: string;
@@ -38,14 +39,13 @@ export const Sidebar = ({
 {
   open: boolean;
   close: () => void;
-  setInitialSettings: (settings: differentiationSettings) => void;
+  setInitialSettings: (settings: regressionSettings) => void;
   // solve: any;
   running: boolean;
 }) => {
   // const [mode, setMode] = useState<"edit" | "visualize">("edit");
   const id = useId();
-  const [settings, setSettings] = useState<differentiationSettings>({
-    dataType: "equation",
+  const [settings, setSettings] = useState<regressionSettings>({
     type: "forward",
     order: "1",
     equation: "",
@@ -105,9 +105,50 @@ export const Sidebar = ({
           </div>
           <div className=" flex-1 w-full overflow-auto p-3">
             <h3 className="font-semibold mb-4 text-xl">Linear Regression</h3>
-            <div className="space-y-3 mt-8">
-              <h4 className="font-semibold mb-4">Data Model</h4>
-              <Tabs
+            <Dialog>
+              {settings.data ? (
+                <div className="flex gap-4">
+                  <DialogTrigger className="flex-1">
+                    <div className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 w-full">
+                      Edit Data
+                    </div>
+                  </DialogTrigger>
+                  <Button
+                    variant="destructive"
+                    onClick={() => {
+                      setSettings((s) => ({
+                        ...s,
+                        data: undefined,
+                      }));
+                    }}
+                    className="flex-1"
+                  >
+                    Clear Data
+                  </Button>
+                </div>
+              ) : (
+                <DialogTrigger className="w-full">
+                  <div className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 w-full">
+                    Add Data
+                  </div>
+                </DialogTrigger>
+              )}
+              <TableUploadModal
+                initialData={settings.data}
+                setInitialData={(data) => {
+                  setSettings((s) => ({
+                    ...s,
+                    data: data,
+                  }));
+                }}
+              />
+            </Dialog>
+            {settings.data && (
+              <>
+                <div className="space-y-3 mt-8">
+                  <h4 className="font-semibold mb-4">Data</h4>
+
+                  {/* <Tabs
                 defaultValue={settings.dataType}
                 // className="w-[400px]"
               >
@@ -135,182 +176,184 @@ export const Sidebar = ({
                     Table/File
                   </TabsTrigger>
                 </TabsList>
-              </Tabs>
+              </Tabs> */}
 
-              {settings.dataType == "equation" ? (
-                <div className="py-3 overflow-hidden">
-                  <label
-                    className="text-sm font-medium text-gray-900 whitespace-nowrap block"
-                    htmlFor={id}
-                  >
-                    f(x) =
-                  </label>
-                  <math-field
-                    ref={mf}
-                    onInput={(evt) =>
-                      setSettings((s) => ({
-                        ...s,
-                        equation: latexToMathjs(
-                          (evt.target as HTMLInputElement).value
-                        ),
-                        latex: (evt.target as HTMLInputElement).value,
-                      }))
-                    }
-                    style={{
-                      width: "100%",
-                      maxWidth: "353px",
-                    }}
-                  >
-                    {settings.latex}
-                  </math-field>
+                  {/* {settings.dataType == "equation" ? (
+                    <div className="py-3 overflow-hidden">
+                      <label
+                        className="text-sm font-medium text-gray-900 whitespace-nowrap block"
+                        htmlFor={id}
+                      >
+                        f(x) =
+                      </label>
+                      <math-field
+                        ref={mf}
+                        onInput={(evt) =>
+                          setSettings((s) => ({
+                            ...s,
+                            equation: latexToMathjs(
+                              (evt.target as HTMLInputElement).value
+                            ),
+                            latex: (evt.target as HTMLInputElement).value,
+                          }))
+                        }
+                        style={{
+                          width: "100%",
+                          maxWidth: "353px",
+                        }}
+                      >
+                        {settings.latex}
+                      </math-field>
+                    </div>
+                  ) : (
+                    <div>Type of data</div>
+                  )} */}
                 </div>
-              ) : (
-                <div>Type of data</div>
-              )}
-            </div>
 
-            <div className="space-y-3 mt-8">
-              <h4 className="font-semibold mb-4">Order</h4>
-              <Tabs
-                defaultValue={settings.order}
-                // className="w-[400px]"
-              >
-                <TabsList className="w-fit">
-                  <TabsTrigger
-                    value="1"
-                    onClick={() =>
-                      setSettings((s) => ({
-                        ...s,
-                        order: "1",
-                      }))
-                    }
+                <div className="space-y-3 mt-8">
+                  <h4 className="font-semibold mb-4">Order</h4>
+                  <Tabs
+                    defaultValue={settings.order}
+                    // className="w-[400px]"
                   >
-                    First
-                  </TabsTrigger>
-                  <TabsTrigger
-                    onClick={() =>
-                      setSettings((s) => ({
-                        ...s,
-                        order: "2",
-                      }))
-                    }
-                    value="2"
-                  >
-                    Second
-                  </TabsTrigger>
-                  <TabsTrigger
-                    onClick={() =>
-                      setSettings((s) => ({
-                        ...s,
-                        order: "3",
-                      }))
-                    }
-                    value="3"
-                  >
-                    Third
-                  </TabsTrigger>
-                  <TabsTrigger
-                    onClick={() =>
-                      setSettings((s) => ({
-                        ...s,
-                        order: "4",
-                      }))
-                    }
-                    value="4"
-                  >
-                    Fourth
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
+                    <TabsList className="w-fit">
+                      <TabsTrigger
+                        value="1"
+                        onClick={() =>
+                          setSettings((s) => ({
+                            ...s,
+                            order: "1",
+                          }))
+                        }
+                      >
+                        First
+                      </TabsTrigger>
+                      <TabsTrigger
+                        onClick={() =>
+                          setSettings((s) => ({
+                            ...s,
+                            order: "2",
+                          }))
+                        }
+                        value="2"
+                      >
+                        Second
+                      </TabsTrigger>
+                      <TabsTrigger
+                        onClick={() =>
+                          setSettings((s) => ({
+                            ...s,
+                            order: "3",
+                          }))
+                        }
+                        value="3"
+                      >
+                        Third
+                      </TabsTrigger>
+                      <TabsTrigger
+                        onClick={() =>
+                          setSettings((s) => ({
+                            ...s,
+                            order: "4",
+                          }))
+                        }
+                        value="4"
+                      >
+                        Fourth
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
 
-            <div className="space-y-3 mt-8">
-              <h4 className="font-semibold mb-4">Mode</h4>
-              <Tabs
-                defaultValue={settings.type}
-                // className="w-[400px]"
-              >
-                <TabsList className="w-fit">
-                  <TabsTrigger
-                    value="forward"
-                    onClick={() =>
-                      setSettings((s) => ({
-                        ...s,
-                        type: "forward",
-                      }))
-                    }
+                <div className="space-y-3 mt-8">
+                  <h4 className="font-semibold mb-4">Mode</h4>
+                  <Tabs
+                    defaultValue={settings.type}
+                    // className="w-[400px]"
                   >
-                    Forward
-                  </TabsTrigger>
-                  <TabsTrigger
-                    onClick={() =>
-                      setSettings((s) => ({
-                        ...s,
-                        type: "central",
-                      }))
-                    }
-                    value="central"
-                  >
-                    Central
-                  </TabsTrigger>
-                  <TabsTrigger
-                    onClick={() =>
-                      setSettings((s) => ({
-                        ...s,
-                        type: "backward",
-                      }))
-                    }
-                    value="backward"
-                  >
-                    Backward
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
+                    <TabsList className="w-fit">
+                      <TabsTrigger
+                        value="forward"
+                        onClick={() =>
+                          setSettings((s) => ({
+                            ...s,
+                            type: "forward",
+                          }))
+                        }
+                      >
+                        Forward
+                      </TabsTrigger>
+                      <TabsTrigger
+                        onClick={() =>
+                          setSettings((s) => ({
+                            ...s,
+                            type: "central",
+                          }))
+                        }
+                        value="central"
+                      >
+                        Central
+                      </TabsTrigger>
+                      <TabsTrigger
+                        onClick={() =>
+                          setSettings((s) => ({
+                            ...s,
+                            type: "backward",
+                          }))
+                        }
+                        value="backward"
+                      >
+                        Backward
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
 
-            <div className="space-y-3 mt-5">
-              <h4 className="font-semibold mb-4">Point</h4>
-              <div className="grid w-full max-w-sm items-center gap-1.5">
-                <Label htmlFor="email">x = </Label>
-                <Input
-                  type="number"
-                  placeholder="0"
-                  value={settings.x}
-                  onChange={(e) =>
-                    setSettings((s) => ({
-                      ...s,
-                      x: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-            </div>
-            <div className="space-y-3 mt-5">
-              <h4 className="font-semibold mb-4">Step Size</h4>
-              <div className="grid w-full max-w-sm items-center gap-1.5">
-                <Label htmlFor="email">h = </Label>
-                <Input
-                  type="number"
-                  placeholder="0"
-                  value={settings.h}
-                  onChange={(e) =>
-                    setSettings((s) => ({
-                      ...s,
-                      h: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-            </div>
-            <div className="mt-8">
-              <Button
-                className="w-full"
-                disabled={!valid || running}
-                onClick={runComputation}
-              >
-                Run Computation
-              </Button>
-            </div>
+                <div className="space-y-3 mt-5">
+                  <h4 className="font-semibold mb-4">Point</h4>
+                  <div className="grid w-full max-w-sm items-center gap-1.5">
+                    <Label htmlFor="email">x = </Label>
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      value={settings.x}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          x: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="space-y-3 mt-5">
+                  <h4 className="font-semibold mb-4">Step Size</h4>
+                  <div className="grid w-full max-w-sm items-center gap-1.5">
+                    <Label htmlFor="email">h = </Label>
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      value={settings.h}
+                      onChange={(e) =>
+                        setSettings((s) => ({
+                          ...s,
+                          h: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="mt-8">
+                  <Button
+                    className="w-full"
+                    disabled={!valid || running}
+                    onClick={runComputation}
+                  >
+                    Run Computation
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </motion.div>
       )}

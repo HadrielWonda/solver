@@ -30,7 +30,7 @@ import Prism from "../../../public/prism.js";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { MdError } from "react-icons/md";
-import { Sidebar, differentiationSettings } from "./Sidebar";
+import { Sidebar, regressionSettings } from "./Sidebar";
 import { RiFileList3Line } from "react-icons/ri";
 import useSWRMutation from "swr/mutation";
 import {
@@ -733,7 +733,7 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
       <Sidebar
         open={sidebarOpen}
         close={closeSidebar}
-        setInitialSettings={(settings: differentiationSettings) => {
+        setInitialSettings={(settings: regressionSettings) => {
           setInitialValues({
             ...settings,
             order: Number(settings.order),
