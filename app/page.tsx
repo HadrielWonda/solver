@@ -117,14 +117,14 @@ export default function Home() {
                   // disabled
                   className="col-span-2"
                 >
-                  Linear Least-Square Regression
+                  Simple Least-Square Regression
                 </Tab>
                 <Tab
                   href="/curve-fitting/polynomial-regression"
-                  // disabled
+                  disabled
                   className="col-span-2"
                 >
-                  Polynomial Least-Square Regression
+                  Multiple Least-Square Regression
                 </Tab>
                 {/* <Tab
                   href="/systems-of-nonlinear-equations/newton-raphson"
