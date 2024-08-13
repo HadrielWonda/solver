@@ -46,3 +46,7 @@ export function latexToMathjs(latexString: string): string {
     return latexString; // or throw an error, depending on your preference
   }
 }
+
+export const capitalize = (str: string) => {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};

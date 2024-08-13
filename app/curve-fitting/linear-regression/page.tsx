@@ -1,6 +1,13 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
-import React, { useCallback, useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -50,6 +57,8 @@ import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import NewtonCotesSection from "@/components/NewtonCotesSection";
 import Image from "next/image";
+import { FunctionPlot, FunctionPlotProps } from "@/lib/graph/FunctionPlot";
+import { capitalize } from "@/lib/utils";
 
 class ResponseError extends Error {
   response: string;
@@ -655,26 +664,25 @@ const IntroSection = ({ solve }: { solve: () => void }) => {
 
 const SolveSection = ({ intro }: { intro: () => void }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const closeSidebar = useCallback(() => {
-    setSidebarOpen(false);
-  }, [setSidebarOpen]);
-  const openSidebar = useCallback(() => {
-    setSidebarOpen(true);
-  }, [setSidebarOpen]);
 
-  const [initialValues, setInitialValues] = useState<
+  const [data, setData] = useState<undefined | string[][]>();
+
+  const [models, setModels] = useState<
     | {
-        dataType: "equation" | "data";
-        type: "forward" | "backward" | "central";
-        order: number;
-        equation: string;
-        latex: string;
-        x: number;
-        h: number;
+        x: number[];
+        y: number[];
+        models: {
+          type: string;
+          name: string;
+          x: string;
+          y: string;
+        }[];
       }
     | undefined
   >();
-  const [latex, setLatex] = useState("");
+  // {
+  //   models: [{ type: "linear", x: "log(x)", y: "log(y)" }],
+  // }
 
   const {
     trigger,
@@ -687,13 +695,13 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
     async () => {
       try {
         const res = await fetch(
-          "https://solver-python-api.onrender.com/differentiation/hadf",
+          "https://solver-python-api.onrender.com/regression/linear",
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify(initialValues),
+            body: JSON.stringify(models),
           }
         );
 
@@ -710,7 +718,15 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
           }
         }
 
-        return result as Promise<number>;
+        return result as Promise<
+          {
+            m: string;
+            c: string;
+            y_expr: string;
+            type: string;
+            name: string;
+          }[]
+        >;
       } catch (error: Error | any) {
         throw new ResponseError("Bad fetch response", String(error));
       }
@@ -726,6 +742,103 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
   // console.log("data", results);
   // console.log("resultError", resultError?.response);
 
+  // Graph logics
+  const [size, setSize] = useState<
+    undefined | { width: number; height: number }
+  >();
+
+  const elementRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (elementRef.current) {
+      const rect = elementRef.current.getBoundingClientRect();
+      setSize({
+        width: rect.width,
+        height: rect.height,
+      }); // Should now be non-zero
+    }
+  }, []);
+
+  const [resultIndex, setResultIndex] = useState(0);
+
+  const points = useMemo(() => {
+    if (!data || data.length > 2) return [];
+    return Array(data[0].length)
+      .fill(0)
+      .map((_, i) => [Number(data[1][i]), Number(data[0][i])]);
+  }, [data]);
+
+  const options = useMemo(() => {
+    return {
+      data: [
+        ...(results
+          ? [
+              {
+                points,
+                fnType: "points",
+                color: "red",
+                graphType: "scatter",
+              },
+              {
+                fn: results[resultIndex].y_expr.replace("**", "^"),
+                color: "blue",
+              },
+            ]
+          : [
+              {
+                points,
+                fnType: "points",
+                color: "red",
+                graphType: "scatter",
+              },
+            ]),
+      ],
+      grid: true,
+      xAxis: { type: "linear" },
+      yAxis: { type: "linear" },
+      tip: undefined,
+      ...size,
+      ...(results
+        ? {
+            title: `y = ${results[resultIndex].y_expr.replace("**", "^")}`,
+            xAxis: {
+              label: "x - axis",
+            },
+            yAxis: {
+              label: "y - axis",
+            },
+          }
+        : {}),
+    };
+  }, [size, points, results, resultIndex]);
+
+  // const Graph = useMemo(
+  //   () => (size ? <FunctionPlot options={options as any} /> : null),
+  //   [options, size]
+  // );
+
+  const closeSidebar = useCallback(() => {
+    setSidebarOpen(false);
+    if (elementRef.current) {
+      const rect = elementRef.current.getBoundingClientRect();
+      setSize({
+        width: rect.width,
+        height: rect.height,
+      }); // Should now be non-zero
+    }
+  }, [setSidebarOpen]);
+
+  const openSidebar = useCallback(() => {
+    setSidebarOpen(true);
+    if (elementRef.current) {
+      const rect = elementRef.current.getBoundingClientRect();
+      setSize({
+        width: rect.width,
+        height: rect.height,
+      }); // Should now be non-zero
+    }
+  }, [setSidebarOpen]);
+
   return (
     <div className="w-full h-screen flex">
       {/* <Component /> */}
@@ -734,21 +847,22 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
         open={sidebarOpen}
         close={closeSidebar}
         setInitialSettings={(settings: regressionSettings) => {
-          setInitialValues({
+          if (!data) return;
+          setModels({
             ...settings,
-            order: Number(settings.order),
-            x: Number(settings.x),
-            h: Number(settings.h),
+            x: data[1].map(Number),
+            y: data[0].map(Number),
           });
-          setLatex(settings.equation);
           setTimeout(() => {
             trigger();
           }, 200);
         }}
         running={isMutating}
+        data={data}
+        setData={setData}
       />
       <div className="flex-1 flex flex-col w-full h-screen relative overflow-y-hidden">
-        <div className="pt-3 px-5 flex items-center gap-3 justify-between">
+        <div className="pt-3 px-5 flex items-center gap-3 justify-between w-full">
           <div className="flex items-center gap-3">
             {!sidebarOpen && (
               <button
@@ -789,202 +903,235 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
             </TabsList>
           </Tabs>
         </div>
-        {isMutating ? (
-          <div className="flex-1">
-            <div className="py-8 px-5">
-              <Skeleton className="h-12 w-[300px] mb-6" />
-              <div className="space-y-2">
-                <Skeleton className="h-5 w-[340px]" />
-                <Skeleton className="h-4 w-[340px]" />
-                <Skeleton className="h-4 w-[340px]" />
-              </div>
-            </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[100px]">Iteration</TableHead>
-                  <TableHead>x0</TableHead>
-                  <TableHead>x1</TableHead>
-                  <TableHead>x2</TableHead>
-                  <TableHead className="">xr</TableHead>
-                  <TableHead className="">Abs. Rel. Error (%)</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell className="font-medium">
-                    <Skeleton className="h-4 w-[80%]" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[60%]" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[70%]" />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Skeleton className="h-4 w-[50%]" />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Skeleton className="h-4 w-[50%]" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[70%]" />
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium">
-                    <Skeleton className="h-4 w-[80%]" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[60%]" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[70%]" />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Skeleton className="h-4 w-[50%]" />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Skeleton className="h-4 w-[50%]" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[70%]" />
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium">
-                    <Skeleton className="h-4 w-[80%]" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[60%]" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[70%]" />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Skeleton className="h-4 w-[50%]" />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Skeleton className="h-4 w-[50%]" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[70%]" />
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium">
-                    <Skeleton className="h-4 w-[80%]" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[60%]" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[70%]" />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Skeleton className="h-4 w-[50%]" />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Skeleton className="h-4 w-[50%]" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[70%]" />
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium">
-                    <Skeleton className="h-4 w-[80%]" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[60%]" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[70%]" />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Skeleton className="h-4 w-[50%]" />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Skeleton className="h-4 w-[50%]" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[70%]" />
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-            <div className="my-6 flex justify-end px-5">
-              <Skeleton className="h-12 w-[300px]" />
-            </div>
-          </div>
-        ) : resultError ? (
-          <div className="flex items-center justify-center w-full min-h-[400px] flex-col gap-2 p-4 text-center h-full">
-            <MdError className="text-red-600" size={64} />
 
-            <div className="space-y-2">
-              <h3 className="text-2xl font-bold text-red-600">
-                {resultError?.response}
-              </h3>
-              <p className="max-w-[600px] text-gray-500 dark:text-gray-400">
-                Edit parameters and run computation to generate results
-              </p>
-            </div>
+        {results && data?.length == 2 ? (
+          <div className="px-5 pt-3">
+            <Tabs
+              defaultValue={models?.models[0].name}
+              // className="w-[400px]"
+            >
+              <TabsList className="w-fit">
+                {models?.models.map((model, i) => (
+                  <TabsTrigger
+                    key={i}
+                    value={model.name}
+                    onClick={() => setResultIndex(i)}
+                  >
+                    {capitalize(model.name)}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
           </div>
-        ) : results ? (
-          <div className="flex items-center justify-center w-full min-h-[400px] flex-col gap-2 p-4 text-center h-full">
-            <div className="py-8 px-5">
-              <div className="flex flex-1 gap-2 overflow-hidden text-ellipsis mb-6">
-                <span className="whitespace-nowrap font-[1.2rem]">f(x) = </span>
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: mathlive.convertLatexToMarkup(latex),
-                  }}
-                  style={{
-                    fontSize: "1.2rem",
-                  }}
-                />
-              </div>
-              <div className="space-y-2">
-                <p className="font-semibold">
-                  <span>dy/dx: </span> <span>{results}</span>
-                </p>
-                {/* <p className="t text-gray-500 font-normal text-sm">
-                  <span>Relative Absolute Error: </span>{" "}
-                  <span>{results.results[results.results.length - 1].ea}%</span>
-                </p>
-                <p className="t text-gray-500 font-normal text-sm">
-                  <span>Number of iterations: </span>{" "}
-                  <span>{results.results.length}</span>
-                </p> */}
-              </div>
-            </div>
-            <div className="flex gap-4 mt-8">
-              <Button onClick={() => trigger()}>Rerun</Button>
-              <Button
-                onClick={() => {
-                  reset();
-                  setInitialValues(undefined);
-                }}
-                variant="destructive"
-              >
-                Reset
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center justify-center w-full min-h-[400px] flex-col gap-2 p-4 text-center h-full">
-            <RiFileList3Line className="text-gray-500" size={64} />
+        ) : null}
 
-            <div className="space-y-2">
-              <h3 className="text-2xl font-bold text-gray-500">
-                No Results Created
-              </h3>
-              <p className="max-w-[600px] text-gray-500 dark:text-gray-400">
-                Fill parameters and run computation to generate results
-              </p>
-            </div>
-          </div>
-        )}
+        <div ref={elementRef} className="flex-1">
+          {data && data.length == 2 ? (
+            // Graph
+            <FunctionPlot options={options as any} />
+          ) : (
+            <>
+              {isMutating ? (
+                <div className="flex-1">
+                  <div className="py-8 px-5">
+                    <Skeleton className="h-12 w-[300px] mb-6" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-5 w-[340px]" />
+                      <Skeleton className="h-4 w-[340px]" />
+                      <Skeleton className="h-4 w-[340px]" />
+                    </div>
+                  </div>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[100px]">Iteration</TableHead>
+                        <TableHead>x0</TableHead>
+                        <TableHead>x1</TableHead>
+                        <TableHead>x2</TableHead>
+                        <TableHead className="">xr</TableHead>
+                        <TableHead className="">Abs. Rel. Error (%)</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell className="font-medium">
+                          <Skeleton className="h-4 w-[80%]" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-[60%]" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-[70%]" />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Skeleton className="h-4 w-[50%]" />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Skeleton className="h-4 w-[50%]" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-[70%]" />
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">
+                          <Skeleton className="h-4 w-[80%]" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-[60%]" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-[70%]" />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Skeleton className="h-4 w-[50%]" />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Skeleton className="h-4 w-[50%]" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-[70%]" />
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">
+                          <Skeleton className="h-4 w-[80%]" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-[60%]" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-[70%]" />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Skeleton className="h-4 w-[50%]" />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Skeleton className="h-4 w-[50%]" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-[70%]" />
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">
+                          <Skeleton className="h-4 w-[80%]" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-[60%]" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-[70%]" />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Skeleton className="h-4 w-[50%]" />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Skeleton className="h-4 w-[50%]" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-[70%]" />
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">
+                          <Skeleton className="h-4 w-[80%]" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-[60%]" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-[70%]" />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Skeleton className="h-4 w-[50%]" />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Skeleton className="h-4 w-[50%]" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-4 w-[70%]" />
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                  <div className="my-6 flex justify-end px-5">
+                    <Skeleton className="h-12 w-[300px]" />
+                  </div>
+                </div>
+              ) : resultError ? (
+                <div className="flex items-center justify-center w-full min-h-[400px] flex-col gap-2 p-4 text-center h-full">
+                  <MdError className="text-red-600" size={64} />
+
+                  <div className="space-y-2">
+                    <h3 className="text-2xl font-bold text-red-600">
+                      {resultError?.response}
+                    </h3>
+                    <p className="max-w-[600px] text-gray-500 dark:text-gray-400">
+                      Edit parameters and run computation to generate results
+                    </p>
+                  </div>
+                </div>
+              ) : results ? (
+                <div className="flex items-center justify-center w-full min-h-[400px] flex-col gap-2 p-4 text-center h-full">
+                  <div className="py-8 px-5">
+                    <div className="flex flex-1 gap-2 overflow-hidden text-ellipsis mb-6">
+                      <span className="whitespace-nowrap font-[1.2rem]">
+                        f(x) ={" "}
+                      </span>
+                      {/* <span
+                      dangerouslySetInnerHTML={{
+                        __html: mathlive.convertLatexToMarkup(latex),
+                      }}
+                      style={{
+                        fontSize: "1.2rem",
+                      }}
+                    /> */}
+                    </div>
+                    <div className="space-y-2">
+                      <p className="font-semibold">
+                        {/* <span>dy/dx: </span> <span>{results}</span> */}
+                      </p>
+                      {/* <p className="t text-gray-500 font-normal text-sm">
+          <span>Relative Absolute Error: </span>{" "}
+          <span>{results.results[results.results.length - 1].ea}%</span>
+        </p>
+        <p className="t text-gray-500 font-normal text-sm">
+          <span>Number of iterations: </span>{" "}
+          <span>{results.results.length}</span>
+        </p> */}
+                    </div>
+                  </div>
+                  <div className="flex gap-4 mt-8">
+                    <Button onClick={() => trigger()}>Rerun</Button>
+                    <Button
+                      onClick={() => {
+                        reset();
+                        setModels(undefined);
+                      }}
+                      variant="destructive"
+                    >
+                      Reset
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center w-full min-h-[400px] flex-col gap-2 p-4 text-center h-full">
+                  <RiFileList3Line className="text-gray-500" size={64} />
+
+                  <div className="space-y-2">
+                    <h3 className="text-2xl font-bold text-gray-500">
+                      No Results Created
+                    </h3>
+                    <p className="max-w-[600px] text-gray-500 dark:text-gray-400">
+                      Fill parameters and run computation to generate results
+                    </p>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

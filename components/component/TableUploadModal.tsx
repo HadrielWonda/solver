@@ -89,27 +89,29 @@ export default function TableUploadModal({
                   <TableHead key={i}>
                     <div className="flex flex-nowrap items-center gap-2">
                       <span className="font-bold text-nowrap">
-                        {i == 0 ? "y" : `x${i}`}
+                        {i == 0 ? "y" : data.length == 2 ? "x" : `x${i}`}
                       </span>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              size={"icon"}
-                              // className="self-center cursor-cell"
-                              variant="destructive"
-                              onClick={() => {
-                                setData(data.filter((_, j) => j !== i));
-                              }}
-                            >
-                              <MdDeleteOutline size={20} color="white" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Delete column</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      {data.length > 2 ? (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                size={"icon"}
+                                // className="self-center cursor-cell"
+                                variant="destructive"
+                                onClick={() => {
+                                  setData(data.filter((_, j) => j !== i));
+                                }}
+                              >
+                                <MdDeleteOutline size={20} color="white" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Delete column</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : null}
                     </div>
                   </TableHead>
                 ))}
@@ -125,29 +127,31 @@ export default function TableUploadModal({
                         <span className="font-bold text-nowrap">{`Row ${
                           i + 1
                         }`}</span>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                size={"icon"}
-                                // className="self-center cursor-cell"
-                                variant="destructive"
-                                onClick={() => {
-                                  const newData = [...data];
-                                  newData.forEach((column) =>
-                                    column.splice(i, 1)
-                                  );
-                                  setData(newData);
-                                }}
-                              >
-                                <MdDeleteOutline size={20} color="white" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Delete row</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                        {data[0].length > 2 ? (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  size={"icon"}
+                                  // className="self-center cursor-cell"
+                                  variant="destructive"
+                                  onClick={() => {
+                                    const newData = [...data];
+                                    newData.forEach((column) =>
+                                      column.splice(i, 1)
+                                    );
+                                    setData(newData);
+                                  }}
+                                >
+                                  <MdDeleteOutline size={20} color="white" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Delete row</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ) : null}
                       </div>
                     </TableCell>
                     {data.map((column, j) => (

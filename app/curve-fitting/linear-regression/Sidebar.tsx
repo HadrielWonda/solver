@@ -2,7 +2,14 @@ import { AnimatePresence, motion } from "framer-motion";
 import { AiOutlineRollback } from "react-icons/ai";
 import * as mathlive from "mathlive";
 import "mathlive/static.css";
-import { useEffect, useId, useRef, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
 import { latexToMathjs } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +17,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import TableUploadModal from "@/components/component/TableUploadModal";
+import { Checkbox } from "@/components/ui/checkbox";
+import CustomModelModal from "@/components/component/CustomModelModal";
 
 // export type equationSettings = {
 //   dataType: "equation" | "data";
@@ -21,13 +30,14 @@ import TableUploadModal from "@/components/component/TableUploadModal";
 // };
 
 export type regressionSettings = {
-  data?: string[][];
-  type: "forward" | "backward" | "central";
-  order: "1" | "2" | "3" | "4";
-  equation: string;
-  latex: string;
-  x: string;
-  h: string;
+  models: {
+    type: string;
+    name: string;
+    x: string;
+    y: string;
+    "x-latex"?: string;
+    "y-latex"?: string;
+  }[];
 };
 
 export const Sidebar = ({
@@ -35,24 +45,24 @@ export const Sidebar = ({
   close,
   setInitialSettings,
   running,
+  data,
+  setData,
 }: // solve,
 {
   open: boolean;
   close: () => void;
   setInitialSettings: (settings: regressionSettings) => void;
+  data: string[][] | undefined;
+  setData: Dispatch<SetStateAction<string[][] | undefined>>;
   // solve: any;
   running: boolean;
 }) => {
   // const [mode, setMode] = useState<"edit" | "visualize">("edit");
   const id = useId();
   const [settings, setSettings] = useState<regressionSettings>({
-    type: "forward",
-    order: "1",
-    equation: "",
-    latex: "",
-    x: "",
-    h: "",
+    models: [],
   });
+
   const mf = useRef<any>(null);
 
   const runComputation = () => {
@@ -80,10 +90,7 @@ export const Sidebar = ({
     }
   }, []);
 
-  const valid =
-    !isNaN(Number(settings.x)) &&
-    !isNaN(Number(settings.h)) &&
-    settings.equation.includes("x");
+  const valid = data && settings.models.length > 0;
 
   return (
     <AnimatePresence mode="wait" initial={false}>
@@ -106,25 +113,40 @@ export const Sidebar = ({
           <div className=" flex-1 w-full overflow-auto p-3">
             <h3 className="font-semibold mb-4 text-xl">Linear Regression</h3>
             <Dialog>
-              {settings.data ? (
-                <div className="flex gap-4">
-                  <DialogTrigger className="flex-1">
-                    <div className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 w-full">
-                      Edit Data
-                    </div>
-                  </DialogTrigger>
-                  <Button
-                    variant="destructive"
-                    onClick={() => {
-                      setSettings((s) => ({
-                        ...s,
-                        data: undefined,
-                      }));
-                    }}
-                    className="flex-1"
-                  >
-                    Clear Data
-                  </Button>
+              {data ? (
+                <div>
+                  <p className="font-bold text-lg my-3">
+                    {data.length == 2 ? (
+                      <span>y = f(x)</span>
+                    ) : (
+                      <>
+                        <span>y = f(x1</span>
+                        {Array(data.length - 2)
+                          .fill(0)
+                          .map((_, i) => (
+                            <span key={i + 2}>, x{i + 2}</span>
+                          ))}
+                        <span>)</span>
+                      </>
+                    )}
+                  </p>
+
+                  <div className="flex gap-4">
+                    <DialogTrigger className="flex-1">
+                      <div className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 w-full">
+                        Edit Data
+                      </div>
+                    </DialogTrigger>
+                    <Button
+                      variant="destructive"
+                      onClick={() => {
+                        setData(undefined);
+                      }}
+                      className="flex-1"
+                    >
+                      Clear Data
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <DialogTrigger className="w-full">
@@ -133,227 +155,290 @@ export const Sidebar = ({
                   </div>
                 </DialogTrigger>
               )}
-              <TableUploadModal
-                initialData={settings.data}
-                setInitialData={(data) => {
-                  setSettings((s) => ({
-                    ...s,
-                    data: data,
-                  }));
-                }}
-              />
+              <TableUploadModal initialData={data} setInitialData={setData} />
             </Dialog>
-            {settings.data && (
-              <>
-                <div className="space-y-3 mt-8">
-                  <h4 className="font-semibold mb-4">Data</h4>
-
-                  {/* <Tabs
-                defaultValue={settings.dataType}
-                // className="w-[400px]"
-              >
-                <TabsList className="w-fit">
-                  <TabsTrigger
-                    value="equation"
-                    onClick={() =>
-                      setSettings((s) => ({
-                        ...s,
-                        dataType: "equation",
-                      }))
-                    }
-                  >
-                    Equation
-                  </TabsTrigger>
-                  <TabsTrigger
-                    onClick={() =>
-                      setSettings((s) => ({
-                        ...s,
-                        dataType: "data",
-                      }))
-                    }
-                    value="data"
-                  >
-                    Table/File
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs> */}
-
-                  {/* {settings.dataType == "equation" ? (
-                    <div className="py-3 overflow-hidden">
-                      <label
-                        className="text-sm font-medium text-gray-900 whitespace-nowrap block"
-                        htmlFor={id}
-                      >
-                        f(x) =
-                      </label>
-                      <math-field
-                        ref={mf}
-                        onInput={(evt) =>
-                          setSettings((s) => ({
-                            ...s,
-                            equation: latexToMathjs(
-                              (evt.target as HTMLInputElement).value
-                            ),
-                            latex: (evt.target as HTMLInputElement).value,
-                          }))
-                        }
-                        style={{
-                          width: "100%",
-                          maxWidth: "353px",
+            <div className="space-y-3 mt-8">
+              <h4 className="font-semibold mb-4">Select/Add Models</h4>
+              <div className="space-y-4">
+                <div className="items-top flex items-center space-x-2">
+                  <Checkbox
+                    id="linear"
+                    checked={settings.models.some(
+                      (model) => model.name === "linear"
+                    )}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSettings({
+                          models: [
+                            ...settings.models,
+                            {
+                              type: "linear",
+                              name: "linear",
+                              x: "x",
+                              y: "y",
+                            },
+                          ],
+                        });
+                      } else {
+                        setSettings({
+                          models: settings.models.filter(
+                            (model) => model.name !== "linear"
+                          ),
+                        });
+                      }
+                    }}
+                  />
+                  <div className="grid gap-1 leading-none">
+                    <label
+                      htmlFor="terms1"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Linear equation
+                    </label>
+                    <p className="text-sm text-muted-foreground">
+                      <math>
+                        <mrow>
+                          <mi>y</mi>
+                          <mo>=</mo>
+                          <mi>a</mi>
+                          <mo>+</mo>
+                          <mi>b</mi>
+                          <mi>x</mi>
+                        </mrow>
+                      </math>
+                    </p>
+                  </div>
+                </div>
+                {/* <div className="items-top flex items-center space-x-2">
+                  <Checkbox
+                    id="power"
+                    checked={settings.models.some(
+                      (model) => model.name === "power"
+                    )}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSettings({
+                          models: [
+                            ...settings.models,
+                            {
+                              type: "linear",
+                              name: "power",
+                              x: "log(x)",
+                              y: "log(y)",
+                            },
+                          ],
+                        });
+                      } else {
+                        setSettings({
+                          models: settings.models.filter(
+                            (model) => model.name !== "power"
+                          ),
+                        });
+                      }
+                    }}
+                  />
+                  <div className="grid gap-1 leading-none">
+                    <label
+                      htmlFor="terms1"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Power equation
+                    </label>
+                    <p className="text-sm text-muted-foreground">
+                      <math>
+                        <mrow>
+                          <mi>y</mi>
+                          <mo>=</mo>
+                          <mi>a</mi>
+                          <mo>&#8290;</mo>
+                          <msup>
+                            <mi>x</mi>
+                            <mi>b</mi>
+                          </msup>
+                        </mrow>
+                      </math>
+                      <span className="px-3">{`=>`}</span>
+                      <math>
+                        <mrow>
+                          <mo>log</mo>
+                          <mi>y</mi>
+                          <mo>=</mo>
+                          <mi>a</mi>
+                          <mo>+</mo>
+                          <mi>b</mi>
+                          <mo>log</mo>
+                          <mi>x</mi>
+                        </mrow>
+                      </math>
+                    </p>
+                  </div>
+                </div> */}
+                <div className="items-top flex items-center space-x-2">
+                  <Checkbox
+                    id="exponential"
+                    checked={settings.models.some(
+                      (model) => model.name === "exponential"
+                    )}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSettings({
+                          models: [
+                            ...settings.models,
+                            {
+                              type: "linear",
+                              name: "exponential",
+                              x: "x",
+                              y: "log(y)",
+                            },
+                          ],
+                        });
+                      } else {
+                        setSettings({
+                          models: settings.models.filter(
+                            (model) => model.name !== "exponential"
+                          ),
+                        });
+                      }
+                    }}
+                  />
+                  <div className="grid gap-1 leading-none">
+                    <label
+                      htmlFor="terms1"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Exponential equation
+                    </label>
+                    <p className="text-sm text-muted-foreground">
+                      <math>
+                        <mrow>
+                          <mi>y</mi>
+                          <mo>=</mo>
+                          <mi>a</mi>
+                          <mo>&#8290;</mo>
+                          <msup>
+                            <mi>e</mi>
+                            <mrow>
+                              <mi>b</mi>
+                              <mi>x</mi>
+                            </mrow>
+                          </msup>
+                        </mrow>
+                      </math>
+                      <span className="px-3">{`=>`}</span>
+                      <math>
+                        <mrow>
+                          <mo>ln</mo>
+                          <mi>y</mi>
+                          <mo>=</mo>
+                          <mo>ln</mo>
+                          <mi>a</mi>
+                          <mo>+</mo>
+                          <mi>b</mi>
+                          <mi>x</mi>
+                        </mrow>
+                      </math>
+                    </p>
+                  </div>
+                </div>
+                {settings.models
+                  .filter((model) => model.type === "custom")
+                  .map((model) => (
+                    <div
+                      key={model.name}
+                      className="items-top flex items-center space-x-2"
+                    >
+                      <Checkbox
+                        id={model.name}
+                        checked={settings.models.some(
+                          (m) => m.name === model.name
+                        )}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSettings({
+                              models: [...settings.models, model],
+                            });
+                          } else {
+                            setSettings({
+                              models: settings.models.filter(
+                                (m) => m.name !== model.name
+                              ),
+                            });
+                          }
                         }}
-                      >
-                        {settings.latex}
-                      </math-field>
+                      />
+                      <div className="grid gap-1 leading-none">
+                        <label
+                          htmlFor={model.name}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {model.name}
+                        </label>
+                        <p className="text-sm text-muted-foreground">
+                          <math>
+                            <mrow>
+                              <mi>y&#772;</mi>
+                              <mo>=</mo>
+                              <mi>a</mi>
+                              <mo>+</mo>
+                              <mi>b</mi>
+                              <mi>x&#772;</mi>
+                            </mrow>
+                          </math>
+                          <span className="px-3">{`=>`}</span>
+                          y&#772; =
+                          <span
+                            dangerouslySetInnerHTML={{
+                              __html: mathlive.convertLatexToMarkup(
+                                model["y-latex"] as string
+                              ),
+                            }}
+                          />
+                          , x&#772; =
+                          <span
+                            dangerouslySetInnerHTML={{
+                              __html: mathlive.convertLatexToMarkup(
+                                model["x-latex"] as string
+                              ),
+                            }}
+                          />
+                        </p>
+                      </div>
                     </div>
-                  ) : (
-                    <div>Type of data</div>
-                  )} */}
-                </div>
+                  ))}
+              </div>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="w-full mt-1">Add Custom Model</Button>
+                </DialogTrigger>
+                <CustomModelModal
+                  saveChanges={({ x, y }) => {
+                    setSettings({
+                      models: [
+                        ...settings.models,
+                        {
+                          type: "custom",
+                          name: `custom ${settings.models.length + 1}`,
+                          x: latexToMathjs(x),
+                          y: latexToMathjs(y),
+                          "x-latex": x,
+                          "y-latex": y,
+                        },
+                      ],
+                    });
+                  }}
+                />
+              </Dialog>
+            </div>
 
-                <div className="space-y-3 mt-8">
-                  <h4 className="font-semibold mb-4">Order</h4>
-                  <Tabs
-                    defaultValue={settings.order}
-                    // className="w-[400px]"
-                  >
-                    <TabsList className="w-fit">
-                      <TabsTrigger
-                        value="1"
-                        onClick={() =>
-                          setSettings((s) => ({
-                            ...s,
-                            order: "1",
-                          }))
-                        }
-                      >
-                        First
-                      </TabsTrigger>
-                      <TabsTrigger
-                        onClick={() =>
-                          setSettings((s) => ({
-                            ...s,
-                            order: "2",
-                          }))
-                        }
-                        value="2"
-                      >
-                        Second
-                      </TabsTrigger>
-                      <TabsTrigger
-                        onClick={() =>
-                          setSettings((s) => ({
-                            ...s,
-                            order: "3",
-                          }))
-                        }
-                        value="3"
-                      >
-                        Third
-                      </TabsTrigger>
-                      <TabsTrigger
-                        onClick={() =>
-                          setSettings((s) => ({
-                            ...s,
-                            order: "4",
-                          }))
-                        }
-                        value="4"
-                      >
-                        Fourth
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-                </div>
-
-                <div className="space-y-3 mt-8">
-                  <h4 className="font-semibold mb-4">Mode</h4>
-                  <Tabs
-                    defaultValue={settings.type}
-                    // className="w-[400px]"
-                  >
-                    <TabsList className="w-fit">
-                      <TabsTrigger
-                        value="forward"
-                        onClick={() =>
-                          setSettings((s) => ({
-                            ...s,
-                            type: "forward",
-                          }))
-                        }
-                      >
-                        Forward
-                      </TabsTrigger>
-                      <TabsTrigger
-                        onClick={() =>
-                          setSettings((s) => ({
-                            ...s,
-                            type: "central",
-                          }))
-                        }
-                        value="central"
-                      >
-                        Central
-                      </TabsTrigger>
-                      <TabsTrigger
-                        onClick={() =>
-                          setSettings((s) => ({
-                            ...s,
-                            type: "backward",
-                          }))
-                        }
-                        value="backward"
-                      >
-                        Backward
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-                </div>
-
-                <div className="space-y-3 mt-5">
-                  <h4 className="font-semibold mb-4">Point</h4>
-                  <div className="grid w-full max-w-sm items-center gap-1.5">
-                    <Label htmlFor="email">x = </Label>
-                    <Input
-                      type="number"
-                      placeholder="0"
-                      value={settings.x}
-                      onChange={(e) =>
-                        setSettings((s) => ({
-                          ...s,
-                          x: e.target.value,
-                        }))
-                      }
-                    />
-                  </div>
-                </div>
-                <div className="space-y-3 mt-5">
-                  <h4 className="font-semibold mb-4">Step Size</h4>
-                  <div className="grid w-full max-w-sm items-center gap-1.5">
-                    <Label htmlFor="email">h = </Label>
-                    <Input
-                      type="number"
-                      placeholder="0"
-                      value={settings.h}
-                      onChange={(e) =>
-                        setSettings((s) => ({
-                          ...s,
-                          h: e.target.value,
-                        }))
-                      }
-                    />
-                  </div>
-                </div>
-                <div className="mt-8">
-                  <Button
-                    className="w-full"
-                    disabled={!valid || running}
-                    onClick={runComputation}
-                  >
-                    Run Computation
-                  </Button>
-                </div>
-              </>
-            )}
+            <div className="mt-12">
+              <Button
+                className="w-full"
+                disabled={!valid || running}
+                onClick={runComputation}
+              >
+                Run Computation
+              </Button>
+            </div>
           </div>
         </motion.div>
       )}
