@@ -832,13 +832,16 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
     "/api/user",
     async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8000/regression/linear", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(models),
-        });
+        const res = await fetch(
+          "https://solver-python-api.onrender.com/regression/linear",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(models),
+          }
+        );
 
         const result = await res.json();
 
