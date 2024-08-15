@@ -1,0 +1,78 @@
+```ts
+import * as math from "mathjs";
+import { Request, Response } from "express";
+
+interface RegressionModel {
+  type: string;
+  x: string;
+  y: string;
+  name: string;
+  degree?: number;
+}
+
+interface RegressionBodyType {
+  x: number[];
+  y: number[];
+  models: RegressionModel[];
+}
+
+const inbuiltPolynomialRegression = (
+  degree: number,
+  x: number[],
+  y: number[]
+): string[] => {
+  const coefficients = math.polyfit(x, y, degree);
+  return coefficients.map((v: number) => v.toString());
+};
+
+export const simpleLinearRegression = async (req: Request, res: Response) => {
+  const bodyValues: RegressionBodyType = req.body;
+  const models = bodyValues.models;
+  const x = bodyValues.x;
+  const y = bodyValues.y;
+  const n = x.length;
+  const results = [];
+
+  for (const model of models) {
+    if (model.type === "linear") {
+      const uExpr = math.simplify(model.x);
+      const u = x.map((xi, i) => uExpr.evaluate({ x: xi, y: y[i] }));
+
+      const vExpr = math.simplify(model.y);
+      const v = x.map((xi, i) => vExpr.evaluate({ x: xi, y: y[i] }));
+
+      const sumU = math.sum(u);
+      const sumV = math.sum(v);
+      const sumUSquared = math.sum(u.map((ui: number) => ui ** 2));
+      const sumUV = math.sum(u.map((ui: number, i: number) => ui * v[i]));
+
+      const m = (n * sumUV - sumU * sumV) / (n * sumUSquared - sumU ** 2);
+      const c = (sumV - m * sumU) / n;
+
+      // Make y the subject of the formula in vExpr
+      const evalVExpr = math.add(math.multiply(m, uExpr), c);
+      const yExpr = math.simplify(
+        math.solve(math.subtract(vExpr, evalVExpr), "y")[0]
+      );
+      const yValues = x.map((xi) => yExpr.evaluate({ x: xi }));
+
+      results.push({
+        m: m.toString(),
+        c: c.toString(),
+        y_expr: yExpr.toString(),
+        type: "linear",
+        name: model.name,
+      });
+    } else {
+      results.push({
+        a: inbuiltPolynomialRegression(model.degree!, x, y),
+        type: "polynomial",
+        name: model.name,
+        degree: model.degree,
+      });
+    }
+  }
+
+  res.json(results);
+};
+```

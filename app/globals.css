@@ -178,6 +178,10 @@ circle.scatter {
   r: 4;
   fill: red;
 }
+svg > text.title {
+  font-size: 14px;
+  font-weight: 700;
+}
 @keyframes lds-ellipsis1 {
   0% {
     transform: scale(0);

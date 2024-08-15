@@ -68,10 +68,17 @@ export default function TableUploadModal({
             reader.onload = (e) => {
               const content = e.target?.result as string;
               const rows = content.split("\n");
-              const newData = rows.map((row) =>
-                row.split(",").map((cell) => cell.trim())
-              );
-              setData(newData);
+              const x: string[] = [];
+              const y: string[] = [];
+              rows.forEach((row) => {
+                const [y_val, x_val] = row.split(",");
+                y.push(y_val.trim());
+                x.push(x_val.trim());
+                console.log("y_val", y_val.trim());
+                console.log("x_val", x_val.trim());
+              });
+
+              setData([y, x]);
             };
             reader.readAsText(file);
           }}

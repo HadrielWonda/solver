@@ -30,14 +30,21 @@ import CustomModelModal from "@/components/component/CustomModelModal";
 // };
 
 export type regressionSettings = {
-  models: {
-    type: string;
-    name: string;
-    x: string;
-    y: string;
-    "x-latex"?: string;
-    "y-latex"?: string;
-  }[];
+  models: (
+    | {
+        type: "linear";
+        name: string;
+        x: string;
+        y: string;
+        "x-latex"?: string;
+        "y-latex"?: string;
+      }
+    | {
+        type: "polynomial";
+        name: string;
+        degree: string;
+      }
+  )[];
 };
 
 export const Sidebar = ({
@@ -341,7 +348,8 @@ export const Sidebar = ({
                   </div>
                 </div>
                 {settings.models
-                  .filter((model) => model.type === "custom")
+                  .filter((model) => model.type === "linear")
+                  .filter((model) => model.name.includes("custom"))
                   .map((model) => (
                     <div
                       key={model.name}
@@ -405,24 +413,71 @@ export const Sidebar = ({
                       </div>
                     </div>
                   ))}
+                {settings.models
+                  .filter((model) => model.type == "polynomial")
+                  .map((model) => (
+                    <div
+                      key={model.name}
+                      className="items-top flex items-center space-x-2"
+                    >
+                      <Checkbox
+                        id={model.name}
+                        checked={settings.models.some(
+                          (m) => m.name === model.name
+                        )}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSettings({
+                              models: [...settings.models, model],
+                            });
+                          } else {
+                            setSettings({
+                              models: settings.models.filter(
+                                (m) => m.name !== model.name
+                              ),
+                            });
+                          }
+                        }}
+                      />
+                      <div className="grid gap-1 leading-none">
+                        <label
+                          htmlFor={model.name}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {model.name}
+                        </label>
+                        <p className="text-sm text-muted-foreground">
+                          {model.degree} order polynomial
+                        </p>
+                      </div>
+                    </div>
+                  ))}
               </div>
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button className="w-full mt-1">Add Custom Model</Button>
+                  <Button className="w-full mt-1">
+                    Add Polynomial/Custom Model
+                  </Button>
                 </DialogTrigger>
                 <CustomModelModal
-                  saveChanges={({ x, y }) => {
+                  saveChanges={({ x, y }, degree, type) => {
                     setSettings({
                       models: [
                         ...settings.models,
-                        {
-                          type: "custom",
-                          name: `custom ${settings.models.length + 1}`,
-                          x: latexToMathjs(x),
-                          y: latexToMathjs(y),
-                          "x-latex": x,
-                          "y-latex": y,
-                        },
+                        type === "polynomial"
+                          ? {
+                              type: "polynomial",
+                              name: `polynomial ${settings.models.length + 1}`,
+                              degree,
+                            }
+                          : {
+                              type: "linear",
+                              name: `custom ${settings.models.length + 1}`,
+                              x: latexToMathjs(x),
+                              y: latexToMathjs(y),
+                              "x-latex": x,
+                              "y-latex": y,
+                            },
                       ],
                     });
                   }}

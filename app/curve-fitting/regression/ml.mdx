@@ -1,0 +1,49 @@
+```ts
+function results = simple_linear_regression(bodyValues)
+    models = bodyValues.models;
+    x = bodyValues.x;
+    y = bodyValues.y;
+    n = length(x);
+    results = [];
+
+    for i = 1:length(models)
+        model = models(i);
+
+        if strcmp(model.type, 'linear')
+            syms u_expr v_expr y_expr;
+
+            u_expr = evalin(symengine, model.x);
+            u = subs(u_expr, {'x', 'y'}, {x, y});
+
+            v_expr = evalin(symengine, model.y);
+            v = subs(v_expr, {'x', 'y'}, {x, y});
+
+            sum_u = sum(u);
+            sum_v = sum(v);
+            sum_u_squared = sum(u.^2);
+            sum_uv = sum(u .* v);
+
+            m = (n * sum_uv - sum_u * sum_v) / (n * sum_u_squared - sum_u^2);
+            c = (sum_v - m * sum_u) / n;
+
+            % Make y the subject of the formula in v_expr
+            eval_v_expr = m * u_expr + c;
+            y_expr = solve(v_expr == eval_v_expr, 'y');
+            y_values = subs(y_expr, 'x', x);
+
+            result = struct('m', char(m), 'c', char(c), 'y_expr', char(y_expr), 'type', 'linear', 'name', model.name);
+            results = [results, result];
+        else
+            coefficients = inbuilt_polynomial_regression(str2double(model.degree), x, y);
+            result = struct('a', coefficients, 'type', 'polynomial', 'name', model.name, 'degree', model.degree);
+            results = [results, result];
+        end
+    end
+end
+
+function coefficients = inbuilt_polynomial_regression(degree, x, y)
+    p = polyfit(x, y, degree);
+    coefficients = arrayfun(@num2str, flip(p), 'UniformOutput', false);
+end
+
+```

@@ -50,3 +50,15 @@ export function latexToMathjs(latexString: string): string {
 export const capitalize = (str: string) => {
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
+
+export const generatePolynomialEqaution = (constants: string[]) => {
+  return constants.reduce((acc, constant, index) => {
+    if (index === 0) {
+      return `${constant}`;
+    }
+    if (Number(constant) == 0) {
+      return acc;
+    }
+    return `${acc} + ${constant}x^${index}`;
+  }, "");
+};

@@ -1,0 +1,52 @@
+```py
+class regressionBodyType(BaseModel):
+    x: list[float]
+    y: list[float]
+    models: list[dict[str, str]]
+
+def simple_regression(bodyValues: regressionBodyType):
+    models = bodyValues.models
+    x = bodyValues.x
+    y = bodyValues.y
+    n = len(x)
+    results = []
+
+    for model in models:
+        if model['type'] == "linear":
+            u_expr = sp.sympify(model["x"])
+            u = [u_expr.subs([("y", y[i]), ("x", x[i])]) for i in range(n)]
+
+            v_expr = sp.sympify(model["y"])
+            v = [v_expr.subs([("y", y[i]), ("x", x[i])]) for i in range(n)]
+
+            sum_u = sum(u)
+            sum_v = sum(v)
+            sum_u_squared = sum([ui**2 for ui in u])
+            sum_uv = sum([u[i] * v[i] for i in range(n)])
+            m = (n * sum_uv - sum_u * sum_v) / (n * sum_u_squared - sum_u**2)
+            c = (sum_v - m * sum_u) / n
+
+            # Make y the subject of the formula in v_expr
+            eval_v_expr = m*u_expr + c
+            y_values = sp.symbols('y')
+            y_expr = sp.simplify(sp.solve(v_expr - eval_v_expr, y_values)[0])
+            y_values = [y_expr.subs("x", x[i]) for i in range(n)]
+            # print("y_expr: ", y_expr)
+            # print("y_values: ", y_values)
+            # print("y", y)
+
+            results.append({"m": str(m), "c": str(c), "y_expr": str(y_expr), "type": "linear", "name": model["name"]})
+        else:
+            results.append({
+                "a": inbuilt_polynomial_regression(int(model["degree"]), x, y),
+                "type": "polynomial",
+                "name": model["name"],
+                "degree": model["degree"]
+            })
+    return results
+
+
+def inbuilt_polynomial_regression(degree, x, y):
+  return [str(v) for v in np.flip(np.polyfit(np.array(x), np.array(y), degree))]
+
+```
