@@ -57,7 +57,7 @@ export default function CustomModelModal({
       <DialogHeader>
         <DialogTitle>Add Custom Modal</DialogTitle>
         <DialogDescription>
-          Make changes to your profile here. Click save when you are done.
+          Create a custom model for your data
         </DialogDescription>
       </DialogHeader>
       <Tabs
@@ -167,7 +167,7 @@ export default function CustomModelModal({
       ) : (
         <>
           <div className="space-y-3 mt-5">
-            <h4 className="font-semibold mb-3">Range - x</h4>
+            <h4 className="font-semibold mb-3">Polynomial model degree</h4>
             <Input
               type="number"
               placeholder="0"

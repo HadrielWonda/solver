@@ -36,8 +36,8 @@ export type regressionSettings = {
         name: string;
         x: string;
         y: string;
-        "x-latex"?: string;
-        "y-latex"?: string;
+        xLatex?: string;
+        yLatex?: string;
       }
     | {
         type: "polynomial";
@@ -216,7 +216,7 @@ export const Sidebar = ({
                     </p>
                   </div>
                 </div>
-                {/* <div className="items-top flex items-center space-x-2">
+                <div className="items-top flex items-center space-x-2">
                   <Checkbox
                     id="power"
                     checked={settings.models.some(
@@ -279,7 +279,70 @@ export const Sidebar = ({
                       </math>
                     </p>
                   </div>
-                </div> */}
+                </div>
+                <div className="items-top flex items-center space-x-2">
+                  <Checkbox
+                    id="power2"
+                    checked={settings.models.some(
+                      (model) => model.name === "power2"
+                    )}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSettings({
+                          models: [
+                            ...settings.models,
+                            {
+                              type: "linear",
+                              name: "power2",
+                              x: "x",
+                              y: "log(y)",
+                            },
+                          ],
+                        });
+                      } else {
+                        setSettings({
+                          models: settings.models.filter(
+                            (model) => model.name !== "power2"
+                          ),
+                        });
+                      }
+                    }}
+                  />
+                  <div className="grid gap-1 leading-none">
+                    <label
+                      htmlFor="terms1"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Power equation 2
+                    </label>
+                    <p className="text-sm text-muted-foreground">
+                      <math>
+                        <mrow>
+                          <mi>y</mi>
+                          <mo>=</mo>
+                          <mi>a</mi>
+                          <mo>&#8290;</mo>
+                          <msup>
+                            <mi>b</mi>
+                            <mi>x</mi>
+                          </msup>
+                        </mrow>
+                      </math>
+                      <span className="px-3">{`=>`}</span>
+                      <math>
+                        <mrow>
+                          <mo>log</mo>
+                          <mi>y</mi>
+                          <mo>=</mo>
+                          <mi>a</mi>
+                          <mo>+</mo>
+                          <mi>b</mi>
+                          <mi>x</mi>
+                        </mrow>
+                      </math>
+                    </p>
+                  </div>
+                </div>
                 <div className="items-top flex items-center space-x-2">
                   <Checkbox
                     id="exponential"
@@ -347,9 +410,138 @@ export const Sidebar = ({
                     </p>
                   </div>
                 </div>
+                <div className="items-top flex items-center space-x-2">
+                  <Checkbox
+                    id="quadratic"
+                    checked={settings.models.some(
+                      (model) => model.name === "quadratic"
+                    )}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSettings({
+                          models: [
+                            ...settings.models,
+                            {
+                              type: "polynomial",
+                              name: "quadratic",
+                              degree: "2",
+                            },
+                          ],
+                        });
+                      } else {
+                        setSettings({
+                          models: settings.models.filter(
+                            (model) => model.name !== "quadratic"
+                          ),
+                        });
+                      }
+                    }}
+                  />
+                  <div className="grid gap-1 leading-none">
+                    <label
+                      htmlFor="terms1"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Quadratic equation
+                    </label>
+                    <p className="text-sm text-muted-foreground">
+                      <math>
+                        <mrow>
+                          <mi>y</mi>
+                          <mo>=</mo>
+                          <mi>a</mi>
+                          <msup>
+                            <mo>&#8290;</mo>
+                            <mn>2</mn>
+                          </msup>
+                          <mo>+</mo>
+                          <mi>b</mi>
+                          <mi>x</mi>
+                          <mo>+</mo>
+                          <mi>c</mi>
+                        </mrow>
+                      </math>
+                    </p>
+                  </div>
+                </div>
+                <div className="items-top flex items-center space-x-2">
+                  <Checkbox
+                    id="model-5"
+                    checked={settings.models.some(
+                      (model) => model.name === "model-5"
+                    )}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSettings({
+                          models: [
+                            ...settings.models,
+                            {
+                              type: "linear",
+                              name: "model-5",
+                              x: "1/x",
+                              y: "y",
+                            },
+                          ],
+                        });
+                      } else {
+                        setSettings({
+                          models: settings.models.filter(
+                            (model) => model.name !== "model-5"
+                          ),
+                        });
+                      }
+                    }}
+                  />
+                  <div className="grid gap-1 leading-none">
+                    <label
+                      htmlFor="terms1"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Model 5
+                    </label>
+                    <p className="text-sm text-muted-foreground">
+                      <math>
+                        <mrow>
+                          <mi>y</mi>
+                          <mo>=</mo>
+                          <mfrac>
+                            <mi>a</mi>
+                            <mi>x</mi>
+                          </mfrac>
+                          <mo>+</mo>
+                          <mi>b</mi>
+                        </mrow>
+                      </math>
+                      {/* <span className="px-3">{`=>`}</span>
+                      <math>
+                        <mrow>
+                          <mo>ln</mo>
+                          <mi>y</mi>
+                          <mo>=</mo>
+                          <mo>ln</mo>
+                          <mi>a</mi>
+                          <mo>+</mo>
+                          <mi>b</mi>
+                          <mi>x</mi>
+                        </mrow>
+                      </math> */}
+                    </p>
+                  </div>
+                </div>
                 {settings.models
                   .filter((model) => model.type === "linear")
                   .filter((model) => model.name.includes("custom"))
+                  .map(
+                    (i) =>
+                      i as {
+                        type: "linear";
+                        name: string;
+                        x: string;
+                        y: string;
+                        xLatex?: string;
+                        yLatex?: string;
+                      }
+                  )
                   .map((model) => (
                     <div
                       key={model.name}
@@ -397,7 +589,7 @@ export const Sidebar = ({
                           <span
                             dangerouslySetInnerHTML={{
                               __html: mathlive.convertLatexToMarkup(
-                                model["y-latex"] as string
+                                model.yLatex as string
                               ),
                             }}
                           />
@@ -405,7 +597,7 @@ export const Sidebar = ({
                           <span
                             dangerouslySetInnerHTML={{
                               __html: mathlive.convertLatexToMarkup(
-                                model["x-latex"] as string
+                                model.xLatex as string
                               ),
                             }}
                           />
@@ -415,6 +607,15 @@ export const Sidebar = ({
                   ))}
                 {settings.models
                   .filter((model) => model.type == "polynomial")
+                  .filter((model) => model.degree != "2")
+                  .map(
+                    (i) =>
+                      i as {
+                        type: "polynomial";
+                        name: string;
+                        degree: string;
+                      }
+                  )
                   .map((model) => (
                     <div
                       key={model.name}
@@ -475,8 +676,8 @@ export const Sidebar = ({
                               name: `custom ${settings.models.length + 1}`,
                               x: latexToMathjs(x),
                               y: latexToMathjs(y),
-                              "x-latex": x,
-                              "y-latex": y,
+                              xLatex: x,
+                              yLatex: y,
                             },
                       ],
                     });

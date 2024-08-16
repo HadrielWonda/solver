@@ -709,76 +709,6 @@ const IntroSection = ({ solve }: { solve: () => void }) => {
                     </MathData>
                   </MathRow>
                 </MathBlock>
-                <Parargraph>or, by collecting terms,</Parargraph>
-                <MathBlock>
-                  <MathRow>
-                    <MathData>
-                      <mi>f</mi>
-                      <mo>&#x2032;</mo>
-                      <mo>(</mo>
-                      <msub>
-                        <mi>x</mi>
-                        <mi>i</mi>
-                      </msub>
-                      <mo>)</mo>
-                    </MathData>
-                    <MathData>
-                      <mo>=</mo>
-                    </MathData>
-                    <MathData>
-                      <mfrac>
-                        <mrow>
-                          <mo>-</mo>
-                          <mi>f</mi>
-                          <mo>(</mo>
-                          <msub>
-                            <mi>x</mi>
-                            <mrow>
-                              <mi>i</mi>
-                              <mo>+</mo>
-                              <mn>2</mn>
-                            </mrow>
-                          </msub>
-                          <mo>)</mo>
-                          <mo>+</mo>
-                          <mn>4</mn>
-                          <mi>f</mi>
-                          <mo>(</mo>
-                          <msub>
-                            <mi>x</mi>
-                            <mrow>
-                              <mi>i</mi>
-                              <mo>+</mo>
-                              <mn>1</mn>
-                            </mrow>
-                          </msub>
-                          <mo>)</mo>
-                          <mo>-</mo>
-                          <mn>3</mn>
-                          <mi>f</mi>
-                          <mo>(</mo>
-                          <msub>
-                            <mi>x</mi>
-                            <mi>i</mi>
-                          </msub>
-                          <mo>)</mo>
-                        </mrow>
-                        <mrow>
-                          <mn>2</mn>
-                          <mi>h</mi>
-                        </mrow>
-                      </mfrac>
-                      <mo>+</mo>
-                      <mo>O</mo>
-                      <mo>(</mo>
-                      <msup>
-                        <mi>h</mi>
-                        <mn>2</mn>
-                      </msup>
-                      <mo>)</mo>
-                    </MathData>
-                  </MathRow>
-                </MathBlock>
               </section>
             </div>
             <div>
@@ -832,16 +762,13 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
     "/api/user",
     async () => {
       try {
-        const res = await fetch(
-          "https://solver-python-api.onrender.com/regression/linear",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(models),
-          }
-        );
+        const res = await fetch("http://127.0.0.1:8000/regression/linear", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(models),
+        });
 
         const result = await res.json();
 
@@ -887,7 +814,7 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
 
   useEffect(() => {
     if (!data) reset();
-  }, [data]);
+  }, [data, reset]);
 
   // console.log("data", results);
   // console.log("resultError", resultError?.response);
@@ -941,8 +868,25 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
               {
                 fn:
                   results[resultIndex].type == "linear"
-                    ? results[resultIndex].y_expr.replace("**", "^")
-                    : generatePolynomialEqaution(results[resultIndex].a),
+                    ? (
+                        results[resultIndex] as {
+                          m: string;
+                          c: string;
+                          y_expr: string;
+                          type: "linear";
+                          name: string;
+                        }
+                      ).y_expr.replace("**", "^")
+                    : generatePolynomialEqaution(
+                        (
+                          results[resultIndex] as {
+                            a: string[];
+                            degree: string;
+                            type: "polynomial";
+                            name: string;
+                          }
+                        ).a
+                      ),
                 color: "blue",
               },
             ]
@@ -970,8 +914,25 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
         ? {
             title: `y = ${
               results[resultIndex].type == "linear"
-                ? results[resultIndex].y_expr.replace("**", "^")
-                : generatePolynomialEqaution(results[resultIndex].a)
+                ? (
+                    results[resultIndex] as {
+                      m: string;
+                      c: string;
+                      y_expr: string;
+                      type: "linear";
+                      name: string;
+                    }
+                  ).y_expr.replace("**", "^")
+                : generatePolynomialEqaution(
+                    (
+                      results[resultIndex] as {
+                        a: string[];
+                        degree: string;
+                        type: "polynomial";
+                        name: string;
+                      }
+                    ).a
+                  )
             }`,
             xAxis: {
               label: "x - axis",

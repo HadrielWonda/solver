@@ -582,7 +582,7 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
               <div className="space-y-2">
                 <p className="font-semibold">
                   <span>Root: </span>{" "}
-                  <span>{results[results.length - 1].xi}</span>
+                  <span>{results[results.length - 1].xr}</span>
                 </p>
                 <p className="t text-gray-500 font-normal text-sm">
                   <span>Relative Absolute Error: </span>{" "}
