@@ -55,9 +55,11 @@ import EllipticResults from "@/components/component/EllipticResults";
 
 class ResponseError extends Error {
   response: string;
-  constructor(message: string, res: any) {
+  detail?: string;
+  constructor(message: string, res: string, detail?: string) {
     super(message);
     this.response = res;
+    this.detail = detail;
   }
 }
 
@@ -455,40 +457,71 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
     setSidebarOpen(true);
   }, [setSidebarOpen]);
 
-  const [initialValues, setInitialValues] = useState<
-    | {
-        equationType: "laplace" | "poisson" | "others";
-        equation: string;
-        latex: string;
-        n: {
-          x: string;
-          y: string;
-        };
-        stoppingCriteria: "max_error" | "max_iterations";
-        maxIterations: string;
-        maxError: string;
-        bondary: {
-          t: {
-            type: "dirichlet" | "neumann";
-            value: string;
-          };
-          b: {
-            type: "dirichlet" | "neumann";
-            value: string;
-          };
-          l: {
-            type: "dirichlet" | "neumann";
-            value: string;
-          };
-          r: {
-            type: "dirichlet" | "neumann";
-            value: string;
-          };
-        };
-        overRelaxation: string;
-      }
-    | undefined
-  >();
+  const [initialValues, setInitialValues] = useState<{
+    equationType: "laplace" | "poisson" | "others";
+    equation: string;
+    latex: string;
+    n: {
+      x: string;
+      y: string;
+    };
+    stoppingCriteria: "max_error" | "max_iterations";
+    maxIterations: string;
+    maxError: string;
+    bondary: {
+      t: {
+        type: "dirichlet" | "neumann";
+        value: string;
+      };
+      b: {
+        type: "dirichlet" | "neumann";
+        value: string;
+      };
+      l: {
+        type: "dirichlet" | "neumann";
+        value: string;
+      };
+      r: {
+        type: "dirichlet" | "neumann";
+        value: string;
+      };
+    };
+    h?: string;
+    b?: string;
+    overRelaxation: string;
+  }>({
+    equationType: "laplace",
+    equation: "",
+    latex: "",
+    n: {
+      x: "",
+      y: "",
+    },
+    stoppingCriteria: "max_iterations",
+    maxIterations: "",
+    maxError: "",
+    bondary: {
+      t: {
+        type: "dirichlet",
+        value: "",
+      },
+      b: {
+        type: "dirichlet",
+        value: "",
+      },
+      l: {
+        type: "dirichlet",
+        value: "",
+      },
+      r: {
+        type: "dirichlet",
+        value: "",
+      },
+    },
+    h: "",
+    b: "",
+    overRelaxation: "",
+  });
   const [latex, setLatex] = useState("");
 
   const {
@@ -500,45 +533,37 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
   } = useSWRMutation(
     "/api/user",
     async () => {
-      try {
-        const res = await fetch(
-          "https://solver-python-api.onrender.com/pde/finite-difference-elliptic",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              nx: Number(initialValues?.n.x),
-              ny: Number(initialValues?.n.y),
-              l: Number(initialValues?.bondary.l.value),
-              r: Number(initialValues?.bondary.r.value),
-              t: Number(initialValues?.bondary.t.value),
-              b: Number(initialValues?.bondary.b.value),
-              max_iterations: Number(initialValues?.maxIterations),
-              max_error: Number(initialValues?.maxError),
-              over_relaxation: Number(initialValues?.overRelaxation),
-            }),
-          }
-        );
-
-        const result = await res.json();
-
-        if (!res.ok) {
-          if (typeof result.detail == "string") {
-            throw new ResponseError("Bad fetch response", result.detail);
-          } else {
-            throw new ResponseError(
-              "Bad fetch response",
-              result.detail[0].loc[1] + " " + result.detail[0].msg
-            );
-          }
+      const res = await fetch(
+        "https://solver-python-api.onrender.com/pde/finite-difference-elliptic",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            nx: Number(initialValues?.n.x),
+            ny: Number(initialValues?.n.y),
+            boundary: initialValues?.bondary,
+            h: Number(initialValues?.h ?? 0),
+            b: Number(initialValues?.b ?? 0),
+            max_iterations: Number(initialValues?.maxIterations),
+            max_error: Number(initialValues?.maxError),
+            over_relaxation: Number(initialValues?.overRelaxation),
+          }),
         }
+      );
 
-        return result as Promise<ellipticResults>;
-      } catch (error: Error | any) {
-        throw new ResponseError("Bad fetch response", String(error));
+      const result = await res.json();
+
+      if (!res.ok) {
+        if (typeof result.detail == "string") {
+          throw Error(result.detail);
+        } else {
+          throw Error(result.detail[0].loc[1] + " " + result.detail[0].msg);
+        }
       }
+
+      return result as Promise<ellipticResults>;
     },
     {
       async onError(err, key, config) {
@@ -656,20 +681,19 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
             <MdError className="text-red-600" size={64} />
 
             <div className="space-y-2">
-              <h3 className="text-2xl font-bold text-red-600">
-                {resultError?.response}
-              </h3>
+              <h3 className="text-2xl font-bold text-red-600">Error!</h3>
               <p className="max-w-[600px] text-gray-500 dark:text-gray-400">
-                Edit parameters and run computation to generate results
+                {resultError?.message ??
+                  "Edit parameters and run computation to generate results"}
               </p>
             </div>
           </div>
         ) : results && initialValues ? (
-          <EllipticResults results={results} />
+          <EllipticResults results={results} boundary={initialValues.bondary} />
         ) : sideMode == "set" && initialValues ? (
-          <div className="h-full flex flex-col p-4">
+          <div className="h-full flex justify-center flex-col p-4">
             <h4 className="font-semibold mb-4">Bondary Conditions:</h4>
-            <div className="w-[200px] mx-auto mb-4">
+            <div className="mx-auto mb-4 flex flex-col gap-1.5">
               <Tabs
                 defaultValue={initialValues.bondary.t.type}
                 className="mx-auto mb-2"
@@ -679,7 +703,7 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
                     value="dirichlet"
                     onClick={() =>
                       setInitialValues((s) => {
-                        const cpy = { ...initialValues };
+                        const cpy = { ...s };
                         cpy.bondary.t.type = "dirichlet";
                         return cpy;
                       })
@@ -691,7 +715,7 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
                     value="neumann"
                     onClick={() =>
                       setInitialValues((s) => {
-                        const cpy = { ...initialValues };
+                        const cpy = { ...s };
                         cpy.bondary.t.type = "neumann";
                         return cpy;
                       })
@@ -702,35 +726,61 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
-              <div className="flex w-full max-w-sm items-center gap-1.5">
-                <Label
-                  htmlFor="email"
-                  className="text-nowrap whitespace-nowrap"
-                >
-                  {initialValues.bondary.t.type == "dirichlet" ? (
-                    "T"
-                  ) : (
-                    <math>
-                      <mfrac>
-                        <mi>dT</mi>
-                        <mi>dx</mi>
-                      </mfrac>
-                    </math>
-                  )}{" "}
-                  =
-                </Label>
-                <Input
-                  type="number"
-                  placeholder="0"
-                  value={initialValues.bondary.t.value}
-                  onChange={(e) =>
-                    setInitialValues((s) => {
-                      const cpy = { ...initialValues };
-                      cpy.bondary.t.value = e.target.value;
-                      return cpy;
-                    })
-                  }
-                />
+              <div className="flex items-center gap-4 max-w-sm">
+                <div className="flex items-center gap-1.5">
+                  <Label
+                    htmlFor="email"
+                    className="text-nowrap whitespace-nowrap"
+                  >
+                    {initialValues.bondary.t.type == "dirichlet" ? (
+                      "T"
+                    ) : (
+                      <math>
+                        <mfrac>
+                          <mi>dT</mi>
+                          <mi>dx</mi>
+                        </mfrac>
+                      </math>
+                    )}{" "}
+                    =
+                  </Label>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    value={initialValues.bondary.t.value}
+                    onChange={(e) =>
+                      setInitialValues((s) => {
+                        const cpy = { ...s };
+                        cpy.bondary.t.value = e.target.value;
+                        return cpy;
+                      })
+                    }
+                  />
+                </div>
+                {initialValues.bondary.t.type != "dirichlet" &&
+                initialValues.bondary.t.value &&
+                initialValues.bondary.t.value !== "0" ? (
+                  <div className="flex items-center gap-1.5">
+                    <Label
+                      htmlFor="email"
+                      className="text-nowrap whitespace-nowrap"
+                    >
+                      Length of the bondary:
+                    </Label>
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      value={initialValues.b}
+                      onChange={(e) =>
+                        setInitialValues((s) => {
+                          const cpy = { ...s };
+                          cpy.b = e.target.value;
+                          return cpy;
+                        })
+                      }
+                    />
+                  </div>
+                ) : null}
               </div>
             </div>
             <div className="w-full flex-1 flex justify-center gap-4">
@@ -744,7 +794,7 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
                       value="dirichlet"
                       onClick={() =>
                         setInitialValues((s) => {
-                          const cpy = { ...initialValues };
+                          const cpy = { ...s };
                           cpy.bondary.l.type = "dirichlet";
                           return cpy;
                         })
@@ -756,7 +806,7 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
                       value="neumann"
                       onClick={() =>
                         setInitialValues((s) => {
-                          const cpy = { ...initialValues };
+                          const cpy = { ...s };
                           cpy.bondary.l.type = "neumann";
                           return cpy;
                         })
@@ -790,17 +840,42 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
                     value={initialValues.bondary.l.value}
                     onChange={(e) =>
                       setInitialValues((s) => {
-                        const cpy = { ...initialValues };
+                        const cpy = { ...s };
                         cpy.bondary.l.value = e.target.value;
                         return cpy;
                       })
                     }
                   />
                 </div>
+                {initialValues.bondary.l.type != "dirichlet" &&
+                initialValues.bondary.l.value &&
+                initialValues.bondary.l.value !== "0" ? (
+                  <div className="flex flex-col w-full max-w-sm gap-1.5 mt-4">
+                    <Label
+                      htmlFor="email"
+                      className="text-nowrap whitespace-nowrap mb-1"
+                    >
+                      Length of the bondary:
+                    </Label>
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      value={initialValues.h}
+                      onChange={(e) =>
+                        setInitialValues((s) => {
+                          const cpy = { ...s };
+                          cpy.h = e.target.value;
+                          return cpy;
+                        })
+                      }
+                    />
+                  </div>
+                ) : null}
               </div>
               <Grids
                 x={Number(initialValues.n.x)}
                 y={Number(initialValues.n.y)}
+                boundary={initialValues.bondary}
               />
               <div className="w-[200px] self-center">
                 <Tabs
@@ -812,7 +887,7 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
                       value="dirichlet"
                       onClick={() =>
                         setInitialValues((s) => {
-                          const cpy = { ...initialValues };
+                          const cpy = { ...s };
                           cpy.bondary.r.type = "dirichlet";
                           return cpy;
                         })
@@ -824,7 +899,7 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
                       value="neumann"
                       onClick={() =>
                         setInitialValues((s) => {
-                          const cpy = { ...initialValues };
+                          const cpy = { ...s };
                           cpy.bondary.r.type = "neumann";
                           return cpy;
                         })
@@ -858,18 +933,42 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
                     value={initialValues.bondary.r.value}
                     onChange={(e) =>
                       setInitialValues((s) => {
-                        const cpy = { ...initialValues };
+                        const cpy = { ...s };
                         cpy.bondary.r.value = e.target.value;
                         return cpy;
                       })
                     }
                   />
                 </div>
+                {initialValues.bondary.r.type != "dirichlet" &&
+                initialValues.bondary.r.value &&
+                initialValues.bondary.r.value !== "0" ? (
+                  <div className="flex flex-col w-full max-w-sm gap-1.5 mt-4">
+                    <Label
+                      htmlFor="email"
+                      className="text-nowrap whitespace-nowrap mb-1"
+                    >
+                      Length of the bondary:
+                    </Label>
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      value={initialValues.h}
+                      onChange={(e) =>
+                        setInitialValues((s) => {
+                          const cpy = { ...s };
+                          cpy.h = e.target.value;
+                          return cpy;
+                        })
+                      }
+                    />
+                  </div>
+                ) : null}
               </div>
             </div>
-            <div className="w-[200px] mx-auto mt-4">
+            <div className="mx-auto mt-4 flex flex-col gap-1.5">
               <Tabs
-                defaultValue={initialValues.bondary.b.type}
+                defaultValue={initialValues.bondary.t.type}
                 className="mx-auto mb-2"
               >
                 <TabsList className="w-fit">
@@ -877,7 +976,7 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
                     value="dirichlet"
                     onClick={() =>
                       setInitialValues((s) => {
-                        const cpy = { ...initialValues };
+                        const cpy = { ...s };
                         cpy.bondary.b.type = "dirichlet";
                         return cpy;
                       })
@@ -889,7 +988,7 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
                     value="neumann"
                     onClick={() =>
                       setInitialValues((s) => {
-                        const cpy = { ...initialValues };
+                        const cpy = { ...s };
                         cpy.bondary.b.type = "neumann";
                         return cpy;
                       })
@@ -900,35 +999,61 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
-              <div className="flex w-full max-w-sm items-center gap-1.5">
-                <Label
-                  htmlFor="email"
-                  className="text-nowrap whitespace-nowrap"
-                >
-                  {initialValues.bondary.t.type == "dirichlet" ? (
-                    "T"
-                  ) : (
-                    <math>
-                      <mfrac>
-                        <mi>dT</mi>
-                        <mi>dx</mi>
-                      </mfrac>
-                    </math>
-                  )}{" "}
-                  =
-                </Label>
-                <Input
-                  type="number"
-                  placeholder="0"
-                  value={initialValues.bondary.b.value}
-                  onChange={(e) =>
-                    setInitialValues((s) => {
-                      const cpy = { ...initialValues };
-                      cpy.bondary.b.value = e.target.value;
-                      return cpy;
-                    })
-                  }
-                />
+              <div className="flex items-center gap-4 max-w-sm">
+                <div className="flex items-center gap-1.5">
+                  <Label
+                    htmlFor="email"
+                    className="text-nowrap whitespace-nowrap"
+                  >
+                    {initialValues.bondary.b.type == "dirichlet" ? (
+                      "T"
+                    ) : (
+                      <math>
+                        <mfrac>
+                          <mi>dT</mi>
+                          <mi>dx</mi>
+                        </mfrac>
+                      </math>
+                    )}{" "}
+                    =
+                  </Label>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    value={initialValues.bondary.b.value}
+                    onChange={(e) =>
+                      setInitialValues((s) => {
+                        const cpy = { ...s };
+                        cpy.bondary.b.value = e.target.value;
+                        return cpy;
+                      })
+                    }
+                  />
+                </div>
+                {initialValues.bondary.b.type != "dirichlet" &&
+                initialValues.bondary.b.value &&
+                initialValues.bondary.b.value !== "0" ? (
+                  <div className="flex items-center gap-1.5">
+                    <Label
+                      htmlFor="email"
+                      className="text-nowrap whitespace-nowrap"
+                    >
+                      Length of the bondary:
+                    </Label>
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      value={initialValues.b}
+                      onChange={(e) =>
+                        setInitialValues((s) => {
+                          const cpy = { ...s };
+                          cpy.b = e.target.value;
+                          return cpy;
+                        })
+                      }
+                    />
+                  </div>
+                ) : null}
               </div>
             </div>
             <div className="mt-8 flex justify-center">

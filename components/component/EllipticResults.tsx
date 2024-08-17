@@ -28,8 +28,27 @@ import { MdOutlineFullscreen } from "react-icons/md";
 
 export default function EllipticResults({
   results,
+  boundary,
 }: {
   results: ellipticResults;
+  boundary: {
+    t: {
+      type: "dirichlet" | "neumann";
+      value: string;
+    };
+    b: {
+      type: "dirichlet" | "neumann";
+      value: string;
+    };
+    l: {
+      type: "dirichlet" | "neumann";
+      value: string;
+    };
+    r: {
+      type: "dirichlet" | "neumann";
+      value: string;
+    };
+  };
 }) {
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(results.length - 1);
@@ -78,23 +97,30 @@ export default function EllipticResults({
                       <MdOutlineFullscreen size={24} />
                     </Button>
                   </DialogTrigger>
-
+                  <div className="w-full h-4" />
                   <div className="w-full h-full flex justify-center gap-4">
                     <IterationGrids
                       x={results[0].matrix[0].length - 2}
                       y={results[0].matrix.length - 2}
+                      boundary={boundary}
                       result={itr.matrix}
                     />
                   </div>
-                  <DialogContent className="w-[80vw] h-[90vh] max-w-[80vw] max-h-[90vh]">
-                    <div className="w-full h-full flex justify-center gap-4">
-                      <IterationGrids
-                        x={results[0].matrix[0].length - 2}
-                        y={results[0].matrix.length - 2}
-                        result={itr.matrix}
-                        big
-                      />
+                  <div className="w-full h-4" />
+                  <DialogContent className="w-[80vw] h-[90vh] max-w-[80vw] max-h-[90vh] flex flex-col">
+                    <div className="w-full h-4" />
+                    <div className="w-full flex-1">
+                      <div className="w-full h-full flex justify-center gap-4">
+                        <IterationGrids
+                          x={results[0].matrix[0].length - 2}
+                          y={results[0].matrix.length - 2}
+                          result={itr.matrix}
+                          big
+                          boundary={boundary}
+                        />
+                      </div>
                     </div>
+                    <div className="w-full h-4" />
                     {/* <DialogHeader>
                         <DialogTitle>Are you absolutely sure?</DialogTitle>
                         <DialogDescription>
@@ -169,11 +195,30 @@ export function IterationGrids({
   y,
   result,
   big,
+  boundary,
 }: {
   x: number;
   y: number;
   result: number[][];
   big?: boolean;
+  boundary: {
+    t: {
+      type: "dirichlet" | "neumann";
+      value: string;
+    };
+    b: {
+      type: "dirichlet" | "neumann";
+      value: string;
+    };
+    l: {
+      type: "dirichlet" | "neumann";
+      value: string;
+    };
+    r: {
+      type: "dirichlet" | "neumann";
+      value: string;
+    };
+  };
 }) {
   return (
     <div
@@ -236,6 +281,206 @@ export function IterationGrids({
             ))}
           </div>
         ))}
+      </div>
+      <div className="w-full absolute top-0 h-[1px] flex justify-between items-stretch">
+        {boundary.t.type == "dirichlet" ? (
+          <p className=" text-center font-semibold -mt-6 mx-auto">
+            T = {boundary.t.value}
+          </p>
+        ) : (
+          <>
+            {result[0].map((row, i) => (
+              <div
+                key={i}
+                style={{
+                  fontSize:
+                    Math.max(x, y) > 10
+                      ? big
+                        ? "10px"
+                        : "7px"
+                      : big
+                      ? "16px"
+                      : "12px",
+                  marginTop: "-9px",
+                  width: "1px",
+
+                  // transform: `translateX(${Math.max(x, y) > 10 ? -2 : -4}px)`,
+                }}
+              >
+                <Tooltip key={i}>
+                  <TooltipTrigger asChild>
+                    <p className="bg-white w-fit hover:z-10 cursor-context-menu hover:bg-red-300 -translate-x-1/2 px-[2px]">
+                      {Number(row).toFixed(Math.max(x, y) > 10 ? 2 : 4)}
+                    </p>
+                  </TooltipTrigger>
+                  <TooltipContent className="font-bold text-lg">
+                    <math>
+                      <msub>
+                        <mi>T</mi>
+                        <ms>
+                          {0}, {i + 1}
+                        </ms>
+                      </msub>
+                    </math>
+                    = {Number(row).toFixed(8)}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            ))}
+          </>
+        )}
+      </div>
+      <div className="w-full absolute bottom-0 h-[1px] flex justify-between items-stretch">
+        {boundary.b.type == "dirichlet" ? (
+          <p className=" text-center font-semibold -mb-6 mx-auto">
+            T = {boundary.b.value}
+          </p>
+        ) : (
+          <>
+            {result[y + 1].map((row, i) => (
+              <div
+                key={i}
+                style={{
+                  fontSize:
+                    Math.max(x, y) > 10
+                      ? big
+                        ? "10px"
+                        : "7px"
+                      : big
+                      ? "16px"
+                      : "12px",
+                  marginBottom: "-9px",
+                  width: "1px",
+
+                  // transform: `translateX(${Math.max(x, y) > 10 ? -2 : -4}px)`,
+                }}
+              >
+                <Tooltip key={i}>
+                  <TooltipTrigger asChild>
+                    <p className="bg-white w-fit hover:z-10 cursor-context-menu hover:bg-red-300 -translate-x-1/2 -translate-y-1/2 px-[2px]">
+                      {Number(row).toFixed(Math.max(x, y) > 10 ? 2 : 4)}
+                    </p>
+                  </TooltipTrigger>
+                  <TooltipContent className="font-bold text-lg">
+                    <math>
+                      <msub>
+                        <mi>T</mi>
+                        <ms>
+                          {y + 1}, {i + 1}
+                        </ms>
+                      </msub>
+                    </math>
+                    = {Number(row).toFixed(8)}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            ))}
+          </>
+        )}
+      </div>
+      <div className="h-full absolute left-0 top-0 w-[1px] flex flex-col justify-evenly items-stretch">
+        {boundary.l.type == "dirichlet" ? (
+          <p className=" text-center font-semibold pr-2 mx-auto text-nowrap -translate-x-full">
+            T = {boundary.l.value}
+          </p>
+        ) : (
+          <>
+            {result
+              .map((row) => row[0])
+              .filter((_, idx) => (idx == 0 || idx == y + 1 ? false : true))
+              .map((row, i) => (
+                <div
+                  key={i}
+                  style={{
+                    fontSize:
+                      Math.max(x, y) > 10
+                        ? big
+                          ? "10px"
+                          : "7px"
+                        : big
+                        ? "16px"
+                        : "12px",
+                    // marginBottom: "-9px",
+                    width: "1px",
+                    height: "1px",
+
+                    // transform: `translateX(${Math.max(x, y) > 10 ? -2 : -4}px)`,
+                  }}
+                >
+                  <Tooltip key={i}>
+                    <TooltipTrigger asChild>
+                      <p className="bg-white w-fit hover:z-10 cursor-context-menu hover:bg-red-300 -translate-x-1/2 -translate-y-1/2 px-[2px]">
+                        {Number(row).toFixed(Math.max(x, y) > 10 ? 2 : 4)}
+                      </p>
+                    </TooltipTrigger>
+                    <TooltipContent className="font-bold text-lg">
+                      <math>
+                        <msub>
+                          <mi>T</mi>
+                          <ms>
+                            {i + 1}, {0}
+                          </ms>
+                        </msub>
+                      </math>
+                      = {Number(row).toFixed(8)}
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              ))}
+          </>
+        )}
+      </div>
+      <div className="h-full absolute right-0 top-0 w-[1px] flex flex-col justify-evenly items-stretch">
+        {boundary.r.type == "dirichlet" ? (
+          <p className=" text-center font-semibold pl-2 mx-auto text-nowrap">
+            T = {boundary.r.value}
+          </p>
+        ) : (
+          <>
+            {result
+              .map((row) => row[x + 1])
+              .filter((_, idx) => (idx == 0 || idx == y + 1 ? false : true))
+              .map((row, i) => (
+                <div
+                  key={i}
+                  style={{
+                    fontSize:
+                      Math.max(x, y) > 10
+                        ? big
+                          ? "10px"
+                          : "7px"
+                        : big
+                        ? "16px"
+                        : "12px",
+                    // marginBottom: "-9px",
+                    width: "1px",
+                    height: "1px",
+
+                    // transform: `translateX(${Math.max(x, y) > 10 ? -2 : -4}px)`,
+                  }}
+                >
+                  <Tooltip key={i}>
+                    <TooltipTrigger asChild>
+                      <p className="bg-white w-fit hover:z-10 cursor-context-menu hover:bg-red-300 -translate-x-1/2 -translate-y-1/2 px-[2px]">
+                        {Number(row).toFixed(Math.max(x, y) > 10 ? 2 : 4)}
+                      </p>
+                    </TooltipTrigger>
+                    <TooltipContent className="font-bold text-lg">
+                      <math>
+                        <msub>
+                          <mi>T</mi>
+                          <ms>
+                            {i + 1}, {x + 1}
+                          </ms>
+                        </msub>
+                      </math>
+                      = {Number(row).toFixed(8)}
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              ))}
+          </>
+        )}
       </div>
     </div>
   );

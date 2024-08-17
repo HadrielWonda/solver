@@ -607,6 +607,14 @@ export const Sidebar = ({
                   ))}
                 {settings.models
                   .filter((model) => model.type == "polynomial")
+                  .map(
+                    (m) =>
+                      m as {
+                        type: "polynomial";
+                        name: string;
+                        degree: string;
+                      }
+                  )
                   .filter((model) => model.degree != "2")
                   .map(
                     (i) =>
