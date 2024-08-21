@@ -437,7 +437,7 @@ export const Sidebar = ({
                   >
                     1-D
                   </TabsTrigger>
-                  <TabsTrigger
+                  {/* <TabsTrigger
                     onClick={() =>
                       setSettings((s) => ({
                         ...s,
@@ -446,9 +446,10 @@ export const Sidebar = ({
                     }
                     value="2"
                     className="flex-1"
+                    disabled
                   >
                     2-D
-                  </TabsTrigger>
+                  </TabsTrigger> */}
                 </TabsList>
               </Tabs>
             </div>

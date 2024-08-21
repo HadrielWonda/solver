@@ -619,26 +619,29 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
   } = useSWRMutation(
     "/api/user",
     async () => {
-      const res = await fetch("http://127.0.0.1:8000/pde/parabolic-Implicit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          nx,
-          ny,
-          boundary: initialValues?.bondary,
-          equationType: initialValues?.equationType,
-          dimension: Number(initialValues?.dimension),
-          k: Number(initialValues?.k),
-          x: Number(initialValues?.x),
-          dx: Number(initialValues?.dx),
-          y: Number(initialValues?.y),
-          t: Number(initialValues?.t),
-          dt: Number(initialValues?.dt),
-          T: Number(initialValues?.T),
-        }),
-      });
+      const res = await fetch(
+        "https://solver-python-api.onrender.com/pde/parabolic-implicit",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            nx,
+            ny,
+            boundary: initialValues?.bondary,
+            equationType: initialValues?.equationType,
+            dimension: Number(initialValues?.dimension),
+            k: Number(initialValues?.k),
+            x: Number(initialValues?.x),
+            dx: Number(initialValues?.dx),
+            y: Number(initialValues?.y),
+            t: Number(initialValues?.t),
+            dt: Number(initialValues?.dt),
+            T: Number(initialValues?.T),
+          }),
+        }
+      );
 
       const result = await res.json();
 
