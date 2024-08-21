@@ -53,6 +53,9 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import EllipticResults from "@/components/component/EllipticResults";
 import PDES from "@/components/PDESection";
+import RodGrid from "@/components/component/RodGrid";
+import ParabolicResults2D from "@/components/component/ParabolicResults2D";
+import ParabolicResults1D from "@/components/component/ParabolicResults1D";
 
 class ResponseError extends Error {
   response: string;
@@ -70,11 +73,21 @@ const csvConfig = mkConfig({ useKeysAsHeaders: true });
 
 type paramMode = "intro" | "solve" | "steps" | null;
 
-export type ellipticResults = {
-  itr: number;
-  matrix: number[][];
-  abre: number;
-}[];
+export type parabolicResults =
+  | {
+      dimension: "2";
+      result: {
+        time: string;
+        matrix: string[][];
+      }[];
+    }
+  | {
+      dimension: "1";
+      result: {
+        time: string;
+        matrix: string[];
+      }[];
+    };
 
 export default function Page() {
   const router = useRouter();
@@ -126,7 +139,7 @@ const CodeDialog = () => {
       onAnimationStart={() => setReRenderTrigger((i) => !i)}
     >
       <DialogHeader>
-        <DialogTitle>Finite Difference: Elliptic Equations</DialogTitle>
+        <DialogTitle>Parabolic Equations: Explicit Method</DialogTitle>
         <DialogDescription>
           Copy code to make changes or run in a different enviroment.
         </DialogDescription>
@@ -210,7 +223,7 @@ const IntroSection = ({ solve }: { solve: () => void }) => {
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
                     <BreadcrumbPage>
-                      Finite Difference: Elliptic Equations
+                      Parabolic Equations: Explicit Method
                     </BreadcrumbPage>
                   </BreadcrumbItem>
                 </BreadcrumbList>
@@ -220,7 +233,7 @@ const IntroSection = ({ solve }: { solve: () => void }) => {
           <div className="space-y-2">
             <div className="mb-12 mt-2">
               <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl md:text-6xl text-center mb-4">
-                Finite Difference: Elliptic Equations
+                Parabolic Equations: Explicit Method
               </h1>
               <div className="flex gap-4 justify-center items-center">
                 <Button onClick={solve}>Start Computation</Button>
@@ -237,203 +250,278 @@ const IntroSection = ({ solve }: { solve: () => void }) => {
               <PDES />
               <section>
                 <h4 className="bold font-bold my-2 text-left">
-                  Finite Difference: Elliptic Equations
+                  Parabolic Equations: Explicit Method
                 </h4>
-
+                <Parargraph>The heat-conduction equation</Parargraph>
+                <MathBlock>
+                  <MathRow>
+                    <MathData>
+                      <mi>k</mi>
+                      <mfrac>
+                        <mi>ẟ²T</mi>
+                        <mi>ẟx²</mi>
+                      </mfrac>
+                    </MathData>
+                    <MathData>
+                      <mo>=</mo>
+                    </MathData>
+                    <MathData>
+                      <mfrac>
+                        <mi>∂T</mi>
+                        <mi>∂t</mi>
+                      </mfrac>
+                    </MathData>
+                  </MathRow>
+                </MathBlock>
                 <Parargraph>
-                  The most common alternatives to the shooting method are fi
-                  nite-difference approaches. In these techniques, fi nite
-                  divided differences are substituted for the derivatives in the
-                  original equation. Thus, a linear differential equation is
-                  transformed into a set of simultaneous algebraic equations
-                  that can be solved
+                  ... requires approximations for the second derivative in space
+                  and the fi rst derivative in time. The former is represented
+                  in the same fashion as for the Laplace equation by a centered
+                  finite-divided difference and f forward finite-divided
+                  difference is used to approximate the time derivative
                 </Parargraph>
+                <MathBlock>
+                  <MathRow>
+                    <MathData>
+                      <mfrac>
+                        <mi>ẟ²T</mi>
+                        <mi>ẟx²</mi>
+                      </mfrac>
+                    </MathData>
+                    <MathData>
+                      <mo>=</mo>
+                    </MathData>
+                    <MathData>
+                      <mfrac>
+                        <mrow>
+                          <msubsup>
+                            <mi>T</mi>
+                            <mrow>
+                              <mi>i</mi>
+                              <mo>+</mo>
+                              <mn>1</mn>
+                            </mrow>
+                            <mi>l</mi>
+                          </msubsup>
+                          <mo>-</mo>
+                          <mn>2</mn>
+                          <msubsup>
+                            <mi>T</mi>
+                            <mrow>
+                              <mi>i</mi>
+                            </mrow>
+                            <mi>l</mi>
+                          </msubsup>
+                          <mo>+</mo>
+                          <msubsup>
+                            <mi>T</mi>
+                            <mrow>
+                              <mi>i</mi>
+                              <mo>-</mo>
+                              <mn>1</mn>
+                            </mrow>
+                            <mi>l</mi>
+                          </msubsup>
+                        </mrow>
+                        <mrow>
+                          <mi>Δx</mi>
+                          <mo>²</mo>
+                        </mrow>
+                      </mfrac>
+                    </MathData>
+                  </MathRow>
+                  <MathRow>
+                    <MathData>
+                      <mfrac>
+                        <mi>∂T</mi>
+                        <mi>∂t</mi>
+                      </mfrac>
+                    </MathData>
+                    <MathData>
+                      <mo>=</mo>
+                    </MathData>
+                    <MathData>
+                      <mfrac>
+                        <mrow>
+                          <msubsup>
+                            <mi>T</mi>
+                            <mi>i</mi>
+                            <mrow>
+                              <mi>l</mi>
+                              <mo>+</mo>
+                              <mn>1</mn>
+                            </mrow>
+                          </msubsup>
+                          <mo>-</mo>
+                          <msubsup>
+                            <mi>T</mi>
+                            <mi>i</mi>
+                            <mi>l</mi>
+                          </msubsup>
+                        </mrow>
+                        <mi>Δt</mi>
+                      </mfrac>
+                    </MathData>
+                  </MathRow>
+                </MathBlock>
 
-                <h3 className="bold font-bold mt-8 mb-2 text-left">
-                  First Order Derivatives
-                </h3>
-                <ol>
-                  <li>
-                    <span>Forward Difference:</span>
-                    <MathBlock className="my-0">
-                      <MathRow>
-                        <MathData>f'(x) ≈</MathData>
-                        <MathData>
-                          <mfrac>
-                            <ms>f(x+h) - f(x)</ms>
-                            <mi>h</mi>
-                          </mfrac>
-                        </MathData>
-                      </MathRow>
-                    </MathBlock>
-                  </li>
-                  <li>
-                    <span>Backward Difference:</span>
-                    <MathBlock className="my-0">
-                      <MathRow>
-                        <MathData>f'(x) ≈</MathData>
-                        <MathData>
-                          <mfrac>
-                            <ms>f(x) - f(x-h)</ms>
-                            <mi>h</mi>
-                          </mfrac>
-                        </MathData>
-                      </MathRow>
-                    </MathBlock>
-                  </li>
-                  <li>
-                    <span>Central Difference:</span>
-                    <MathBlock className="my-0">
-                      <MathRow>
-                        <MathData>f'(x) ≈</MathData>
-                        <MathData>
-                          <mfrac>
-                            <ms>f(x+h) - f(x-h)</ms>
+                <Parargraph>Substituting yields</Parargraph>
+                <MathBlock>
+                  <MathRow>
+                    <MathData>
+                      <mi>k</mi>
+                      <mfrac>
+                        <mrow>
+                          <msubsup>
+                            <mi>T</mi>
                             <mrow>
-                              <mn>2</mn>
-                              <mi>h</mi>
+                              <mi>i</mi>
+                              <mo>+</mo>
+                              <mn>1</mn>
                             </mrow>
-                          </mfrac>
-                        </MathData>
-                      </MathRow>
-                    </MathBlock>
-                  </li>
-                </ol>
-
-                <h3 className="bold font-bold mt-8 mb-2 text-left">
-                  Second Order Derivatives
-                </h3>
-                <ol>
-                  <li>
-                    <span>Forward Difference:</span>
-                    <MathBlock className="my-0">
-                      <MathRow>
-                        <MathData>f''(x) ≈</MathData>
-                        <MathData>
-                          <mfrac>
-                            <ms>f(x+2h) - 2f(x+h) + f(x)</ms>
+                            <mi>l</mi>
+                          </msubsup>
+                          <mo>-</mo>
+                          <mn>2</mn>
+                          <msubsup>
+                            <mi>T</mi>
                             <mrow>
-                              <msup>
-                                <mi>h</mi>
-                                <mn>2</mn>
-                              </msup>
+                              <mi>i</mi>
                             </mrow>
-                          </mfrac>
-                        </MathData>
-                      </MathRow>
-                    </MathBlock>
-                  </li>
-                  <li>
-                    <span>Backward Difference:</span>
-                    <MathBlock className="my-0">
-                      <MathRow>
-                        <MathData>f''(x) ≈</MathData>
-                        <MathData>
-                          <mfrac>
-                            <ms>f(x) - 2f(x-h) + f(x-2h)</ms>
+                            <mi>l</mi>
+                          </msubsup>
+                          <mo>+</mo>
+                          <msubsup>
+                            <mi>T</mi>
                             <mrow>
-                              <msup>
-                                <mi>h</mi>
-                                <mn>2</mn>
-                              </msup>
+                              <mi>i</mi>
+                              <mo>-</mo>
+                              <mn>1</mn>
                             </mrow>
-                          </mfrac>
-                        </MathData>
-                      </MathRow>
-                    </MathBlock>
-                  </li>
-                  <li>
-                    <span>Central Difference:</span>
-                    <MathBlock className="my-0">
-                      <MathRow>
-                        <MathData>f''(x) ≈</MathData>
-                        <MathData>
-                          <mfrac>
-                            <ms>f(x+h) - 2f(x) + f(x-h)</ms>
+                            <mi>l</mi>
+                          </msubsup>
+                        </mrow>
+                        <mrow>
+                          <mi>Δx</mi>
+                          <mo>²</mo>
+                        </mrow>
+                      </mfrac>
+                    </MathData>
+                    <MathData>
+                      <mo>=</mo>
+                    </MathData>
+                    <MathData>
+                      <mfrac>
+                        <mrow>
+                          <msubsup>
+                            <mi>T</mi>
+                            <mi>i</mi>
                             <mrow>
-                              <msup>
-                                <mi>h</mi>
-                                <mn>2</mn>
-                              </msup>
+                              <mi>l</mi>
+                              <mo>+</mo>
+                              <mn>1</mn>
                             </mrow>
-                          </mfrac>
-                        </MathData>
-                      </MathRow>
-                    </MathBlock>
-                  </li>
-                </ol>
-
-                <h3 className="bold font-bold mt-8 mb-2 text-left">
-                  Third Order Derivatives
-                </h3>
-                <ol>
-                  <li>
-                    <span>Forward Difference:</span>
-                    <MathBlock className="my-0">
-                      <MathRow>
-                        <MathData>f'''(x) ≈</MathData>
-                        <MathData>
-                          <mfrac>
-                            <ms>f(x+3h) - 3f(x+2h) + 3f(x+h) - f(x)</ms>
-                            <mrow>
-                              <msup>
-                                <mi>h</mi>
-                                <mn>3</mn>
-                              </msup>
-                            </mrow>
-                          </mfrac>
-                        </MathData>
-                      </MathRow>
-                    </MathBlock>
-                  </li>
-                  <li>
-                    <span>Backward Difference:</span>
-                    <MathBlock className="my-0">
-                      <MathRow>
-                        <MathData>f'''(x) ≈</MathData>
-                        <MathData>
-                          <mfrac>
-                            <ms>f(x) - 3f(x-h) + 3f(x-2h) - f(x-3h)</ms>
-                            <mrow>
-                              <msup>
-                                <mi>h</mi>
-                                <mn>3</mn>
-                              </msup>
-                            </mrow>
-                          </mfrac>
-                        </MathData>
-                      </MathRow>
-                    </MathBlock>
-                  </li>
-                  <li>
-                    <span>Central Difference:</span>
-                    <MathBlock className="my-0">
-                      <MathRow>
-                        <MathData>f'''(x) ≈</MathData>
-                        <MathData>
-                          <mfrac>
-                            <ms>f(x+2h) - 2f(x+h) + 2f(x-h) - f(x-2h)</ms>
-                            <mrow>
-                              <mn>2</mn>
-                              <msup>
-                                <mi>h</mi>
-                                <mn>3</mn>
-                              </msup>
-                            </mrow>
-                          </mfrac>
-                        </MathData>
-                      </MathRow>
-                    </MathBlock>
-                  </li>
-                </ol>
-
-                <Parargraph className="mt-6">
-                  These formulas are derived based on Taylor series expansions
-                  and are used depending on the data points available and the
-                  desired accuracy. Central differences generally provide a more
-                  accurate approximation compared to forward and backward
-                  differences because they use information from both sides of
-                  the point of interest.
+                          </msubsup>
+                          <mo>-</mo>
+                          <msubsup>
+                            <mi>T</mi>
+                            <mi>i</mi>
+                            <mi>l</mi>
+                          </msubsup>
+                        </mrow>
+                        <mi>Δt</mi>
+                      </mfrac>
+                    </MathData>
+                  </MathRow>
+                </MathBlock>
+                <Parargraph>which can be solved for</Parargraph>
+                <MathBlock>
+                  <MathRow>
+                    <MathData>
+                      <msubsup>
+                        <mi>T</mi>
+                        <mi>i</mi>
+                        <mrow>
+                          <mi>l</mi>
+                          <mo>+</mo>
+                          <mn>1</mn>
+                        </mrow>
+                      </msubsup>
+                    </MathData>
+                    <MathData>
+                      <mo>=</mo>
+                    </MathData>
+                    <MathData>
+                      <msubsup>
+                        <mi>T</mi>
+                        <mi>i</mi>
+                        <mi>l</mi>
+                      </msubsup>
+                      <mo>+</mo>
+                      <mi>λ</mi>
+                      <mo>(</mo>
+                      <msubsup>
+                        <mi>T</mi>
+                        <mrow>
+                          <mi>i</mi>
+                          <mo>+</mo>
+                          <mn>1</mn>
+                        </mrow>
+                        <mi>l</mi>
+                      </msubsup>
+                      <mo>-</mo>
+                      <mn>2</mn>
+                      <msubsup>
+                        <mi>T</mi>
+                        <mrow>
+                          <mi>i</mi>
+                        </mrow>
+                        <mi>l</mi>
+                      </msubsup>
+                      <mo>+</mo>
+                      <msubsup>
+                        <mi>T</mi>
+                        <mrow>
+                          <mi>i</mi>
+                          <mo>-</mo>
+                          <mn>1</mn>
+                        </mrow>
+                        <mi>l</mi>
+                      </msubsup>
+                      <mo>)</mo>
+                    </MathData>
+                  </MathRow>
+                </MathBlock>
+                <Parargraph>where</Parargraph>
+                <MathBlock>
+                  <MathRow>
+                    <MathData>
+                      <mi>λ</mi>
+                    </MathData>
+                    <MathData>
+                      <mo>=</mo>
+                    </MathData>
+                    <MathData>
+                      <mi>k</mi>
+                      <mfrac>
+                        <mi>Δt</mi>
+                        <mrow>
+                          <mi>Δx</mi>
+                          <mo>²</mo>
+                        </mrow>
+                      </mfrac>
+                    </MathData>
+                  </MathRow>
+                </MathBlock>
+                <Parargraph>
+                  This equation can be written for all the interior nodes on the
+                  body. It then provides an explicit means to compute values at
+                  each node for a future time based on the present values at the
+                  node and its neighbors.
+                </Parargraph>
+                <Parargraph>
+                  The explicit method is conditionally stable, meaning that the
+                  time step must be chosen carefully to avoid instability.
                 </Parargraph>
               </section>
             </div>
@@ -461,16 +549,17 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
   }, [setSidebarOpen]);
 
   const [initialValues, setInitialValues] = useState<{
-    equationType: "laplace" | "poisson" | "others";
+    equationType: "heat" | "others";
     equation: string;
     latex: string;
-    n: {
-      x: string;
-      y: string;
-    };
-    stoppingCriteria: "max_error" | "max_iterations";
-    maxIterations: string;
-    maxError: string;
+    dimension: "1" | "2";
+    k: string;
+    x: string;
+    dx: string;
+    y: string;
+    t: string;
+    dt: string;
+    T: string;
     bondary: {
       t: {
         type: "dirichlet" | "neumann";
@@ -489,20 +578,18 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
         value: string;
       };
     };
-    h?: string;
-    b?: string;
-    overRelaxation: string;
   }>({
-    equationType: "laplace",
+    equationType: "heat",
     equation: "",
     latex: "",
-    n: {
-      x: "",
-      y: "",
-    },
-    stoppingCriteria: "max_iterations",
-    maxIterations: "",
-    maxError: "",
+    dimension: "1",
+    k: "",
+    x: "",
+    dx: "",
+    y: "",
+    t: "",
+    dt: "",
+    T: "",
     bondary: {
       t: {
         type: "dirichlet",
@@ -521,11 +608,17 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
         value: "",
       },
     },
-    h: "",
-    b: "",
-    overRelaxation: "",
   });
   const [latex, setLatex] = useState("");
+
+  const nx =
+    initialValues.x && initialValues.dx
+      ? Number(initialValues?.x) / Number(initialValues?.dx) - 1
+      : 0;
+  const ny =
+    initialValues.y && initialValues.dx
+      ? Number(initialValues?.y) / Number(initialValues?.dx) - 1
+      : 0;
 
   const {
     trigger,
@@ -537,21 +630,25 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
     "/api/user",
     async () => {
       const res = await fetch(
-        "https://solver-python-api.onrender.com/pde/finite-difference-elliptic",
+        "https://solver-python-api.onrender.com/pde/parabolic-explicit",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            nx: Number(initialValues?.n.x),
-            ny: Number(initialValues?.n.y),
+            nx,
+            ny,
             boundary: initialValues?.bondary,
-            h: Number(initialValues?.h ?? 0),
-            b: Number(initialValues?.b ?? 0),
-            max_iterations: Number(initialValues?.maxIterations),
-            max_error: Number(initialValues?.maxError),
-            over_relaxation: Number(initialValues?.overRelaxation),
+            equationType: initialValues?.equationType,
+            dimension: Number(initialValues?.dimension),
+            k: Number(initialValues?.k),
+            x: Number(initialValues?.x),
+            dx: Number(initialValues?.dx),
+            y: Number(initialValues?.y),
+            t: Number(initialValues?.t),
+            dt: Number(initialValues?.dt),
+            T: Number(initialValues?.T),
           }),
         }
       );
@@ -566,7 +663,7 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
         }
       }
 
-      return result as Promise<ellipticResults>;
+      return result as Promise<parabolicResults>;
     },
     {
       async onError(err, key, config) {
@@ -577,14 +674,27 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
   );
 
   const valid =
-    initialValues?.bondary.b.value &&
-    initialValues?.bondary.t.value &&
-    initialValues?.bondary.l.value &&
-    initialValues?.bondary.r.value &&
-    !isNaN(Number(initialValues?.bondary.b.value)) &&
-    !isNaN(Number(initialValues?.bondary.t.value)) &&
-    !isNaN(Number(initialValues?.bondary.l.value)) &&
-    !isNaN(Number(initialValues?.bondary.r.value));
+    initialValues.k != "" &&
+    !isNaN(Number(initialValues.k)) &&
+    initialValues.t &&
+    !isNaN(Number(initialValues.t)) &&
+    initialValues.dt &&
+    !isNaN(Number(initialValues.dt)) &&
+    initialValues.dx &&
+    !isNaN(Number(initialValues.dx)) &&
+    initialValues.x &&
+    !isNaN(Number(initialValues.x)) &&
+    initialValues.bondary.l.value &&
+    !isNaN(Number(initialValues.bondary.l.value)) &&
+    initialValues.bondary.r.value &&
+    !isNaN(Number(initialValues.bondary.r.value)) &&
+    (initialValues.dimension == "1" ||
+      (initialValues.y &&
+        !isNaN(Number(initialValues.y)) &&
+        initialValues.bondary.t.value &&
+        !isNaN(Number(initialValues.bondary.t.value)) &&
+        initialValues.bondary.b.value &&
+        !isNaN(Number(initialValues.bondary.b.value))));
 
   useEffect(() => {
     if (resultError) {
@@ -652,7 +762,7 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
                     <BreadcrumbPage>
-                      Finite Difference: Elliptic Equations
+                      Parabolic Equations: Explicit Method
                     </BreadcrumbPage>
                   </BreadcrumbItem>
                 </BreadcrumbList>
@@ -687,100 +797,93 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
             </div>
           </div>
         ) : results && initialValues ? (
-          <EllipticResults results={results} boundary={initialValues.bondary} />
+          results.dimension == "1" ? (
+            <ParabolicResults1D
+              boundary={initialValues.bondary}
+              nx={nx}
+              x={Number(initialValues.x)}
+              dx={Number(initialValues.dx)}
+              results={results.result}
+              t={Number(initialValues.t)}
+            />
+          ) : (
+            <ParabolicResults2D
+              results={results.result}
+              boundary={initialValues.bondary}
+              t={Number(initialValues.t)}
+            />
+          )
         ) : sideMode == "set" && initialValues ? (
           <div className="h-full flex justify-center flex-col p-4">
             <h4 className="font-semibold mb-4">Bondary Conditions:</h4>
-            <div className="mx-auto mb-4 flex flex-col gap-1.5">
-              <Tabs
-                defaultValue={initialValues.bondary.t.type}
-                className="mx-auto mb-2"
-              >
-                <TabsList className="w-fit">
-                  <TabsTrigger
-                    value="dirichlet"
-                    onClick={() =>
-                      setInitialValues((s) => {
-                        const cpy = { ...s };
-                        cpy.bondary.t.type = "dirichlet";
-                        return cpy;
-                      })
-                    }
-                  >
-                    Dirichlet
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="neumann"
-                    onClick={() =>
-                      setInitialValues((s) => {
-                        const cpy = { ...s };
-                        cpy.bondary.t.type = "neumann";
-                        return cpy;
-                      })
-                    }
-                    // disabled
-                  >
-                    Neumann
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-              <div className="flex items-center gap-4 max-w-sm">
-                <div className="flex items-center gap-1.5">
-                  <Label
-                    htmlFor="email"
-                    className="text-nowrap whitespace-nowrap"
-                  >
-                    {initialValues.bondary.t.type == "dirichlet" ? (
-                      "T"
-                    ) : (
-                      <math>
-                        <mfrac>
-                          <mi>dT</mi>
-                          <mi>dx</mi>
-                        </mfrac>
-                      </math>
-                    )}{" "}
-                    =
-                  </Label>
-                  <Input
-                    type="number"
-                    placeholder="0"
-                    value={initialValues.bondary.t.value}
-                    onChange={(e) =>
-                      setInitialValues((s) => {
-                        const cpy = { ...s };
-                        cpy.bondary.t.value = e.target.value;
-                        return cpy;
-                      })
-                    }
-                  />
-                </div>
-                {initialValues.bondary.t.type != "dirichlet" &&
-                initialValues.bondary.t.value &&
-                initialValues.bondary.t.value !== "0" ? (
+            {initialValues.dimension == "2" ? (
+              <div className="mx-auto mb-4 flex flex-col gap-1.5">
+                <Tabs
+                  defaultValue={initialValues.bondary.t.type}
+                  className="mx-auto mb-2"
+                >
+                  <TabsList className="w-fit">
+                    <TabsTrigger
+                      value="dirichlet"
+                      onClick={() =>
+                        setInitialValues((s) => {
+                          const cpy = { ...s };
+                          cpy.bondary.t.type = "dirichlet";
+                          return cpy;
+                        })
+                      }
+                    >
+                      Dirichlet
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="neumann"
+                      onClick={() =>
+                        setInitialValues((s) => {
+                          const cpy = { ...s };
+                          cpy.bondary.t.type = "neumann";
+                          return cpy;
+                        })
+                      }
+                      // disabled
+                    >
+                      Neumann
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+                <div className="flex items-center gap-4 max-w-sm">
                   <div className="flex items-center gap-1.5">
                     <Label
                       htmlFor="email"
                       className="text-nowrap whitespace-nowrap"
                     >
-                      Length of the bondary:
+                      {initialValues.bondary.t.type == "dirichlet" ? (
+                        "T"
+                      ) : (
+                        <math>
+                          <mfrac>
+                            <mi>dT</mi>
+                            <mi>dx</mi>
+                          </mfrac>
+                        </math>
+                      )}{" "}
+                      =
                     </Label>
                     <Input
                       type="number"
                       placeholder="0"
-                      value={initialValues.b}
+                      value={initialValues.bondary.t.value}
                       onChange={(e) =>
                         setInitialValues((s) => {
                           const cpy = { ...s };
-                          cpy.b = e.target.value;
+                          cpy.bondary.t.value = e.target.value;
                           return cpy;
                         })
                       }
                     />
                   </div>
-                ) : null}
+                </div>
               </div>
-            </div>
+            ) : null}
             <div className="w-full flex-1 flex justify-center gap-4">
               <div className="w-[200px] self-center">
                 <Tabs
@@ -826,7 +929,7 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
                       <math>
                         <mfrac>
                           <mi>dT</mi>
-                          <mi>dy</mi>
+                          <mi>dx</mi>
                         </mfrac>
                       </math>
                     )}{" "}
@@ -845,36 +948,17 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
                     }
                   />
                 </div>
-                {initialValues.bondary.l.type != "dirichlet" &&
-                initialValues.bondary.l.value &&
-                initialValues.bondary.l.value !== "0" ? (
-                  <div className="flex flex-col w-full max-w-sm gap-1.5 mt-4">
-                    <Label
-                      htmlFor="email"
-                      className="text-nowrap whitespace-nowrap mb-1"
-                    >
-                      Length of the bondary:
-                    </Label>
-                    <Input
-                      type="number"
-                      placeholder="0"
-                      value={initialValues.h}
-                      onChange={(e) =>
-                        setInitialValues((s) => {
-                          const cpy = { ...s };
-                          cpy.h = e.target.value;
-                          return cpy;
-                        })
-                      }
-                    />
-                  </div>
-                ) : null}
               </div>
-              <Grids
-                x={Number(initialValues.n.x)}
-                y={Number(initialValues.n.y)}
-                boundary={initialValues.bondary}
-              />
+              {initialValues.dimension == "2" ? (
+                <Grids x={nx} y={ny} boundary={initialValues.bondary} />
+              ) : (
+                <RodGrid
+                  boundary={initialValues.bondary}
+                  nx={nx}
+                  x={Number(initialValues.x)}
+                  dx={Number(initialValues.dx)}
+                />
+              )}
               <div className="w-[200px] self-center">
                 <Tabs
                   defaultValue={initialValues.bondary.r.type}
@@ -919,7 +1003,7 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
                       <math>
                         <mfrac>
                           <mi>dT</mi>
-                          <mi>dy</mi>
+                          <mi>dx</mi>
                         </mfrac>
                       </math>
                     )}{" "}
@@ -938,122 +1022,76 @@ const SolveSection = ({ intro }: { intro: () => void }) => {
                     }
                   />
                 </div>
-                {initialValues.bondary.r.type != "dirichlet" &&
-                initialValues.bondary.r.value &&
-                initialValues.bondary.r.value !== "0" ? (
-                  <div className="flex flex-col w-full max-w-sm gap-1.5 mt-4">
-                    <Label
-                      htmlFor="email"
-                      className="text-nowrap whitespace-nowrap mb-1"
-                    >
-                      Length of the bondary:
-                    </Label>
-                    <Input
-                      type="number"
-                      placeholder="0"
-                      value={initialValues.h}
-                      onChange={(e) =>
+              </div>
+            </div>
+            {initialValues.dimension == "2" ? (
+              <div className="mx-auto mt-4 flex flex-col gap-1.5">
+                <Tabs
+                  defaultValue={initialValues.bondary.b.type}
+                  className="mx-auto mb-2"
+                >
+                  <TabsList className="w-fit">
+                    <TabsTrigger
+                      value="dirichlet"
+                      onClick={() =>
                         setInitialValues((s) => {
                           const cpy = { ...s };
-                          cpy.h = e.target.value;
+                          cpy.bondary.b.type = "dirichlet";
                           return cpy;
                         })
                       }
-                    />
-                  </div>
-                ) : null}
-              </div>
-            </div>
-            <div className="mx-auto mt-4 flex flex-col gap-1.5">
-              <Tabs
-                defaultValue={initialValues.bondary.b.type}
-                className="mx-auto mb-2"
-              >
-                <TabsList className="w-fit">
-                  <TabsTrigger
-                    value="dirichlet"
-                    onClick={() =>
-                      setInitialValues((s) => {
-                        const cpy = { ...s };
-                        cpy.bondary.b.type = "dirichlet";
-                        return cpy;
-                      })
-                    }
-                  >
-                    Dirichlet
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="neumann"
-                    onClick={() =>
-                      setInitialValues((s) => {
-                        const cpy = { ...s };
-                        cpy.bondary.b.type = "neumann";
-                        return cpy;
-                      })
-                    }
-                    // disabled
-                  >
-                    Neumann
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-              <div className="flex items-center gap-4 max-w-sm">
-                <div className="flex items-center gap-1.5">
-                  <Label
-                    htmlFor="email"
-                    className="text-nowrap whitespace-nowrap"
-                  >
-                    {initialValues.bondary.b.type == "dirichlet" ? (
-                      "T"
-                    ) : (
-                      <math>
-                        <mfrac>
-                          <mi>dT</mi>
-                          <mi>dx</mi>
-                        </mfrac>
-                      </math>
-                    )}{" "}
-                    =
-                  </Label>
-                  <Input
-                    type="number"
-                    placeholder="0"
-                    value={initialValues.bondary.b.value}
-                    onChange={(e) =>
-                      setInitialValues((s) => {
-                        const cpy = { ...s };
-                        cpy.bondary.b.value = e.target.value;
-                        return cpy;
-                      })
-                    }
-                  />
-                </div>
-                {initialValues.bondary.b.type != "dirichlet" &&
-                initialValues.bondary.b.value &&
-                initialValues.bondary.b.value !== "0" ? (
+                    >
+                      Dirichlet
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="neumann"
+                      onClick={() =>
+                        setInitialValues((s) => {
+                          const cpy = { ...s };
+                          cpy.bondary.b.type = "neumann";
+                          return cpy;
+                        })
+                      }
+                      // disabled
+                    >
+                      Neumann
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+                <div className="flex items-center gap-4 max-w-sm">
                   <div className="flex items-center gap-1.5">
                     <Label
                       htmlFor="email"
                       className="text-nowrap whitespace-nowrap"
                     >
-                      Length of the bondary:
+                      {initialValues.bondary.b.type == "dirichlet" ? (
+                        "T"
+                      ) : (
+                        <math>
+                          <mfrac>
+                            <mi>dT</mi>
+                            <mi>dx</mi>
+                          </mfrac>
+                        </math>
+                      )}{" "}
+                      =
                     </Label>
                     <Input
                       type="number"
                       placeholder="0"
-                      value={initialValues.b}
+                      value={initialValues.bondary.b.value}
                       onChange={(e) =>
                         setInitialValues((s) => {
                           const cpy = { ...s };
-                          cpy.b = e.target.value;
+                          cpy.bondary.b.value = e.target.value;
                           return cpy;
                         })
                       }
                     />
                   </div>
-                ) : null}
+                </div>
               </div>
-            </div>
+            ) : null}
             <div className="mt-8 flex justify-center">
               {isMutating ? (
                 <Button

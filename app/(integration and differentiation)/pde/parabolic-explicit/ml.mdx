@@ -1,0 +1,117 @@
+```ts
+function result = partial_differential_equation_parabolic_explicit(bodyValues)
+    nx = bodyValues.nx;
+    ny = bodyValues.ny;
+    dimension = bodyValues.dimension;
+    k = bodyValues.k;
+    dx = bodyValues.dx;
+    t_max = bodyValues.t;
+    dt = bodyValues.dt;
+    T = bodyValues.T;
+
+    top = str2double(bodyValues.boundary.t.value);
+    top(isnan(top)) = 0;
+    topType = bodyValues.boundary.t.type;
+
+    bottom = str2double(bodyValues.boundary.b.value);
+    bottom(isnan(bottom)) = 0;
+    bottomType = bodyValues.boundary.b.type;
+
+    left = str2double(bodyValues.boundary.l.value);
+    leftType = bodyValues.boundary.l.type;
+
+    right = str2double(bodyValues.boundary.r.value);
+    rightType = bodyValues.boundary.r.type;
+
+    results = struct();
+
+    if dimension == 1
+        if strcmp(leftType, 'neumann')
+            matrix = [T, repmat(T, 1, nx), T];
+        else
+            matrix = [left, repmat(T, 1, nx), right];
+        end
+
+        results(1).time = 0;
+        results(1).matrix = num2str(matrix);
+
+        time = dt;
+        while time <= t_max
+            new_matrix = zeros(1, length(matrix));
+
+            if strcmp(leftType, 'neumann')
+                new_matrix(1) = matrix(1) + 2 * k * (matrix(2) - matrix(1) - dx * left);
+            else
+                new_matrix(1) = matrix(1);
+            end
+
+            for i = 2:nx+1
+                new_matrix(i) = matrix(i) + k * (matrix(i-1) - 2 * matrix(i) + matrix(i+1));
+            end
+
+            if strcmp(rightType, 'neumann')
+                new_matrix(end) = matrix(end) + 2 * k * (matrix(end-1) - matrix(end) - dx * right);
+            else
+                new_matrix(end) = matrix(end);
+            end
+
+            matrix = new_matrix;
+            results(end+1).time = time;
+            results(end).matrix = num2str(matrix);
+            time = time + dt;
+        end
+    else
+        matrix = zeros(ny+2, nx+2);
+
+        if strcmp(topType, 'neumann')
+            matrix(1, :) = T;
+        else
+            matrix(1, :) = top;
+        end
+
+        for i = 2:ny+1
+            matrix(i, 1) = strcmp(leftType, 'neumann') * T + ~strcmp(leftType, 'neumann') * left;
+            matrix(i, end) = strcmp(rightType, 'neumann') * T + ~strcmp(rightType, 'neumann') * right;
+        end
+
+        if strcmp(bottomType, 'neumann')
+            matrix(end, :) = T;
+        else
+            matrix(end, :) = bottom;
+        end
+
+        if strcmp(topType, 'neumann')
+            matrix(1, 1) = left;
+            matrix(1, end) = right;
+        end
+
+        if strcmp(bottomType, 'neumann')
+            matrix(end, 1) = left;
+            matrix(end, end) = right;
+        end
+
+        results(1).time = 0;
+        results(1).matrix = num2str(matrix);
+
+        time = dt;
+        while time <= t_max
+            new_matrix = matrix;
+            for i = 2:ny+1
+                for j = 2:nx+1
+                    new_value = matrix(i,j) + k * (matrix(i-1,j) + matrix(i+1,j) + matrix(i,j-1) + matrix(i,j+1) - 4 * matrix(i,j));
+                    new_matrix(i,j) = new_value;
+                end
+            end
+
+            matrix = new_matrix;
+            results(end+1).time = time;
+            results(end).matrix = num2str(matrix);
+            time = time + dt;
+        end
+    end
+
+    result = struct('result', results, 'dimension', dimension);
+end
+
+
+```

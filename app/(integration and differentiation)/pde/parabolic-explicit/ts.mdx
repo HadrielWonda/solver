@@ -1,0 +1,258 @@
+```ts
+type BoundaryType = {
+  value: string | number;
+  type: string;
+};
+
+type ExplicitBodyType = {
+  nx: number;
+  ny: number;
+  boundary: {
+    l: BoundaryType;
+    r: BoundaryType;
+    t: BoundaryType;
+    b: BoundaryType;
+  };
+  dimension: number;
+  k: number;
+  x: number;
+  dx: number;
+  y: number;
+  t: number;
+  dt: number;
+  T: number;
+};
+
+async function partialDifferentialEquationParabolicExplicit(
+  bodyValues: ExplicitBodyType
+) {
+  const nx = bodyValues.nx;
+  const ny = bodyValues.ny;
+  const dimension = bodyValues.dimension;
+  const k = bodyValues.k;
+  const dx = bodyValues.dx;
+  const t_max = bodyValues.t;
+  const dt = bodyValues.dt;
+  const T = bodyValues.T;
+
+  const top = parseFloat(bodyValues.boundary.t.value.toString()) || 0;
+  const topType = bodyValues.boundary.t.type;
+  const bottom = parseFloat(bodyValues.boundary.b.value.toString()) || 0;
+  const bottomType = bodyValues.boundary.b.type;
+  const left = parseFloat(bodyValues.boundary.l.value.toString());
+  const leftType = bodyValues.boundary.l.type;
+  const right = parseFloat(bodyValues.boundary.r.value.toString());
+  const rightType = bodyValues.boundary.r.type;
+
+  let results = [];
+
+  if (dimension === 1) {
+    let matrix = [
+      leftType === "neumann" ? T : left,
+      ...Array(nx).fill(T),
+      rightType === "neumann" ? T : right,
+    ];
+    results.push({
+      time: "0",
+      matrix: matrix.map((value) => value.toString()),
+    });
+
+    let time = dt;
+    while (time <= t_max) {
+      let newMatrix: number[] = [];
+
+      if (leftType === "neumann") {
+        newMatrix.push(matrix[0] + 2 * k * (matrix[1] - matrix[0] - dx * left));
+      } else {
+        newMatrix.push(matrix[0]);
+      }
+
+      for (let i = 1; i <= nx; i++) {
+        newMatrix.push(
+          matrix[i] + k * (matrix[i - 1] - 2 * matrix[i] + matrix[i + 1])
+        );
+      }
+
+      if (rightType === "neumann") {
+        newMatrix.push(
+          matrix[nx + 1] + 2 * k * (matrix[nx] - matrix[nx + 1] - dx * right)
+        );
+      } else {
+        newMatrix.push(matrix[nx + 1]);
+      }
+
+      matrix = newMatrix;
+      results.push({
+        time: time.toString(),
+        matrix: matrix.map((value) => value.toString()),
+      });
+
+      time += dt;
+    }
+  } else {
+    let matrix: number[][] = [
+      [
+        ...(topType === "neumann" ? [T] : [top]),
+        ...Array(nx).fill(T),
+        ...(topType === "neumann" ? [T] : [top]),
+      ],
+    ];
+
+    for (let i = 1; i <= ny; i++) {
+      let row = [
+        leftType === "neumann" ? T : left,
+        ...Array(nx).fill(0),
+        rightType === "neumann" ? T : right,
+      ];
+      matrix.push(row);
+    }
+
+    matrix.push([
+      ...(bottomType === "neumann" ? [T] : [bottom]),
+      ...Array(nx).fill(T),
+      ...(bottomType === "neumann" ? [T] : [bottom]),
+    ]);
+
+    if (topType === "neumann") {
+      matrix[0][0] = left;
+      matrix[0][nx + 1] = right;
+    }
+
+    if (bottomType === "neumann") {
+      matrix[ny + 1][0] = left;
+      matrix[ny + 1][nx + 1] = right;
+    }
+
+    if (leftType === "neumann") {
+      matrix[0][0] = top;
+      matrix[ny + 1][0] = bottom;
+    }
+
+    if (rightType === "neumann") {
+      matrix[0][nx + 1] = top;
+      matrix[ny + 1][nx + 1] = bottom;
+    }
+
+    results.push({
+      time: "0",
+      matrix: matrix.map((row) => row.map((value) => value.toString())),
+    });
+
+    let time = dt;
+    while (time <= t_max) {
+      let newMatrix = matrix.map((row) => [...row]);
+
+      for (
+        let i = topType === "neumann" ? 0 : 1;
+        i <= (bottomType === "neumann" ? ny + 1 : ny);
+        i++
+      ) {
+        for (
+          let j = leftType === "neumann" ? 0 : 1;
+          j <= (rightType === "neumann" ? nx + 1 : nx);
+          j++
+        ) {
+          let newValue = 0;
+
+          if (i === 0 && j === 0) {
+            newValue =
+              matrix[i][j] +
+              k *
+                (2 * matrix[i + 1][j] -
+                  2 * dx * top -
+                  2 * matrix[i][j] +
+                  2 * matrix[i][j + 1] -
+                  2 * dx * left -
+                  2 * matrix[i][j]);
+          } else if (i === 0 && j === nx + 1) {
+            newValue =
+              matrix[i][j] +
+              k *
+                (2 * matrix[i + 1][j] -
+                  2 * dx * top -
+                  2 * matrix[i][j] +
+                  2 * matrix[i][j - 1] -
+                  2 * dx * right -
+                  2 * matrix[i][j]);
+          } else if (i === ny + 1 && j === 0) {
+            newValue =
+              matrix[i][j] +
+              k *
+                (2 * matrix[i - 1][j] -
+                  2 * dx * bottom +
+                  2 * matrix[i][j + 1] -
+                  2 * dx * left -
+                  2 * matrix[i][j]);
+          } else if (i === ny + 1 && j === nx + 1) {
+            newValue =
+              matrix[i][j] +
+              k *
+                (2 * matrix[i - 1][j] -
+                  2 * dx * bottom +
+                  2 * matrix[i][j - 1] -
+                  2 * dx * right -
+                  2 * matrix[i][j]);
+          } else if (i === 0) {
+            newValue =
+              matrix[i][j] +
+              k *
+                (2 * matrix[i + 1][j] -
+                  2 * dx * top +
+                  matrix[i][j - 1] +
+                  matrix[i][j + 1] -
+                  2 * matrix[i][j]);
+          } else if (i === ny + 1) {
+            newValue =
+              matrix[i][j] +
+              k *
+                (2 * matrix[i - 1][j] -
+                  2 * dx * bottom +
+                  matrix[i][j - 1] +
+                  matrix[i][j + 1] -
+                  2 * matrix[i][j]);
+          } else if (j === 0) {
+            newValue =
+              matrix[i][j] +
+              k *
+                (matrix[i - 1][j] +
+                  matrix[i + 1][j] +
+                  2 * matrix[i][j + 1] -
+                  2 * dx * left -
+                  2 * matrix[i][j]);
+          } else if (j === nx + 1) {
+            newValue =
+              matrix[i][j] +
+              k *
+                (matrix[i - 1][j] +
+                  matrix[i + 1][j] +
+                  2 * matrix[i][j - 1] -
+                  2 * dx * right -
+                  2 * matrix[i][j]);
+          } else {
+            newValue =
+              matrix[i][j] +
+              k *
+                (matrix[i - 1][j] +
+                  matrix[i + 1][j] +
+                  matrix[i][j - 1] +
+                  matrix[i][j + 1] -
+                  4 * matrix[i][j]);
+          }
+
+          newMatrix[i][j] = newValue;
+        }
+      }
+
+      matrix = newMatrix;
+      results.push({
+        time: time.toString(),
+        matrix: matrix.map((row) => row.map((value) => value.toString())),
+      });
+
+      time += dt;
+    }
+  }
+
+  return { result: results, dimension };
+}
+```

@@ -223,6 +223,12 @@ export default function Home() {
                 <Tab href="/pde/fd-elliptic" className="col-span-2">
                   Finite Difference: Elliptic Equations
                 </Tab>
+                <Tab href="/pde/parabolic-explicit" className="col-span-2">
+                  Parabolic Equations: Explicit Method
+                </Tab>
+                <Tab href="/pde/parabolic-implicit" className="col-span-2">
+                  Parabolic Equations: Implicit Method
+                </Tab>
               </div>
             </div>
           </div>

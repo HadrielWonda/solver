@@ -1,0 +1,120 @@
+```py
+class explicitBodyType(BaseModel):
+    nx: int
+    ny: int
+    boundary: Dict[str, Dict[str, Union[str, int]]]
+    dimension: int
+    k: float
+    x: float
+    dx: float
+    y: float
+    t: float
+    dt: float
+    T: float
+
+async def partial_differential_equation_parabolic_explicit(bodyValues: explicitBodyType):
+    nx = bodyValues.nx
+    ny = bodyValues.ny
+    dimension = bodyValues.dimension
+    k = bodyValues.k
+    x = bodyValues.x
+    dx = bodyValues.dx
+    y = bodyValues.y
+    t = bodyValues.t
+    dt = bodyValues.dt
+    T = bodyValues.T
+    top = float(0 if bodyValues.boundary['t']['value'] == "" else bodyValues.boundary['t']['value'])
+    topType = bodyValues.boundary['t']['type']
+    bottom = float(0 if bodyValues.boundary['b']['value'] == "" else bodyValues.boundary['b']['value'])
+    bottomType = bodyValues.boundary['b']['type']
+    left = float(bodyValues.boundary['l']['value'])
+    leftType = bodyValues.boundary['l']['type']
+    right = float(bodyValues.boundary['r']['value'])
+    rightType = bodyValues.boundary['r']['type']
+
+    if dimension == 1:
+        matrix = [T if leftType == "neumann" else left] + [T] * nx + [T if rightType == "neumann" else right]
+        results = [{"time": "0", "matrix": [str(value) for value in matrix]}]
+
+        time = dt
+        while time <= t:
+            if leftType == "neumann":
+                new_matrix = [matrix[0] + 2* k * (matrix[1] - matrix[0] - dx * left)]
+            else :
+                new_matrix = [matrix[0]]
+
+            for i in range(1, nx+1):
+                new_value = matrix[i] + k * (matrix[i-1] - 2*matrix[i] + matrix[i+1])
+                new_matrix.append(new_value)
+
+            if rightType == "neumann":
+                new_matrix.append(matrix[-1] + 2* k * (matrix[-2] - matrix[-1] - dx * left))
+            else :
+                new_matrix.append(matrix[-1])
+
+
+            matrix = new_matrix
+            results.append({"time": str(time), "matrix": [str(value) for value in matrix]})
+            time += dt
+
+    else:
+        matrix = [[T if topType == "neumann" else top] * (nx+2)]
+        for i in range(1, ny+1):
+            row = [T if leftType == "neumann" else left] + [0] * nx + [T if rightType == "neumann" else right]
+            matrix.append(row)
+        matrix.append([T if bottomType == "neumann" else bottom] * (nx+2))
+
+        if topType == "neumann":
+            matrix[0][0] = left
+            matrix[0][nx+1] = right
+
+        if bottomType == "neumann":
+            matrix[ny+1][0] = left
+            matrix[ny+1][nx+1] = right
+
+        if leftType == "neumann":
+            matrix[0][0] = top
+            matrix[ny+1][0] = bottom
+
+        if rightType == "neumann":
+            matrix[0][nx+1] = top
+            matrix[ny+1][nx+1] = bottom
+
+        results = [{"time": "0", "matrix": [[str(value) for value in row] for row in matrix]}]
+
+
+        time = dt
+        while time <= t:
+            new_matrix = [row.copy() for row in matrix]
+            for i in range(0 if topType == "neumann" else 1, ny+2 if bottomType == "neumann" else ny+1):
+                for j in range(0 if leftType == "neumann" else 1, nx+2 if rightType == "neumann" else nx+1):
+                    if i == 0 and j == 0:
+                        new_value = matrix[i][j] + k * (2*matrix[i+1][j] - 2 * dx * top - 2*matrix[i][j] + 2 * matrix[i][j+1] - 2 * dx * left - 2*matrix[i][j])
+                    elif i == 0 and j == nx+1:
+                        new_value = matrix[i][j] + k * (2*matrix[i+1][j] - 2 * dx * top - 2*matrix[i][j] + 2 * matrix[i][j-1] - 2*matrix[i][j] - 2 * dx * right)
+                    elif i == ny+1 and j == 0:
+                        new_value = matrix[i][j] + k * ( 2 * matrix[i-1][j] - 2*matrix[i][j] - 2 * dx * bottom + 2 * matrix[i][j+1] - 2 * dx * left - 2*matrix[i][j])
+                    elif i == ny+1 and j == nx+1:
+                        new_value = matrix[i][j] + k * ( 2 * matrix[i-1][j] - 2*matrix[i][j] - 2 * dx * bottom + 2 * matrix[i][j-1] - 2*matrix[i][j] - 2 * dx * right)
+                    elif i == 0:
+                        new_value = matrix[i][j] + k * (2*matrix[i+1][j] - 2 * dx * top - 2*matrix[i][j] + matrix[i][j-1] - 2*matrix[i][j] + matrix[i][j+1])
+                    elif i == ny+1:
+                        new_value = matrix[i][j] + k * (2 * matrix[i-1][j] - 2*matrix[i][j] - 2 * dx * bottom + matrix[i][j-1] - 2*matrix[i][j] + matrix[i][j+1])
+                    elif j == 0:
+                        new_value = matrix[i][j] + k * (matrix[i-1][j] - 2*matrix[i][j] + matrix[i+1][j] + 2 * matrix[i][j+1] - 2 * dx * left - 2*matrix[i][j])
+                    elif j == nx+1:
+                        new_value = matrix[i][j] + k * (matrix[i-1][j] - 2*matrix[i][j] + matrix[i+1][j] + 2 * matrix[i][j-1] - 2*matrix[i][j] - 2 * dx * right)
+                    else:
+                        new_value = matrix[i][j] + k * (matrix[i-1][j] - 2*matrix[i][j] + matrix[i+1][j] + matrix[i][j-1] - 2*matrix[i][j] + matrix[i][j+1])
+
+                    new_matrix[i][j] = new_value
+
+            matrix = new_matrix
+            results.append({"time": str(time), "matrix": [[str(value) for value in row] for row in matrix]})
+            time += dt
+
+    return {"result": results, "dimension": dimension}
+
+
+
+```
