@@ -192,6 +192,11 @@ export const Sidebar = ({
                       <mo>=</mo>
                     </MathData>
                     <MathData>
+                      <mi>ρ</mi>
+                      <msub>
+                        <mi>c</mi>
+                        <mi>p</mi>
+                      </msub>
                       <mfrac>
                         <mi>∂T</mi>
                         <mi>∂t</mi>
@@ -368,6 +373,17 @@ export const Sidebar = ({
                           <mrow>
                             <mi>Δx</mi>
                             <mo>²</mo>
+                          </mrow>
+                        </mfrac>
+                        <mo>.</mo>
+                        <mfrac>
+                          <mn>1</mn>
+                          <mrow>
+                            <mi>ρ</mi>
+                            <msub>
+                              <mi>c</mi>
+                              <mi>p</mi>
+                            </msub>
                           </mrow>
                         </mfrac>
                       </MathData>
